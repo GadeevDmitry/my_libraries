@@ -1,14 +1,15 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <stdasrg.h>
+#include <stdarg.h>
 
-#define YELLOW "<font color=Gold"
-#define RED    "<font color=DarkRed"
-#define GREEN  "<font color=LimeGreen"
-#define BLUE   "<font color=MediumBlue"
-#define POISON "<font color=Olive"
-#define BLACK  "<font color=Black"
+#define YELLOW "<font color=Gold>"
+#define RED    "<font color=DarkRed>"
+#define GREEN  "<font color=LimeGreen>"
+#define BLUE   "<font color=MediumBlue>"
+#define POISON "<font color=Olive>"
+#define BLACK  "<font color=Black>"
+#define CANCLE "</font>"
 #define USUAL  BLACK
 
 #ifndef LOG_FILE
@@ -57,7 +58,9 @@ int  _OPEN_CLOSE_LOG_STREAM = OPEN_LOG_STREAM();
 /**
 *   @brief Prints message in LOG_FILE.
 *
-*   @param col [in] - color to print the message
+*   @param fmt [in] - printf format
+*
+*   @return nothing
 */
 
 void log_message(const char *fmt, ...)
@@ -67,6 +70,23 @@ void log_message(const char *fmt, ...)
 
     vfprintf(LOG_STREAM, fmt, ap);
     //fprintf (LOG_STREAM, "</font>");
+}
+
+/**
+*   @brief Prints error-message in LOG_FILE. Before the message prints "ERROR: ".
+*
+*   @param fmt [in] - printf format
+*
+*   @return nothing
+*/
+
+void log_error(const char *fmt)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    fprintf (LOG_STREAM, RED "ERROR: ");
+    vfprintf(LOG_STREAM, fmt ,ap);
 }
 
 #endif //LOG_H
