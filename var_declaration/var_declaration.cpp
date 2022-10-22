@@ -65,5 +65,4 @@ void var_dtor(var_declaration *const var, const var_declaration *const poison)
     var->name_func = poison->name_func;
     var->name_var  = poison->name_var ;
     var->     line = poison->     line;
-
 }
