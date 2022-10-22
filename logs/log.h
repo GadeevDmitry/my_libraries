@@ -1,11 +1,11 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <inttypes.h>
 #include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #define YELLOW "<font color=Gold>"
 #define RED    "<font color=DarkRed>"
@@ -24,12 +24,12 @@ static FILE *LOG_STREAM = nullptr;
 
 /*___________________________FUNCTION_DECLARATION___________________________*/
 
-static int   OPEN_LOG_STREAM  ();
+static int  OPEN_LOG_STREAM  ();
 
-static void  CLOSE_LOG_STREAM ();
-static void  log_message      (const char *fmt, ...);
-static void  log_error        (const char *fmt, ...);
-static void _log_char_ptr     (const char *str_name, const char *str, const int64_t poison, const int len);
+static void CLOSE_LOG_STREAM ();
+static void log_message      (const char *fmt, ...);
+static void log_error        (const char *fmt, ...);
+static void log_char_ptr     (const char *str_name, const char *str, const char *poison, const int len);
 
 /*__________________________________________________________________________*/
 
@@ -87,8 +87,6 @@ static void log_message(const char *fmt, ...)
     //fprintf (LOG_STREAM, "</font>");
 }
 
-#define log_char_ptr(str_name, poison, len) _log_char_ptr(#str_name, str_name, poison, len)
-
 /**
 *   @brief Prints string in LOG_FILE even if it is "nullptr" or "poison".
 *
@@ -100,13 +98,13 @@ static void log_message(const char *fmt, ...)
 *   @return nothing
 */
 
-static void _log_char_ptr(const char *str_name, const char *str, const int64_t poison, const int len)
+static void log_char_ptr(const char *str_name, const char *str, const char *poison, const uint8_t len)
 {
     assert(str_name != nullptr);
 
-    if      (str ==               nullptr)  log_message("%-*s = " BLUE   "nullptr\n", len, str_name);
-    else if (str == (const char *) poison)  log_message("%-*s = " POISON "poison\n" , len, str_name);
-    else                                    log_message("%-*s = " USUAL  "%s\n"     , len, str_name, str);
+    if      (str == nullptr)  log_message("%-*s : " BLUE   "\"nullptr\"\n" CANCEL, len, str_name);
+    else if (str ==  poison)  log_message("%-*s : " POISON "\"POISON\"\n"  CANCEL, len, str_name);
+    else                      log_message("%-*s : " USUAL  "\"%s\"\n"      CANCEL, len, str_name, str);
 }
 
 /**
@@ -123,7 +121,7 @@ static void log_error(const char *fmt, ...)
     va_start(ap, fmt);
 
     fprintf (LOG_STREAM, RED "ERROR: ");
-    vfprintf(LOG_STREAM, fmt ,ap);
+    vfprintf(LOG_STREAM, fmt, ap);
 }
 
 #endif //LOG_H
