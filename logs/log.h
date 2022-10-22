@@ -20,7 +20,7 @@
 #define LOG_FILE "log.html"
 #endif
 
-FILE *LOG_STREAM    = nullptr;
+static FILE *LOG_STREAM = nullptr;
 
 /*___________________________FUNCTION_DECLARATION___________________________*/
 
@@ -58,7 +58,7 @@ static int OPEN_LOG_STREAM()
 {
     LOG_STREAM = fopen(LOG_FILE, "w");
 
-    assert(LOG_STREAM != nullptr);
+    assert (LOG_STREAM != nullptr);
 
     setvbuf(LOG_STREAM,   nullptr, _IONBF, 0);
 
@@ -68,7 +68,7 @@ static int OPEN_LOG_STREAM()
     return 1;
 }
 
-static int  _OPEN_CLOSE_LOG_STREAM = OPEN_LOG_STREAM();
+static int _OPEN_CLOSE_LOG_STREAM = OPEN_LOG_STREAM();
 
 /**
 *   @brief Prints message in LOG_FILE.
@@ -89,8 +89,21 @@ static void log_message(const char *fmt, ...)
 
 #define log_char_ptr(str_name, poison, len) _log_char_ptr(#str_name, str_name, poison, len)
 
+/**
+*   @brief Prints string in LOG_FILE even if it is "nullptr" or "poison".
+*
+*   @param str_name [in] - name of string to print
+*   @param str      [in] - pointer to the first byte of string to print
+*   @param poison   [in] - poison (pointer to the first byte)-value of string to print
+*   @param len      [in] - minimal length of segment occupied by string
+*
+*   @return nothing
+*/
+
 static void _log_char_ptr(const char *str_name, const char *str, const int64_t poison, const int len)
 {
+    assert(str_name != nullptr);
+
     if      (str ==               nullptr)  log_message("%-*s = " BLUE   "nullptr\n", len, str_name);
     else if (str == (const char *) poison)  log_message("%-*s = " POISON "poison\n" , len, str_name);
     else                                    log_message("%-*s = " USUAL  "%s\n"     , len, str_name, str);
