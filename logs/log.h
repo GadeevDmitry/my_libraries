@@ -2,6 +2,10 @@
 #define LOG_H
 
 #include <stdarg.h>
+#include <inttypes.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define YELLOW "<font color=Gold>"
 #define RED    "<font color=DarkRed>"
@@ -9,7 +13,7 @@
 #define BLUE   "<font color=MediumBlue>"
 #define POISON "<font color=Olive>"
 #define BLACK  "<font color=Black>"
-#define CANCLE "</font>"
+#define CANCEL "</font>\n"
 #define USUAL  BLACK
 
 #ifndef LOG_FILE
@@ -18,13 +22,24 @@
 
 FILE *LOG_STREAM    = nullptr;
 
+/*___________________________FUNCTION_DECLARATION___________________________*/
+
+static int   OPEN_LOG_STREAM  ();
+
+static void  CLOSE_LOG_STREAM ();
+static void  log_message      (const char *fmt, ...);
+static void  log_error        (const char *fmt, ...);
+static void _log_char_ptr     (const char *str_name, const char *str, const int64_t poison, const int len);
+
+/*__________________________________________________________________________*/
+
 /**
 *   @brief Closes log-file. Called by using atexit().
 *
 *   @return 1 if closing is OK. Does abort() if an ERROR found.
 */
 
-void CLOSE_LOG_STREAM()
+static void CLOSE_LOG_STREAM()
 {
     assert (LOG_STREAM != nullptr);
 
@@ -39,7 +54,7 @@ void CLOSE_LOG_STREAM()
 *   @return 1 if checking is OK. Does abort() if an ERROR found.
 */
 
-int OPEN_LOG_STREAM()
+static int OPEN_LOG_STREAM()
 {
     LOG_STREAM = fopen(LOG_FILE, "w");
 
@@ -53,7 +68,7 @@ int OPEN_LOG_STREAM()
     return 1;
 }
 
-int  _OPEN_CLOSE_LOG_STREAM = OPEN_LOG_STREAM();
+static int  _OPEN_CLOSE_LOG_STREAM = OPEN_LOG_STREAM();
 
 /**
 *   @brief Prints message in LOG_FILE.
@@ -63,13 +78,22 @@ int  _OPEN_CLOSE_LOG_STREAM = OPEN_LOG_STREAM();
 *   @return nothing
 */
 
-void log_message(const char *fmt, ...)
+static void log_message(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
 
     vfprintf(LOG_STREAM, fmt, ap);
     //fprintf (LOG_STREAM, "</font>");
+}
+
+#define log_char_ptr(str_name, poison, len) _log_char_ptr(#str_name, str_name, poison, len)
+
+static void _log_char_ptr(const char *str_name, const char *str, const int64_t poison, const int len)
+{
+    if      (str ==               nullptr)  log_message("%-*s = " BLUE   "nullptr\n", len, str_name);
+    else if (str == (const char *) poison)  log_message("%-*s = " POISON "poison\n" , len, str_name);
+    else                                    log_message("%-*s = " USUAL  "%s\n"     , len, str_name, str);
 }
 
 /**
@@ -80,7 +104,7 @@ void log_message(const char *fmt, ...)
 *   @return nothing
 */
 
-void log_error(const char *fmt)
+static void log_error(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
