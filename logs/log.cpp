@@ -6,20 +6,6 @@ static void CLOSE_LOG_STREAM ();
 static FILE *LOG_STREAM = nullptr;
 
 /**
-*   @brief Closes log-file. Called by using atexit().
-*
-*   @return 1 if closing is OK. Does abort() if an ERROR found.
-*/
-
-void CLOSE_LOG_STREAM()
-{
-    assert (LOG_STREAM != nullptr);
-
-    fprintf(LOG_STREAM, "\"%s\" CLOSING IS OK\n\n", LOG_FILE);
-    fclose (LOG_STREAM);
-}
-
-/**
 *   @brief Opens log-file. Ckecks if opening is OK and in this case prints message in the log-file.
 *   @brief Uses atexit() to call CLOSE_LOG_STREAM() after program end.
 *
@@ -38,6 +24,20 @@ int OPEN_LOG_STREAM()
 
     atexit(CLOSE_LOG_STREAM);
     return 1;
+}
+
+/**
+*   @brief Closes log-file. Called by using atexit().
+*
+*   @return 1 if closing is OK. Does abort() if an ERROR found.
+*/
+
+void CLOSE_LOG_STREAM()
+{
+    assert (LOG_STREAM != nullptr);
+
+    fprintf(LOG_STREAM, "\"%s\" CLOSING IS OK\n\n", LOG_FILE);
+    fclose (LOG_STREAM);
 }
 
 static int _OPEN_CLOSE_LOG_STREAM = OPEN_LOG_STREAM();
