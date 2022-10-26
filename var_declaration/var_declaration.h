@@ -16,11 +16,11 @@ struct var_declaration
 
 const var_declaration poison_var_declaration = 
 {
-    name_file = nullptr;
-    name_func = nullptr;
-    name_var  = nullptr;
+    nullptr; // name_file
+    nullptr; // name_func
+    nullptr; // name_var
     
-    line      = 0      ;
+          0; // line
 };
 
 /*___________________________FUNCTION_DECLARATION___________________________*/
