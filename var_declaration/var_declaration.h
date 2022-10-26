@@ -69,10 +69,14 @@ static void var_dump(var_declaration *const var)
 {
     assert(var != nullptr);
 
+    log_message("\n");
+
     log_char_ptr("name    of var : ", var->name_var );
     log_char_ptr("created in file: ", var->name_file);
     log_char_ptr("created in func: ", var->name_func);
     log_message ("created in line: %d\n",  var->line);
+    
+    log_message("\n");
 }
 
 /**
