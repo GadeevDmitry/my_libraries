@@ -53,7 +53,7 @@ static void var_ctor(var_declaration *const var, const char *name_file, const ch
 
     var->name_file = name_file    ;
     var->name_func = name_func    ;
-    var->name_var  = name_var     ; // to skip '&'
+    var->name_var  = name_var + 1 ; // to skip '&'
     var->     line =      line    ;
 }
 
