@@ -88,10 +88,7 @@ static void var_dtor(var_declaration *const var)
 {
     assert(var != nullptr);
 
-    var->name_file = poison->name_file;
-    var->name_func = poison->name_func;
-    var->name_var  = poison->name_var ;
-    var->     line = poison->     line;
+    *var = poison_var_declaration;
 }
 
 #endif //VAR_DECLARATION_H
