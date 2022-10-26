@@ -51,9 +51,9 @@ static void var_ctor(var_declaration *const var, const char *name_file, const ch
     assert(name_func != nullptr);
     assert(name_var  != nullptr);
 
-    var->name_file = name_file + 1; // to skip '&'
+    var->name_file = name_file    ;
     var->name_func = name_func    ;
-    var->name_var  = name_var     ;
+    var->name_var  = name_var     ; // to skip '&'
     var->     line =      line    ;
 }
 
