@@ -1,8 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "var_declaration.h"
-#include "log.h"
+#include "../var_declaration/var_declaration.h"
+#include "../logs/log.h"
 
 struct List
 {
