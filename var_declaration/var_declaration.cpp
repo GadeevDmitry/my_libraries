@@ -1,5 +1,25 @@
-#include "var_declaration.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
 #include "../logs/log.h"
+
+struct var_declaration
+{
+    const char  *name_file, *name_func, *name_var;
+    unsigned int line;
+};
+
+const var_declaration poison_var_declaration = 
+{
+    nullptr, // name_file
+    nullptr, // name_func
+    nullptr, // name_var
+    
+          0  // line
+};
+
+/*___________________________FUNCTION_DECLARATION___________________________*/
 
 /**
 *   @brief "var_declaration" constructor.
@@ -12,40 +32,7 @@
 *
 *   @return nothing
 */
-
-void var_ctor(var_declaration *const var, const char *name_file, const char *name_func, const char *name_var, const uint64_t line)
-{
-    assert(var != nullptr);
-    
-    assert(name_file != nullptr);
-    assert(name_func != nullptr);
-    assert(name_var  != nullptr);
-
-    var->name_file = name_file;
-    var->name_func = name_func;
-    var->name_var  = name_var ;
-    var->     line =      line;
-}
-
-/**
-*   @brief Dumps "var_declaration" in LOG_FILE.
-*
-*   @param var    [in] - pointer to the variable to dump
-*   @param poison [in] - pointer to the variable with poison-values
-*
-*   @return nothing
-*/
-
-void var_dump(var_declaration *const var, const var_declaration *const poison)
-{
-    assert(var    != nullptr);
-    assert(poison != nullptr);
-
-    log_char_ptr("name of var ", var->name_var , poison->name_var , 1);
-    log_char_ptr("name of file", var->name_file, poison->name_file, 1);
-    log_char_ptr("name of func", var->name_func, poison->name_func, 1);
-    log_int64_t ("num  of line", var->     line, poison->     line, 1);
-}
+void var_ctor (var_declaration *const var, const char *name_file, const char *name_func, const char *name_var, const unsigned int line);
 
 /**
 *   @brief "var_declaration" destructor. Fills variable by poison-values.
@@ -55,14 +42,50 @@ void var_dump(var_declaration *const var, const var_declaration *const poison)
 *
 *   @return nothing
 */
+void var_dtor (var_declaration *const var);
 
-void var_dtor(var_declaration *const var, const var_declaration *const poison)
+/**
+*   @brief Dumps "var_declaration" in LOG_FILE.
+*
+*   @param var [in] - pointer to the variable to dump
+*
+*   @return nothing
+*/
+void var_dump (var_declaration *const var);
+
+/*__________________________________________________________________________*/
+
+void var_ctor(var_declaration *const var, const char *name_file, const char *name_func, const char *name_var, const unsigned int line)
 {
-    assert(var    != nullptr);
-    assert(poison != nullptr);
+    assert(var != nullptr);
+    
+    assert(name_file != nullptr);
+    assert(name_func != nullptr);
+    assert(name_var  != nullptr);
 
-    var->name_file = poison->name_file;
-    var->name_func = poison->name_func;
-    var->name_var  = poison->name_var ;
-    var->     line = poison->     line;
+    var->name_file = name_file    ;
+    var->name_func = name_func    ;
+    var->name_var  = name_var  + 1; // to skip '&'
+    var->     line =      line    ;
+}
+
+void var_dump(var_declaration *const var)
+{
+    assert(var != nullptr);
+
+    log_message("\n");
+
+    log_char_ptr("name    of var ", var->name_var );
+    log_char_ptr("created in file", var->name_file);
+    log_char_ptr("created in func", var->name_func);
+    log_message ("created in line: %d\n",  var->line);
+    
+    log_message("\n");
+}
+
+void var_dtor(var_declaration *const var)
+{
+    assert(var != nullptr);
+
+    *var = poison_var_declaration;
 }
