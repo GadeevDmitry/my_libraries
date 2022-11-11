@@ -1,55 +1,29 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
 
-static void my_swap(void *a, void *b, const int elem_size)
-{
-    assert(a != nullptr);
-    assert(b != nullptr);
+/*_________________________________________FUNCTION_DECLARATIONS_________________________________________*/
 
-    unsigned char temp = '\0';
+void    my_swap                (void *a, void *b,  const int elem_size);
+void   *get_ptr                (void *begin_array, const int index,     const int elem_size);
 
-    for (size_t i = 0; i < elem_size; ++i)
-    {
-        temp = *((unsigned char *)a + i);
-               *((unsigned char *)a + i) = *((unsigned char *)b + i);
-               *((unsigned char *)b + i) = temp;
-    }
-}
+void    my_quick_sort          (void        *data, const int elem_size, const int      left, 
+                                                                        const int     right,
+                                                                        int (*cmp) (void *, void *));
 
-static void *get_ptr(void *begin_array, const int index, const int elem_size)
-{
-    assert(begin_array != nullptr);
+int     is_empty_input_stream  (FILE *const stream);
+void       clear_input_stream  (FILE *const stream);
 
-    void  *ptr = (unsigned char *)begin_array + index * elem_size;
-    return ptr;
-}
+void    get_line               (char *push_in, const int max_size, FILE *const stream);
+void    get_word               (char *push_in, const int max_size, FILE *const stream);
+void    skip_spaces            (FILE *const stream);
 
-static void my_quick_sort(void *data, int elem_size, const int left, const int right, int (*cmp) (void * elem1, void * elem2))
-{
-    assert(data != nullptr);
-    assert(cmp  != nullptr);
+int     is_empty_input_buff    (const char *buff, const int buff_size, size_t *const pos);
+void       clear_input_buff    (const char *buff, const int buff_size, size_t *const pos);
 
-    if    (left >= right) return;
+void    get_line               (char *push_in, const int max_size, const char *buff, const int buff_size, size_t *const pos);
+void    get_word               (char *push_in, const int max_size, const char *buff, const int buff_size, size_t *const pos);
+void    skip_spaces            (                                   const char *buff, const int buff_size, size_t *const pos);
 
-    int mid = (left + right) / 2;
-
-    my_swap(get_ptr(data, left, elem_size), get_ptr(data, mid, elem_size), elem_size);
-
-    int cut = left;
-    for (int i = left + 1; i <= right; ++i) {
-
-        if ((*cmp)(get_ptr(data, i, elem_size), get_ptr(data, left, elem_size)) <= 0) {
-
-            ++cut;
-
-            my_swap(get_ptr(data, cut, elem_size), get_ptr(data, i, elem_size), elem_size);
-        }
-    }
-
-    my_swap(get_ptr(data, cut, elem_size), get_ptr(data, left, elem_size), elem_size);
-
-    my_quick_sort(data, elem_size,    left, cut - 1, cmp);
-    my_quick_sort(data, elem_size, cut + 1,   right, cmp);
-}
+/*_______________________________________________________________________________________________________*/
 
 #endif //ALGORITHM_H

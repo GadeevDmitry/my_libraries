@@ -12,11 +12,25 @@
 
 /*__________________________________USER_MACRO_DEFINITIONS___________________________________*/
 
-#define log_place()                                                                 \
-        log_message("\n"                                                            \
-                    "    FILE: %s\n"                                                \
-                    "FUNCTION: %s\n"                                                \
+#define log_place()                                                                     \
+        log_message("\n"                                                                \
+                    "    FILE: %s\n"                                                    \
+                    "FUNCTION: %s\n"                                                    \
                     "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__)
+
+#define log_assert(condition)                                                           \
+        if (!(condition))                                                               \
+        {                                                                               \
+			log_message(RED "ASSERT FAILED: %s\n"                           \
+					"         FILE: %s\n"                           \
+					"     FUNCTION: %s\n"                           \
+					"         LINE: %s\n"           ,               \
+				                #condition              ,               \
+						__FILE__		,               \
+						__PRETTY_FUNCTION__	,               \
+						__LINE__		);              \
+			abort();                                                        \
+        }
 
 /*________________________________USER_FUNCTION_DECLARATIONS_________________________________*/
 
