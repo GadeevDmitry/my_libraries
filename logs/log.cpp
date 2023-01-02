@@ -31,13 +31,22 @@ static void LOG_STREAM_CLOSE()
 {
     assert (LOG_STREAM != nullptr);
 
-    fprintf(LOG_STREAM, "\n\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
+    fprintf(LOG_STREAM, "\n");
+
+    if (DYNAMIC_MEMORY == 0) log_message(HTML_COLOR_LIME_GREEN "DYNAMIC_MEMORY = 0. \n" HTML_COLOR_CANCEL                );
+    else                     log_message(HTML_COLOR_DARK_RED   "DYNAMIC_MEMORY = %d.\n" HTML_COLOR_CANCEL, DYNAMIC_MEMORY);
+
+    fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // USER FUNCTION
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+//================================================================================================================================
+// LOG_OUTPUT
+//================================================================================================================================
 
 void log_message(const char *fmt, ...)
 {
@@ -104,4 +113,38 @@ void log_param_place(const char   *file,
                 "    FILE: %s\n"
                 "FUNCTION: %s\n"
                 "    LINE: %d\n", file, func, line);
+}
+
+//================================================================================================================================
+// LOG_MEMORY
+//================================================================================================================================
+
+void *log_calloc(size_t number, size_t size)
+{
+    if ((number * size) == 0) return nullptr;
+
+    void *ret = calloc(number, size);
+    if   (ret == nullptr) return nullptr;
+
+    ++DYNAMIC_MEMORY;
+    return ret;
+}
+
+void *log_realloc(void *ptr, size_t size)
+{
+    void *ret = realloc(ptr, size);
+
+    if      (ptr  == nullptr && size == 0)        return ret;
+    if      (ptr  == nullptr) { ++DYNAMIC_MEMORY; return ret; }
+    else if (size ==       0) { --DYNAMIC_MEMORY; return ret; }
+
+    return ret;
+}
+
+void log_free(void *ptr)
+{
+    if (ptr == nullptr) return;
+
+    --DYNAMIC_MEMORY;
+    free(ptr);
 }

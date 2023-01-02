@@ -30,5 +30,6 @@ static void LOG_STREAM_CLOSE ();
 
 static FILE *LOG_STREAM            = nullptr;           ///< лог файл
 static int  _OPEN_CLOSE_LOG_STREAM = LOG_STREAM_OPEN(); ///< равна 0, если не удалось открыть лог файл, равна 1 иначе
+static int   DYNAMIC_MEMORY        = 0;                 ///< счётчик указателей на динамическую память
 
 #endif //LOG_STATIC_H

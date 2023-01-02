@@ -48,10 +48,14 @@
 // FUNCTION DECLARATION
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+//================================================================================================================================
+// LOG_OUTPUT
+//================================================================================================================================
+
 /**
 *   @brief Эквивалентна fprintf(LOG_STREAM, fmt, ...)
 *
-*   @see log_error  (const char *fmt, ...)
+*   @see log_error(const char *fmt, ...)
 *   @see log_warning(const char *fmt, ...)
 */
 void log_message       (const char *fmt, ...);
@@ -68,7 +72,7 @@ void log_error         (const char *fmt, ...);
 *   @brief Выводит warning в лог файл
 *
 *   @see log_message(const char *fmt, ...)
-*   @see log_error  (const char *fmt, ...)
+*   @see log_error(const char *fmt, ...)
 */
 void log_warning       (const char *fmt, ...);
 
@@ -87,5 +91,37 @@ void log_header        (const char *fmt, ...);
 void log_param_place   (const char *file,
                         const char *func,
                         const int   line);
+
+
+//================================================================================================================================
+// LOG_MEMORY
+//================================================================================================================================
+
+/**
+*   @brief Запрашивает динамическую память, используя calloc(). Увеличивает DYNAMIC_MEMORY, если запрос успешен
+*
+*   @see DYNAMIC_MEMORY
+*   @see log_realloc(void *, size_t)
+*   @see log_free(void *)
+*/
+void *log_calloc  (size_t number, size_t size);
+
+/**
+*   @brief Меняет размер блока динамической памяти, используя realloc(). Меняет DYNAMIC_MEMORY
+*
+*   @see DYNAMIC_MEMORY
+*   @see log_calloc(size_t, size_t)
+*   @see log_free(void *)
+*/
+void *log_realloc (void *ptr, size_t size);
+
+/**
+*   @brief Освобождает блок динамической памяти, используя free(). Уменяшает DYNAMIC_MEMORY, если блок был не пуст
+*
+*   @see DYNAMIC_MEMORY
+*   @see log_calloc(size_t, size_t)
+*   @see log_realloc(void *, size_t)
+*/
+void  log_free    (void *ptr);
 
 #endif //LOG_H
