@@ -44,6 +44,25 @@
 			abort();                                        \
             }
 
+/**
+*   @brief Выводит сообщение об ошибке в лог файл
+*
+*   @see log_message(const char *fmt, ...)
+*   @see log_warning(const char *fmt, ...)
+*/
+#define log_error(fmt, ...)                                 \
+        log_message(HTML_COLOR_DARK_RED                     \
+                        "   ERROR:\n");                     \
+        log_message(fmt, ## __VA_ARGS__);                   \
+        log_message(    "    FILE: %s\n"                    \
+                        "FUNCTION: %s\n"                    \
+                        "    LINE: %d\n\n"                  \
+                    HTML_COLOR_CANCEL   ,                   \
+                                                            \
+                    __FILE__            ,                   \
+                    __PRETTY_FUNCTION__ ,                   \
+                    __LINE__             );
+
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // FUNCTION DECLARATION
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -55,24 +74,16 @@
 /**
 *   @brief Эквивалентна fprintf(LOG_STREAM, fmt, ...)
 *
-*   @see log_error(const char *fmt, ...)
+*   @see log_error(fmt, ...)
 *   @see log_warning(const char *fmt, ...)
 */
 void log_message       (const char *fmt, ...);
 
 /**
-*   @brief Выводит сообщение об ошибке в лог файл
-*
-*   @see log_message(const char *fmt, ...)
-*   @see log_warning(const char *fmt, ...)
-*/
-void log_error         (const char *fmt, ...);
-
-/**
 *   @brief Выводит warning в лог файл
 *
 *   @see log_message(const char *fmt, ...)
-*   @see log_error(const char *fmt, ...)
+*   @see log_error(fmt, ...)
 */
 void log_warning       (const char *fmt, ...);
 

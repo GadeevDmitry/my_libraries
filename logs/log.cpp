@@ -60,20 +60,6 @@ void log_message(const char *fmt, ...)
     va_end(ap);
 }
 
-void log_error(const char *fmt, ...)
-{
-    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
-
-    va_list ap;
-    va_start(ap, fmt);
-
-    fprintf (LOG_STREAM, HTML_COLOR_DARK_RED "ERROR: ");
-    vfprintf(LOG_STREAM, fmt, ap);
-    fprintf (LOG_STREAM, HTML_COLOR_CANCEL);
-
-    va_end(ap);
-}
-
 void log_warning(const char *fmt, ...)
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
