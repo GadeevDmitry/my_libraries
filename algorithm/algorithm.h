@@ -1,29 +1,90 @@
+/** @file */
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
 
-/*_________________________________________FUNCTION_DECLARATIONS_________________________________________*/
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// GLOBAL
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-void    my_swap                (void *a, void *b,  const int elem_size);
-void   *get_ptr                (void *begin_array, const int index,     const int elem_size);
+const double DELTA = 0.0001; ///< погрешность сравнения вещественных чисел по умолчанию
 
-void    my_quick_sort          (void        *data, const int elem_size, const int      left, 
-                                                                        const int     right,
-                                                                        int (*cmp) (void *, void *));
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// STRUCT
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-int     is_empty_input_stream  (FILE *const stream);
-void       clear_input_stream  (FILE *const stream);
+/**
+*   @brief Структура для хранения массива символов
+*/
+struct buffer
+{
+    char  *buff_beg;    ///< указатель на начало буфера
+    char  *buff_pos;    ///< указатель на текущую позицию
+    size_t buff_size;   ///< размер буфера
+};
 
-void    get_line               (char *push_in, const int max_size, FILE *const stream);
-void    get_word               (char *push_in, const int max_size, FILE *const stream);
-void    skip_spaces            (FILE *const stream);
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// FUNCTION DECLARATION
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-int     is_empty_input_buff    (const char *buff, const int buff_size, size_t *const pos);
-void       clear_input_buff    (const char *buff, const int buff_size, size_t *const pos);
+//================================================================================================================================
+// USEFUL FUNCTION
+//================================================================================================================================
 
-void    get_line               (char *push_in, const int max_size, const char *buff, const int buff_size, size_t *const pos);
-void    get_word               (char *push_in, const int max_size, const char *buff, const int buff_size, size_t *const pos);
-void    skip_spaces            (                                   const char *buff, const int buff_size, size_t *const pos);
+/**
+*   @brief Обменивает значения двух переменных
+*
+*   @param a         [in] - указатель на первую переменную
+*   @param b         [in] - указатель на вторую переменную
+*   @param elem_size [in] - размер (в байтах) переменной
+*/
+void my_swap(void *a, void *b, size_t elem_size);
 
-/*_______________________________________________________________________________________________________*/
+/**
+*   @brief Сравнивает два вещественных числа
+*
+*   @param a          [in] - первое число
+*   @param b          [in] - второе число
+*   @param error_rate [in] - погрешность сравнения
+*
+*   @return   0, если a = b с учётом погрешности error_rate
+*   @return < 0, если a < b
+*   @return > 0, если a > b
+*/
+double dblcmp(const double a, const double b, const double error_rate = DELTA);
+
+//================================================================================================================================
+// BUFFER
+//================================================================================================================================
+
+/**
+*   @brief Выделяет динамическую память для буфера buff размера buff_size
+*
+*   @param buff      [in] - буфер
+*   @param buff_size [in] - размер буфера (в байтах)
+*
+*   @return true, если всё ОК
+*   @return false в случае ошибки
+*
+*   @see buffer_ctor(buffer *const, const char *const)
+*/
+bool buffer_ctor(buffer *const buff, const size_t buff_size);
+
+/**
+*   @brief Выделяет динамическую память для содержимого файла <file_name>, заполняет поля буфера buff
+*
+*   @param buff      [in] - буфер
+*   @param file_name [in] - имя файла
+*
+*   @return true если всё ОК
+*   @return false в случае ошибки
+*
+*   @see buffer_ctor(buffer *const, const size_t)
+*/
+bool buffer_ctor(buffer *const buff, const char *const file_name);
+
+/**
+*   @brief Деструктор буфера
+*/
+void buffer_dtor(buffer *const buff);
 
 #endif //ALGORITHM_H

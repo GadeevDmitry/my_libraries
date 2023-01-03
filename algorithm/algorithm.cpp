@@ -3,239 +3,141 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <math.h>
 
-/*_________________________________________FUNCTION_DECLARATIONS_________________________________________*/
+#include <sys/stat.h>
+#include <sys/types.h>
 
-void    my_swap                (void *a, void *b,  const int elem_size);
-void   *get_ptr                (void *begin_array, const int index,     const int elem_size);
+#include "algorithm_static.h"
+#include "algorithm.h"
 
-void    my_quick_sort          (void        *data, const int elem_size, const int      left, 
-                                                                        const int     right,
-                                                                        int (*cmp) (void *, void *));
+#include "../logs/log.h"
 
-int     is_empty_input_stream  (FILE *const stream);
-void       clear_input_stream  (FILE *const stream);
+//================================================================================================================================
+// USEFUL FUNCTION
+//================================================================================================================================
 
-void    get_line               (char *s, const int max_size, FILE *const stream);
-void    get_word               (char *s, const int max_size, FILE *const stream);
-void    skip_spaces            (FILE *const stream);
-
-int     is_empty_input_buff    (const char *buff, const int buff_size, size_t *const pos);
-void       clear_input_buff    (const char *buff, const int buff_size, size_t *const pos);
-
-void    get_line               (char *s, const int max_size, const char *buff, const int buff_size, size_t *const pos);
-void    get_word               (char *s, const int max_size, const char *buff, const int buff_size, size_t *const pos);
-void    skip_spaces            (                             const char *buff, const int buff_size, size_t *const pos);
-
-/*___________________________________________USULAL_FUNCTIONS____________________________________________*/
-
-void my_swap(void *a, void *b, const int elem_size)
+double dblcmp(const double a, const double b, const double error_rate /*= DELTA*/)
 {
-    assert(a);
-    assert(b);
+    if (fabs(a - b) < error_rate) return 0;
+    return a - b;
+}
 
-    unsigned char temp = '\0';
+void my_swap(void *a, void *b, size_t elem_size)
+{
+    assert(a != nullptr);
+    assert(b != nullptr);
 
-    for (size_t i = 0; i < elem_size; ++i)
+    for (; sizeof(long long) <= elem_size; elem_size -= sizeof(long long))
     {
-        temp = *((unsigned char *)a + i);
-               *((unsigned char *)a + i) = *((unsigned char *)b + i);
-               *((unsigned char *)b + i) = temp;
-    }
-}
+        long long temp  = *(long long *)a;
+        *(long long *)a = *(long long *)b;
+        *(long long *)b = temp;
 
-void *get_ptr(void *begin_array, const int index, const int elem_size)
-{
-    assert(begin_array);
+        a = (long long *)a + 1;
+        b = (long long *)b + 1;
 
-    void  *ptr = (unsigned char *)begin_array + index * elem_size;
-    return ptr;
-}
-
-/*__________________________________________ALGORITHM_FUNCTIONS__________________________________________*/
-
-void my_quick_sort(void *data, const int elem_size, const int left, const int right, int (*cmp) (void * elem1, void * elem2))
-{
-    assert(data);
-    assert(cmp );
-
-    if        (left >= right) return;
-    int mid = (left  + right) / 2;
-
-    my_swap(get_ptr(data, left, elem_size), get_ptr(data, mid, elem_size), elem_size);
-
-    int cut = left;
-    for (int i = left + 1; i <= right; ++i) {
-
-        if ((*cmp)(get_ptr(data, i, elem_size), get_ptr(data, left, elem_size)) <= 0) {
-
-            ++cut;
-
-            my_swap(get_ptr(data, cut, elem_size), get_ptr(data, i, elem_size), elem_size);
-        }
+        elem_size -= sizeof(long long);
     }
 
-    my_swap(get_ptr(data, cut, elem_size), get_ptr(data, left, elem_size), elem_size);
-
-    my_quick_sort(data, elem_size,    left, cut - 1, cmp);
-    my_quick_sort(data, elem_size, cut + 1,   right, cmp);
-}
-
-/*_________________________________________FUNCTIONS_WITH_STREAM_________________________________________*/
-
-int is_empty_input_stream(FILE *const stream)
-{
-    assert(stream);
-
-    int     is_empty_temp = ' ';
-    while ((is_empty_temp = getc(stream)) == ' ' || is_empty_temp == '\t')
-        ;
-    ungetc(is_empty_temp, stream);
-    
-    if (is_empty_temp == '\n' || is_empty_temp == EOF) return 1;
-
-    return 0;
-}
-
-void clear_input_stream(FILE *const stream)
-{
-    assert(stream != NULL);
-
-    int     clear_temp ='#';
-    while ((clear_temp = getc(stream)) != '\n' && clear_temp != EOF)
-        ;
-    ungetc(clear_temp, stream);
-}
-
-void get_line(char *push_in, const int max_size, FILE *const stream)
-{
-    assert(push_in);
-    assert(stream );
-
-    skip_spaces(stream);
-
-    int  cnt = 0;
-    for (cnt = 0; cnt < max_size - 1; ++cnt)
+    for (; sizeof(int) <= elem_size; elem_size -= sizeof(int))
     {
-        int cur_char =  getc(stream);
-        if (cur_char == EOF || cur_char == '\n')
-        {
-            ungetc(cur_char, stream);
-            break;
-        }
-        
-        push_in[cnt] = cur_char;
+        int temp  = *(int *)a;
+        *(int *)a = *(int *)b;
+        *(int *)b = temp;
+
+        a = (int *)a + 1;
+        b = (int *)b + 1;
+
+        elem_size -= sizeof(int);
     }
-    while (isspace(push_in[cnt - 1]) && cnt > 0)
-        --cnt;
-    push_in[cnt] = '\0';
-}
 
-void get_word(char *push_in, const int max_size, FILE *const stream)
-{
-    assert(push_in);
-    assert(stream );
-
-    skip_spaces(stream);
-
-    int  cnt = 0;
-    for (cnt = 0; cnt < max_size - 1; ++cnt)
+    for (; sizeof(char) <= elem_size; elem_size -= sizeof(char))
     {
-        int cur_char =  getc(stream);
-        if (cur_char == EOF || isspace(cur_char))
-        {
-            ungetc(cur_char, stream);
-            break;
-        }
+        unsigned char temp  = *(unsigned char *)a;
+        *(unsigned char *)a = *(unsigned char *)b;
+        *(unsigned char *)b = temp;
 
-        push_in[cnt] = cur_char;
+        a = (unsigned char *)a + 1;
+        b = (unsigned char *)b + 1;
+
+        elem_size -= sizeof(unsigned char);
     }
-    push_in[cnt] = '\0';
 }
 
-void skip_spaces(FILE *const stream)
+//================================================================================================================================
+// BUFFER
+//================================================================================================================================
+
+bool buffer_ctor(buffer *const buff, const size_t buff_size)
 {
-    assert(stream);
+    assert(buff != nullptr);
 
-    int cur_char = ' ';
-    while (isspace(cur_char = getc(stream)))
-        ;
-    ungetc(cur_char, stream);
-}
-
-/*_________________________________________FUNCTIONS_WITH_BUFFER_________________________________________*/
-
-int is_empty_input_buff(const char *buff, const int buff_size, size_t *const pos)
-{
-    assert(buff);
-    assert(pos );
-
-    while (*pos < buff_size && (buff[*pos] == ' ' || buff[*pos] == '\t'))
-        ++ *pos;
-
-    if (*pos == buff_size || buff[*pos] == '\n' || buff[*pos] == '\0') return 1;
-
-    return 0;
-}
-
-void clear_input_buff(const char *buff, const int buff_size, size_t *const pos)
-{
-    assert(buff);
-    assert(pos );
-
-    while (*pos < buff_size && buff[*pos] != '\n' && buff[*pos] != '\0')
-        ++ *pos;
-}
-
-void get_line(char *push_in, const int max_size, const char *buff, const int buff_size, size_t *const pos)
-{
-    assert(push_in);
-    assert(buff   );
-    assert(pos    );
-
-    int  limit = (buff_size < max_size) ? buff_size : max_size - 1;
-
-    int  cnt = 0;
-    for (cnt = 0; cnt < limit; ++cnt)
+    buff->buff_beg = (char *) log_calloc(buff_size, sizeof(char));
+    if (buff->buff_beg == nullptr)
     {
-        if (buff[*pos] == '\0' || buff[*pos] == '\n') break;
-        
-        push_in[cnt] = buff[*pos];
-        ++*pos;
+        log_error("log_calloc(size, sizeof(char)) returns nullptr\n");
+        return false;
     }
-    while (isspace(push_in[cnt - 1]) && cnt > 0)
-        --cnt;
-    push_in[cnt] = '\0';
+
+    buff->buff_pos  = buff->buff_beg;
+    buff->buff_size = buff_size;
+
+    return true;
 }
 
-void get_word(char *push_in, const int max_size, const char *buff, const int buff_size, size_t *const pos)
+bool buffer_ctor(buffer *const buff, const char *const file_name)
 {
-    assert(push_in);
-    assert(buff   );
-    assert(pos    );
+    assert(file_name != nullptr);
+    assert(buff      != nullptr);
 
-    int limit = (buff_size < max_size) ? buff_size : max_size - 1;
+    if (!get_file_size(file_name, &buff->buff_size)) return false;
+    buff->buff_size += 1;                                                   //for null character at the end
 
-    int  cnt = 0;
-    for (cnt = 0; cnt < limit; ++cnt)
+    buff->buff_beg = (char *) log_calloc(buff->buff_size, sizeof(char));
+    if (buff->buff_beg == nullptr)
     {
-        if (buff[*pos] == '\0' || isspace(buff[*pos])) break;
-
-        push_in[cnt] = buff[*pos];
-        ++*pos;
+        log_error("log_calloc(buff->buff_size, sizeof(char)) returns nullptr\n");
+        return false;
     }
-    push_in[cnt] = '\0';
+
+    FILE *const stream = fopen(file_name, "r");
+    if (stream == nullptr)
+    {
+        log_error("fopen(\"%s\", \"r\") returns nullptr\n", file_name);
+        return false;
+    }
+
+    fread(buff->buff_beg, sizeof(char), buff->buff_size, stream);
+    buff->buff_beg[buff->buff_size - 1] = '\0';
+    buff->buff_pos = buff->buff_beg;
+
+    return true;
 }
 
-void skip_spaces(const char *buff, const int buff_size, size_t *const pos)
+static bool get_file_size(const char *file_name, size_t *const file_size)
 {
-    assert(buff);
-    assert(pos );
+    assert(file_name != nullptr);
+    assert(file_size != nullptr);
 
-    while (*pos < buff_size)
+    struct stat file_info = {};
+    if (stat(file_name, &file_info) == -1)
     {
-        if (!isspace(buff[*pos])) break;
-        ++*pos;
+        log_error("system call \"stat\" of file \"%s\" returns -1\n", file_name);
+        return false;
     }
+
+    *file_size = (size_t) file_info.st_size;
+    return true;
 }
-/*_______________________________________________________________________________________________________*/
+
+void buffer_dtor(buffer *const buff)
+{
+    if (buff == nullptr) return;
+
+    log_free(buff->buff_beg);
+
+    buff->buff_beg  = nullptr;
+    buff->buff_pos  = nullptr;
+    buff->buff_size = 0;
+}
