@@ -36,8 +36,6 @@ void my_swap(void *a, void *b, size_t elem_size)
 
         a = (long long *)a + 1;
         b = (long long *)b + 1;
-
-        elem_size -= sizeof(long long);
     }
 
     for (; sizeof(int) <= elem_size; elem_size -= sizeof(int))
@@ -48,8 +46,6 @@ void my_swap(void *a, void *b, size_t elem_size)
 
         a = (int *)a + 1;
         b = (int *)b + 1;
-
-        elem_size -= sizeof(int);
     }
 
     for (; sizeof(char) <= elem_size; elem_size -= sizeof(char))
@@ -60,8 +56,6 @@ void my_swap(void *a, void *b, size_t elem_size)
 
         a = (unsigned char *)a + 1;
         b = (unsigned char *)b + 1;
-
-        elem_size -= sizeof(unsigned char);
     }
 }
 
