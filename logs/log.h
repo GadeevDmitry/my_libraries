@@ -22,7 +22,7 @@
         log_message("\n"                                                        \
                     "    FILE: %s\n"                                            \
                     "FUNCTION: %s\n"                                            \
-                    "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__)
+                    "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 /**
 *   @brief assert с сообщением в лог файл
@@ -45,23 +45,33 @@
             }
 
 /**
-*   @brief Выводит сообщение об ошибке в лог файл
+*   @brief Выводит сообение об ошике в заданной параметрами точке в лог файл
 *
+*   @see log_error(fmt, ...)
 *   @see log_message(const char *fmt, ...)
 *   @see log_warning(const char *fmt, ...)
 */
-#define log_error(fmt, ...)                                 \
+#define log_param_error(file, func, line, fmt, ...)         \
         log_message(HTML_COLOR_DARK_RED                     \
-                        "   ERROR:\n");                     \
+                        "ERROR:\n");                        \
         log_message(fmt, ## __VA_ARGS__);                   \
         log_message(    "    FILE: %s\n"                    \
                         "FUNCTION: %s\n"                    \
                         "    LINE: %d\n\n"                  \
                     HTML_COLOR_CANCEL   ,                   \
                                                             \
-                    __FILE__            ,                   \
-                    __PRETTY_FUNCTION__ ,                   \
-                    __LINE__             );
+                    file                ,                   \
+                    func                ,                   \
+                    line                 );
+
+/**
+*   @brief Выводит сообщение об ошибке в точке вызова в лог файл
+*
+*   @see log_param_error(file, func, line, fmt, ...)
+*   @see log_message(const char *fmt, ...)
+*   @see log_warning(const char *fmt, ...)
+*/
+#define log_error(fmt, ...) log_param_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ## __VA_ARGS__);
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // FUNCTION DECLARATION
