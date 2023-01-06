@@ -9,7 +9,6 @@
 #include <sys/types.h>
 
 #include "algorithm_static.h"
-#include "algorithm.h"
 
 #include "../logs/log.h"
 
