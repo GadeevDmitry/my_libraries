@@ -423,7 +423,7 @@ bool stack_push(stack *const stk, const void *const new_el)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool *stack_pop(stack *const stk)
+bool stack_pop(stack *const stk)
 {
     stack_verify(stk);
 
