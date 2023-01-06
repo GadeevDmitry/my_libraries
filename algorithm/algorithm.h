@@ -50,7 +50,7 @@ void my_swap(void *a, void *b, size_t elem_size);
 *   @return < 0, если a < b
 *   @return > 0, если a > b
 */
-double dblcmp(const double a, const double b, const double error_rate = DELTA);
+int dblcmp(const double a, const double b, const double error_rate = DELTA);
 
 /**
 *   @brief Сравнивает (по байтам) две переменные

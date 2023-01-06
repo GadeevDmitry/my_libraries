@@ -16,10 +16,12 @@
 // USEFUL FUNCTION
 //================================================================================================================================
 
-double dblcmp(const double a, const double b, const double error_rate /*= DELTA*/)
+int dblcmp(const double a, const double b, const double error_rate /*= DELTA*/)
 {
     if (fabs(a - b) < error_rate) return 0;
-    return a - b;
+
+    if (a < b) return -1;
+    return 1;
 }
 
 void my_swap(void *a, void *b, size_t elem_size)
