@@ -58,6 +58,44 @@ void my_swap(void *a, void *b, size_t elem_size)
     }
 }
 
+bool is_byte_equal(const void *a, const void *b, size_t elem_size)
+{
+    assert(a != nullptr);
+    assert(b != nullptr);
+
+    for (; sizeof(long long) <= elem_size; elem_size -= sizeof(long long))
+    {
+        const long long a_val = *(const long long *) a;
+        const long long b_val = *(const long long *) b;
+        if (a_val != b_val) return false;
+
+        a = (const long long *) a + 1;
+        b = (const long long *) b + 1;
+    }
+
+    for (; sizeof(int) <= elem_size; elem_size -= sizeof(int))
+    {
+        const int a_val = *(const int *) a;
+        const int b_val = *(const int *) b;
+        if (a_val != b_val) return false;
+
+        a = (const int *) a + 1;
+        b = (const int *) b + 1;
+    }
+
+    for (; sizeof(char) <= elem_size; elem_size -= sizeof(char))
+    {
+        const char a_val = *(const char *) a;
+        const char b_val = *(const char *) b;
+        if (a_val != b_val) return false;
+
+        a = (const char *) a + 1;
+        b = (const char *) b + 1;
+    }
+
+    return true;
+}
+
 //================================================================================================================================
 // BUFFER
 //================================================================================================================================
