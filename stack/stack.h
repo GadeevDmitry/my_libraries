@@ -13,11 +13,16 @@
 */
 struct stack
 {
-    void  *data;        ///< указатель на начало массива с элементами стека
+    void  *data;            ///< указатель на начало массива с элементами стека
 
-    size_t  el_size;    ///< размер элемента стека (в байтах)
-    size_t     size;    ///< размер стека (количество элементов в стеке)
-    size_t capacity;    ///< емкость стека (максимальное количество элементов, которое может храниться в стеке)
+    size_t  el_size;        ///< размер элемента стека (в байтах)
+    size_t     size;        ///< размер стека (количество элементов в стеке)
+    size_t capacity;        ///< емкость стека (максимальное количество элементов, которое может храниться в стеке)
+
+    const void *el_poison;  ///< указатель на POISON-элемент стека
+
+    void (*el_dtor)      (      void *const el);    ///< указатель на dtor элемента стека
+    void (*el_dump)      (const void *const el);    ///< указатель на dump элемента стека
 };
 
 //================================================================================================================================
@@ -31,20 +36,17 @@ struct stack
 /**
 *   @brief Stack ctor
 *
-*   @param stk     [in] - стек
-*   @param el_size [in] - размер элемента стека (в байтах)
-*
 *   @return true, если всё ОК, false в случае ошибки
 *
 *   @see void* stack_new(const size_t el_size)
 *   @see void stack_dtor(stack *const stk)
 */
-bool stack_ctor(stack *const stk, const size_t el_size);
+bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison              = nullptr,
+                                                        void (*el_dtor)      (      void *const) = nullptr,
+                                                        void (*el_dump)      (const void *const) = nullptr);
 
 /**
 *   @brief Создаёт стек в динамической памяти
-*
-*   @param el_size [in] - размер элемента стека (в байтах)
 *
 *   @return указаталь на созданный стек, nullptr в случае ошибки
 *

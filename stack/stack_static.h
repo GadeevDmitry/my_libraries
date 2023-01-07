@@ -28,11 +28,16 @@ typedef unsigned long long stk_hash_t;
 // STACK
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define $data     stk->data
+#define $data           stk->data
 
-#define $el_size  stk->el_size
-#define $size     stk->size
-#define $capacity stk->capacity
+#define $el_size        stk->el_size
+#define $size           stk->size
+#define $capacity       stk->capacity
+
+#define $el_poison      stk->el_poison
+
+#define $el_dtor        stk->el_dtor
+#define $el_dump        stk->el_dump
 
 //================================================================================================================================
 // GLOBAL
@@ -47,11 +52,15 @@ enum STK_STATUS
     STK_NULLPTR                     , ///< stk = nullptr
     STK_NULLPTR_DATA                , ///< .data = nullptr
 
-    STK_POISON_DATA                 , ///< .data     = STK_POISON.data
-    STK_POISON_EL_SIZE              , ///< .el_size  = STK_POISON.el_size
-    STK_POISON_SIZE                 , ///< .size     = STK_POISON.size
-    STK_POISON_CAPACITY             , ///< .capacity = STK_POISON.capacity
+    STK_POISON_DATA                 , ///< .data         = STK_POISON.data
+    STK_POISON_EL_SIZE              , ///< .el_size      = STK_POISON.el_size
+    STK_POISON_SIZE                 , ///< .size         = STK_POISON.size
+    STK_POISON_CAPACITY             , ///< .capacity     = STK_POISON.capacity
+    STK_POISON_EL_POISON            , ///< .el_poison    = STK_POISON.el_poison
+    STK_POISON_EL_DTOR              , ///< .el_dtor      = STK_POISON.el_dtor
+    STK_POISON_EL_DUMP              , ///< .el_dump      = STK_POISON.el_dump
 
+    STK_NOT_POISON_GAP              , ///< не POISON-значение в неиспользуемой ячейке
     STK_INVALID_SIZE_CAPACITY       , ///< .size > .capacity
 
     #ifdef STACK_CANARY_PROTECTION
@@ -77,8 +86,12 @@ static const char *STK_STATUS_MESSAGES[] =
     "stack.data is invalid"                 ,
     "stack.size is invalid"                 ,
     "stack.capacity is invalid"             ,
+    "stack.el_poison is invalid"            ,
     "stack.el_size is invalid"              ,
+    "stack.el_dtor is invalid"              ,
+    "stack.el_dump is invalid"              ,
 
+    "stack gap is not poisoned"             ,
     "stack.size more than stack.capacity"   ,
 
     #ifdef STACK_CANARY_PROTECTION
@@ -95,11 +108,16 @@ static const char *STK_STATUS_MESSAGES[] =
 */
 static const stack STK_POISON =
 {
-    (void *) 0xBADF00D  , //data
+    (void *) 0xBADF00D                      , //data
 
-    0xABADBABE          , //el_size
-    0xBADCAB1E          , //size
-    0xDEADBEFF          , //capacity
+    0xABADBABE                              , //el_size
+    0xBADCAB1E                              , //size
+    0xDEADBEFF                              , //capacity
+
+    (const void *) 0xCAFED00D               , //el_poison
+
+    (void (*)(      void *const)) 0xFEEDFACE, //el_dtor
+    (void (*)(const void *const)) 0xDEADDEAD, //el_dump
 };
 
 #ifdef STACK_CANARY_PROTECTION
@@ -191,6 +209,39 @@ static void stk_set_hash(stack *const stk);
 #endif //STACK_HASH_PROTECTION
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// stack poison
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Устанавливает POISON-значения в неиспользуемые ячейки стека
+*
+*   @see static void stack_gap_fill_poison(stack *const stk)
+*/
+static void stack_gap_fill_poison(stack *const stk);
+
+/**
+*   @brief Устанавливает POISON-значение в ячейку стека с номером filled_index
+*
+*   @see static void stack_gap_fill_poison(stack *const stk)
+*/
+static void stack_el_fill_poison(stack *const stk, const size_t filled_index);
+
+/**
+*   @brief Проверяет наличие POISON-значений в неиспользуемых ячейках стека
+*
+*   @see static bool stack_el_is_poison(const stack *const stk, const size_t checking_index)
+*/
+static bool stack_gap_is_poison(const stack *const stk);
+
+/**
+*   @brief Проверяет наличие POISON-значения в ячейке стека с номером checking_index
+*
+*   @see static bool stack_gap_is_poison(const stack *const stk)
+*/
+static bool stack_el_is_poison(const stack *const stk, const size_t checking_index);
+
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // stack verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -237,9 +288,18 @@ static void stack_static_dump(const stack *const stk, const char *file, const ch
 /**
 *   @brief Dump public-полей стека
 *
-*   @see static void stack_static_dump(const stack *const stk)
+*   @see static void stack_static_dump(const stack *const stk, const char *file, const char *func, const int line)
+*   @see static void stack_data_dump(const stack *const stk)
 */
 static void stack_public_fields_dump(const stack *const stk);
+
+/**
+*   @brief Dump используемых ячеек стека
+*
+*   @see static void stack_static_dump(const stack *const stk, const char *file, const char *func, const int line)
+*   @see static void stack_public_fields_dump(const stack *const stk)
+*/
+static void stack_data_dump(const stack *const stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // stack resize

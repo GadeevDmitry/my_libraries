@@ -127,6 +127,61 @@ static void stk_set_hash(stack *const stk)
 #endif //STACK_HASH_PROTECTION
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// stack poison
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void stack_gap_fill_poison(stack *const stk)
+{
+    assert(stk   != nullptr);
+    assert($data != nullptr);
+
+    if ($el_poison == nullptr) return;
+
+    for (size_t i = $size; i < $capacity; ++i) stack_el_fill_poison(stk, i);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void stack_el_fill_poison(stack *const stk, const size_t filled_index)
+{
+    assert(stk          !=  nullptr);
+    assert($data        !=  nullptr);
+    assert(filled_index < $capacity);
+
+    if ($el_poison == nullptr) return;
+
+    void *filled_el = (char *) $data + $el_size * filled_index;
+    memcpy(filled_el, $el_poison, $el_size);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool stack_gap_is_poison(const stack *const stk)
+{
+    assert(stk   != nullptr);
+    assert($data != nullptr);
+
+    if ($el_poison == nullptr) return true;
+
+    for (size_t i = $size; i < $capacity; ++i) if (!stack_el_is_poison(stk, i)) return false;
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool stack_el_is_poison(const stack *const stk, const size_t checking_index)
+{
+    assert(stk            !=  nullptr);
+    assert($data          !=  nullptr);
+    assert(checking_index < $capacity);
+
+    if ($el_poison == nullptr) return true;
+
+    const void *checkig_el = (char *) $data + $el_size * checking_index;
+    return is_byte_equal(checkig_el, $el_poison, $el_size);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // stack verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -141,16 +196,21 @@ static unsigned stack_verify(const stack *const stk,    const char *file,
 
     if (stk == nullptr) return STK_NULLPTR;
 
-    if ($data     ==             nullptr) err = err | (1 << STK_NULLPTR_DATA         );
-    if ($data     ==     STK_POISON.data) err = err | (1 << STK_POISON_DATA          );
-    if ($el_size  ==  STK_POISON.el_size) err = err | (1 << STK_POISON_EL_SIZE       );
-    if ($size     ==     STK_POISON.size) err = err | (1 << STK_POISON_SIZE          );
-    if ($capacity == STK_POISON.capacity) err = err | (1 << STK_POISON_CAPACITY      );
-    if ($size      >           $capacity) err = err | (1 << STK_INVALID_SIZE_CAPACITY);
+    if ($data         == nullptr                ) err = err | (1 << STK_NULLPTR_DATA       );
+    if ($data         == STK_POISON.data        ) err = err | (1 << STK_POISON_DATA        );
+    if ($el_size      == STK_POISON.el_size     ) err = err | (1 << STK_POISON_EL_SIZE     );
+    if ($size         == STK_POISON.size        ) err = err | (1 << STK_POISON_SIZE        );
+    if ($capacity     == STK_POISON.capacity    ) err = err | (1 << STK_POISON_CAPACITY    );
+    if ($el_poison    == STK_POISON.el_poison   ) err = err | (1 << STK_POISON_EL_POISON   );
+    if ($el_dtor      == STK_POISON.el_dtor     ) err = err | (1 << STK_POISON_EL_DTOR     );
+    if ($el_dump      == STK_POISON.el_dump     ) err = err | (1 << STK_POISON_EL_DUMP     );
+
+    if (!stack_gap_is_poison(stk))                err = err | (1 << STK_NOT_POISON_GAP       );
+    if ($size > $capacity)                        err = err | (1 << STK_INVALID_SIZE_CAPACITY);
 
     #ifdef STACK_CANARY_PROTECTION
-    if (stk_get_left_canary(stk)  != L_CANARY) err = err | (1 << STK_L_CANARY_FAILED);
-    if (stk_get_right_canary(stk) != R_CANARY) err = err | (1 << STK_R_CANARY_FAILED);
+    if (stk_get_left_canary(stk)  != L_CANARY)    err = err | (1 << STK_L_CANARY_FAILED);
+    if (stk_get_right_canary(stk) != R_CANARY)    err = err | (1 << STK_R_CANARY_FAILED);
     #endif
     #ifdef STACK_HASH_PROTECTION
     if (stk_get_actual_hash(stk) != stk_get_saved_hash(stk)) err = err | (1 << STK_HASH_FAILED);
@@ -236,7 +296,32 @@ static void stack_static_dump(const stack *const stk, const char *file,
         #endif //STACK_HASH_PROTECTION
 
         log_message("    data (address: %p)\n"
-                    "    {not finished yet}\n", $data); //неоюходим dump и poison элемента стека
+                    "    {\n");
+
+        stack_data_dump(stk);
+
+        for (size_t i = $size; i < $capacity; ++i)
+        {
+            log_message(HTML_COLOR_MEDIUM_BLUE "        %lu:\n" HTML_COLOR_CANCEL, i);
+
+            if ($el_poison == nullptr || $el_poison == STK_POISON.el_poison)
+            {
+                log_message(HTML_COLOR_DARK_ORANGE "can't compare stack element with poison-element\n" HTML_COLOR_CANCEL);
+            }
+            else if (is_byte_equal((char *) $data + i * $el_size, $el_poison, $el_size))
+            {
+                log_message(HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL);
+                continue;
+            }
+
+            if ($el_dump == nullptr || $el_poison == STK_POISON.el_dump)
+            {
+                log_message(HTML_COLOR_DARK_ORANGE "can't dump stack element\n" HTML_COLOR_CANCEL);
+            }
+            else (*$el_dump) ((char *) $data + i * $el_size);
+            log_message("\n");
+        }
+        log_message("    }\n");
     }
     log_message("}\n\n");
 }
@@ -250,14 +335,46 @@ static void stack_public_fields_dump(const stack *const stk)
 
     if (stk == nullptr) { log_message("}\n\n"); return; }
 
-    if ($el_size == STK_POISON.el_size)   { log_message("    el_size  = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                  { log_message("    el_size  = %lu\n", $el_size); }
+    if ($el_size == STK_POISON.el_size)          { log_message("    el_size   = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("    el_size   = %lu\n", $el_size); }
 
-    if ($size == STK_POISON.size)         { log_message("    size     = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                  { log_message("    size     = %lu\n", $size); }
+    if ($size == STK_POISON.size)                { log_message("    size      = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("    size      = %lu\n", $size); }
 
-    if ($capacity == STK_POISON.capacity) { log_message("    capacity = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                  { log_message("    capacity = %lu\n", $capacity); }
+    if ($capacity == STK_POISON.capacity)        { log_message("    capacity  = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("    capacity  = %lu\n", $capacity); }
+
+    if ($el_poison == nullptr)                   { log_message("    el_poison = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
+    else if ($el_poison == STK_POISON.el_poison) { log_message("    el_poison = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("    el_poison = %p\n", $el_poison); }
+
+    if ($el_dtor == nullptr)                     { log_message("    el_dtor   = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
+    else if ($el_poison == STK_POISON.el_dtor)   { log_message("    el_dtor   = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("    el_dtor   = %p\n", $el_dtor); }
+
+    if ($el_dump == nullptr)                     { log_message("    el_dump   = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
+    else if ($el_poison == STK_POISON.el_poison) { log_message("    el_dump   = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("    el_dump   = %p\n", $el_dump); }
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void stack_data_dump(const stack *const stk)
+{
+    assert(stk   != nullptr);
+    assert($data != nullptr);
+
+    for (size_t i = 0; i < $size; ++i)
+    {
+        log_message("        %lu:\n", i);
+
+        if ($el_dump == nullptr || $el_dump == STK_POISON.el_dump)
+        {
+            log_message(HTML_COLOR_DARK_ORANGE "can't dump stack element\n" HTML_COLOR_CANCEL);
+        }
+        else (*$el_dump) ((char *) $data + i * $el_size);
+        log_message("\n");
+    }
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -308,6 +425,8 @@ static bool stack_resize(stack *const stk, const size_t new_capacity)
     stk_set_hash(stk);
     #endif
 
+    stack_gap_fill_poison(stk);
+
     stack_debug_verify(stk);
     return true;
 }
@@ -320,13 +439,20 @@ static bool stack_resize(stack *const stk, const size_t new_capacity)
 // stack ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool stack_ctor(stack *const stk, const size_t el_size)
+bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison              /* = nullptr */,
+                                                        void (*el_dtor)      (      void *const) /* = nullptr */,
+                                                        void (*el_dump)      (const void *const) /* = nullptr */)
 {
     if (stk == nullptr) { stack_log_error(stk, STK_NULLPTR, __FILE__, __PRETTY_FUNCTION__, __LINE__); return false; }
 
     $el_size  = el_size;
     $size     = 0;
     $capacity = DEFAULT_STACK_CAPACITY;
+
+    $el_poison = el_poison;
+    
+    $el_dtor      = el_dtor;
+    $el_dump      = el_dump;
 
     #ifdef STACK_CANARY_PROTECTION
     size_t canary_size = 2 * sizeof(stk_canary_t);
@@ -354,6 +480,8 @@ bool stack_ctor(stack *const stk, const size_t el_size)
     stk_set_hash(stk);
     #endif
 
+    stack_gap_fill_poison(stk);
+
     stack_debug_verify(stk);
     return true;
 }
@@ -379,9 +507,13 @@ void stack_dtor(stack *const stk)
 {
     stack_verify(stk);
 
-    for (size_t i = 0; i < $size; ++i)
+    if ($el_dtor == nullptr || $el_dtor == STK_POISON.el_dtor)
     {
-        ;//необходим dtor элемента стека
+        log_warning("can't dtor stack elements\n");
+    }
+    else
+    {
+        for (size_t i = 0; i < $size; ++i) (*$el_dtor) ((char *) $data + i * $el_size);
     }
 
     #ifdef STACK_CANARY_PROTECTION
@@ -393,6 +525,11 @@ void stack_dtor(stack *const stk)
     $el_size  = STK_POISON.el_size;
     $size     = STK_POISON.size;
     $capacity = STK_POISON.capacity;
+
+    $el_poison = STK_POISON.el_poison;
+
+    $el_dtor      = STK_POISON.el_dtor;
+    $el_dump      = STK_POISON.el_dump;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -431,7 +568,10 @@ bool stack_pop(stack *const stk)
 
     $size -= 1;
     void *last_el_place = (char *) $data + ($size * $el_size);
-    ; //необходим dtor и poison элемента стека
+    
+    if ($el_dtor == nullptr || $el_dtor == STK_POISON.el_dtor) log_warning("can't dtor stack elements\n");
+    else (*$el_dtor) (last_el_place);
+    stack_el_fill_poison(stk, $size);
 
     #ifdef STACK_HASH_PROTECTION
     stk_set_hash(stk);
@@ -492,7 +632,10 @@ void stack_dump(const stack *const stk, const char *file,
     else
     {
         log_message("    data (address: %p)\n"
-                    "    {not finished yet}\n", $data); //необходим dump элемента стека
+                    "    {\n", $data);
+        stack_data_dump(stk);
+
+        log_message("    }\n");
     }
     log_message("}\n\n");
 }
