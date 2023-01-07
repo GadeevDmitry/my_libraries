@@ -5,8 +5,6 @@
 #include "stack_settings.h"
 #include "stack.h"
 
-#undef stack_dump
-
 #ifdef STACK_CANARY_PROTECTION
 typedef unsigned long long stk_canary_t;
 #endif

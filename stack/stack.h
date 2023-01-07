@@ -37,31 +37,24 @@ struct stack
 *   @brief Stack ctor
 *
 *   @return true, если всё ОК, false в случае ошибки
-*
-*   @see void* stack_new(const size_t el_size)
-*   @see void stack_dtor(stack *const stk)
 */
-bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison              = nullptr,
-                                                        void (*el_dtor)      (      void *const) = nullptr,
-                                                        void (*el_dump)      (const void *const) = nullptr);
+bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison         = nullptr,
+                                                        void (*el_dtor) (      void *const) = nullptr,
+                                                        void (*el_dump) (const void *const) = nullptr);
 
 /**
 *   @brief Создаёт стек в динамической памяти
 *
 *   @return указаталь на созданный стек, nullptr в случае ошибки
-*
-*   @see void stack_ctor(stack *const stk, const size_t el_size)
-*   @see void stack_dtor(stack *const stk)
 */
-void *stack_new(const size_t el_size);
+void *stack_new(const size_t el_size,   const void *const el_poison         = nullptr,
+                                        void (*el_dtor) (      void *const) = nullptr,
+                                        void (*el_dump) (const void *const) = nullptr);
 
 /**
 *   @brief Stack dtor
-*
-*   @see void stack_ctor(stack *const stk, const size_t el_size)
-*   @see void* stack_new(const size_t el_size)
 */
-void stack_dtor(stack *const stk);
+void stack_dtor(void *const stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // stack main
@@ -97,9 +90,21 @@ bool stack_empty(stack *const stk);
 
 /**
 *   @brief Stack dump
+*
+*   @see stack_inline_dump(stk)
 */
-void stack_dump(const stack *const stk, const char *file, const char *func, const int line);
+void stack_dump(const void *const _stk);
 
-#define stack_dump(stk) stack_dump(stk, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+/**
+*   @brief Stack dump с сообщением о файле, функции, строке в точке вызова
+*
+*   @see void stack_dump(const void *const _stk)
+*/
+#define stack_inline_dump(stk)                                                      \
+        log_message("stack dump called in\n"                                        \
+                    "    FILE: %s\n"                                                \
+                    "FUNCTION: %s\n"                                                \
+                    "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);     \
+        stack_dump(stk);
 
 #endif //STACK_H

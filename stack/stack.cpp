@@ -439,9 +439,9 @@ static bool stack_resize(stack *const stk, const size_t new_capacity)
 // stack ctor dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison              /* = nullptr */,
-                                                        void (*el_dtor)      (      void *const) /* = nullptr */,
-                                                        void (*el_dump)      (const void *const) /* = nullptr */)
+bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison         /* = nullptr */,
+                                                        void (*el_dtor) (      void *const) /* = nullptr */,
+                                                        void (*el_dump) (const void *const) /* = nullptr */)
 {
     if (stk == nullptr) { stack_log_error(stk, STK_NULLPTR, __FILE__, __PRETTY_FUNCTION__, __LINE__); return false; }
 
@@ -488,7 +488,9 @@ bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poi
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void *stack_new(const size_t el_size)
+void *stack_new(const size_t el_size,   const void *const el_poison         /* = nullptr */,
+                                        void (*el_dtor) (      void *const) /* = nullptr */,
+                                        void (*el_dump) (const void *const) /* = nullptr */)
 {
     stack *const stk = (stack *) log_calloc(1, sizeof(stack));
     if (stk == nullptr)
@@ -497,14 +499,15 @@ void *stack_new(const size_t el_size)
         return nullptr;
     }
 
-    if (!stack_ctor(stk, el_size)) { log_free(stk); return nullptr; }
+    if (!stack_ctor(stk, el_size, el_poison, el_dtor, el_dump)) { log_free(stk); return nullptr; }
     return stk;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void stack_dtor(stack *const stk)
+void stack_dtor(void *const _stk)
 {
+    stack *const stk = (stack *) _stk;
     stack_verify(stk);
 
     if ($el_dtor == nullptr || $el_dtor == STK_POISON.el_dtor)
@@ -613,17 +616,9 @@ bool stack_empty(stack *const stk)
 // stack user dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void stack_dump(const stack *const stk, const char *file,
-                                        const char *func,
-                                        const int   line)
+void stack_dump(const void *const _stk)
 {
-    assert(file != nullptr);
-    assert(func != nullptr);
-
-    log_message("stack_dump called in\n"
-                "    FILE: %s\n"
-                "FUNCTION: %s\n"
-                "    LINE: %d\n", file, func, line);
+    const stack *const stk = (const stack *) _stk;
 
     stack_public_fields_dump(stk);
 
