@@ -194,7 +194,12 @@ static unsigned stack_verify(const stack *const stk,    const char *file,
 
     unsigned err = 0;
 
-    if (stk == nullptr) return STK_NULLPTR;
+    if (stk == nullptr)
+    {
+        err = err | (1 << STK_NULLPTR);
+        stack_log_error(stk, err, file, func, line);
+        return err;
+    }
 
     if ($data         == nullptr                ) err = err | (1 << STK_NULLPTR_DATA       );
     if ($data         == STK_POISON.data        ) err = err | (1 << STK_POISON_DATA        );
@@ -220,10 +225,10 @@ static unsigned stack_verify(const stack *const stk,    const char *file,
     return err;
 }
 
-#define stack_verify(stk) stack_verify(stk, __FILE__, __PRETTY_FUNCTION__, __LINE__);
+#define stack_verify(stk) stack_verify(stk, __FILE__, __PRETTY_FUNCTION__, __LINE__)
 
 #ifdef STACK_DEBUG
-#define stack_debug_verify(stk) stack_verify(stk)
+#define stack_debug_verify(stk) if (stack_verify(stk) != STK_OK) { assert(false && "stack debug verify filed"); }
 #else
 #define stack_debug_verify(stk) ;
 #endif
@@ -239,7 +244,7 @@ static void stack_log_error(const stack *const stk, const unsigned stk_error,   
     assert(file != nullptr);
     assert(func != nullptr);
 
-    if (stk_error == 0) return;
+    if (stk_error == STK_OK) return;
 
     log_param_error(file, func, line, "stack verify failed\n");
     log_message(HTML_COLOR_DARK_RED);
@@ -508,7 +513,7 @@ void *stack_new(const size_t el_size,   const void *const el_poison         /* =
 void stack_dtor(void *const _stk)
 {
     stack *const stk = (stack *) _stk;
-    stack_verify(stk);
+    if (stack_verify(stk) != STK_OK) return;
 
     if ($el_dtor == nullptr || $el_dtor == STK_POISON.el_dtor)
     {
@@ -541,8 +546,8 @@ void stack_dtor(void *const _stk)
 
 bool stack_push(stack *const stk, const void *const new_el)
 {
-    stack_verify(stk);
-    assert      (new_el != nullptr);
+    if (stack_verify(stk) != STK_OK) return false;
+    if (new_el == nullptr)  { log_error("new_el = nullptr\n"); }
 
     if ($size == $capacity)
     {
@@ -565,7 +570,7 @@ bool stack_push(stack *const stk, const void *const new_el)
 
 bool stack_pop(stack *const stk)
 {
-    stack_verify(stk);
+    if (stack_verify(stk) != STK_OK) return false;
 
     if ($size == 0) { log_error("stack_pop from empty stack\n"); stack_debug_verify(stk); return false; }
 
@@ -596,7 +601,7 @@ bool stack_pop(stack *const stk)
 
 void *stack_front(stack *const stk)
 {
-    stack_verify(stk);
+    if (stack_verify(stk) != STK_OK) return nullptr;
 
     if ($size == 0) { log_error("stack_front from empty stack\n"); return nullptr; }
 
@@ -607,7 +612,7 @@ void *stack_front(stack *const stk)
 
 bool stack_empty(stack *const stk)
 {
-    stack_verify(stk);
+    if (stack_verify(stk) != STK_OK) return false;
 
     return $size == 0;
 }
