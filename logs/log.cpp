@@ -7,6 +7,12 @@
 #include "log.h"
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// GLOBAL
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+size_t LOG_TAB = 0;
+
+//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // STATIC FUNCTION
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -40,6 +46,11 @@ static void LOG_STREAM_CLOSE()
     fclose (LOG_STREAM);
 }
 
+static void log_tab()
+{
+    for (size_t i = 0; i < LOG_TAB; ++i) log_message("\t");
+}
+
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // USER FUNCTION
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -55,6 +66,7 @@ void log_message(const char *fmt, ...)
     va_list  ap;
     va_start(ap, fmt);
 
+    log_tab ();
     vfprintf(LOG_STREAM, fmt, ap);
 
     va_end(ap);
@@ -67,6 +79,7 @@ void log_warning(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
 
+    log_tab ();
     fprintf (LOG_STREAM, HTML_COLOR_DARK_ORANGE "WARNING: ");
     vfprintf(LOG_STREAM, fmt, ap);
     fprintf (LOG_STREAM, HTML_COLOR_CANCEL);
@@ -81,6 +94,7 @@ void log_header(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
 
+    log_tab ();
     fprintf (LOG_STREAM, "<h2>\n");
     vfprintf(LOG_STREAM, fmt, ap);
     fprintf (LOG_STREAM, "</h2>\n");
@@ -95,6 +109,7 @@ void log_param_place(const char   *file,
     assert(file != nullptr);
     assert(func != nullptr);
 
+    log_tab();
     log_message("\n"
                 "    FILE: %s\n"
                 "FUNCTION: %s\n"
