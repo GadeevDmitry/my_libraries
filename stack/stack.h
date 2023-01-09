@@ -70,9 +70,12 @@ bool stack_push(stack *const stk, const void *const new_el);
 /**
 *   @brief Stack pop
 *
+*   @param stk  [in]  - stack to pop
+*   @param data [out] - указатель, в который скопировать содержимое последнего элемента стека
+*
 *   @see bool stack_push(stack *const stk, const void *const new_el)
 */
-bool stack_pop(stack *const stk);
+bool stack_pop(stack *const stk, void *const data = nullptr);
 
 /**
 *   @brief Возвращает указатель на вершину стека stk
