@@ -327,11 +327,11 @@ static void stack_static_dump(const stack *const stk, const char *file,
             else (*$el_dump) ((char *) $data + i * $el_size);
             log_message("\n");
         }
-        log_message("}\n");
         LOG_TAB--;
+        log_message("}\n");
     }
-    log_message("}\n\n");
     LOG_TAB--;
+    log_message("}\n\n");
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
