@@ -273,9 +273,10 @@ static void stack_static_dump(const stack *const stk, const char *file,
                 "    LINE: %d\n\n", file, func, line);
 
     stack_public_fields_dump(stk);
+    if (stk == nullptr) return;
 
-    if      ($data == nullptr)         { log_message("    data = " HTML_COLOR_DARK_RED "nullptr\n" HTML_COLOR_CANCEL); }
-    else if ($data == STK_POISON.data) { log_message("    data = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    if      ($data == nullptr)         { log_message("data        = " HTML_COLOR_DARK_RED "nullptr\n" HTML_COLOR_CANCEL); }
+    else if ($data == STK_POISON.data) { log_message("data        = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
     else
     {
         #ifdef STACK_CANARY_PROTECTION
@@ -284,8 +285,8 @@ static void stack_static_dump(const stack *const stk, const char *file,
 
         log_message("\n"
                     HTML_COLOR_MEDIUM_BLUE
-                    "    l_canary = %llu\n"
-                    "    r_canary = %llu\n"
+                    "l_canary    = %llu\n"
+                    "r_canary    = %llu\n"
                     HTML_COLOR_CANCEL  "\n", left_canary, right_canary);
         #endif //STACK_CANARY_PROTECTION
 
@@ -295,19 +296,19 @@ static void stack_static_dump(const stack *const stk, const char *file,
 
         log_message("\n"
                     HTML_COLOR_MEDIUM_BLUE
-                    "    saved_hash  = %llu\n"
-                    "    actual_hash = %llu\n"
+                    "saved_hash  = %llu\n"
+                    "actual_hash = %llu\n"
                     HTML_COLOR_CANCEL     "\n", svaed_hash, actual_hash);
         #endif //STACK_HASH_PROTECTION
 
-        log_message("    data (address: %p)\n"
-                    "    {\n");
-
+        log_message("data (address: %p)\n"
+                    "{\n");
+        LOG_TAB++;
         stack_data_dump(stk);
 
         for (size_t i = $size; i < $capacity; ++i)
         {
-            log_message(HTML_COLOR_MEDIUM_BLUE "        %lu:\n" HTML_COLOR_CANCEL, i);
+            log_message(HTML_COLOR_MEDIUM_BLUE "%lu:\n" HTML_COLOR_CANCEL, i);
 
             if ($el_poison == nullptr || $el_poison == STK_POISON.el_poison)
             {
@@ -326,9 +327,11 @@ static void stack_static_dump(const stack *const stk, const char *file,
             else (*$el_dump) ((char *) $data + i * $el_size);
             log_message("\n");
         }
-        log_message("    }\n");
+        log_message("}\n");
+        LOG_TAB--;
     }
     log_message("}\n\n");
+    LOG_TAB--;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -337,29 +340,30 @@ static void stack_public_fields_dump(const stack *const stk)
 {
     log_message("stack (address: %p)\n"
                 "{\n",          stk);
+    LOG_TAB++;
 
-    if (stk == nullptr) { log_message("}\n\n"); return; }
+    if (stk == nullptr) { LOG_TAB--; log_message("}\n\n"); return; }
 
-    if ($el_size == STK_POISON.el_size)          { log_message("    el_size   = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                         { log_message("    el_size   = %lu\n", $el_size); }
+    if ($el_size == STK_POISON.el_size)          { log_message("el_size     = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("el_size     = %lu\n", $el_size); }
 
-    if ($size == STK_POISON.size)                { log_message("    size      = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                         { log_message("    size      = %lu\n", $size); }
+    if ($size == STK_POISON.size)                { log_message("size        = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("size        = %lu\n", $size); }
 
-    if ($capacity == STK_POISON.capacity)        { log_message("    capacity  = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                         { log_message("    capacity  = %lu\n", $capacity); }
+    if ($capacity == STK_POISON.capacity)        { log_message("capacity    = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("capacity    = %lu\n", $capacity); }
 
-    if ($el_poison == nullptr)                   { log_message("    el_poison = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
-    else if ($el_poison == STK_POISON.el_poison) { log_message("    el_poison = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                         { log_message("    el_poison = %p\n", $el_poison); }
+    if ($el_poison == nullptr)                   { log_message("el_poison   = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
+    else if ($el_poison == STK_POISON.el_poison) { log_message("el_poison   = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("el_poison   = %p\n", $el_poison); }
 
-    if ($el_dtor == nullptr)                     { log_message("    el_dtor   = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
-    else if ($el_poison == STK_POISON.el_dtor)   { log_message("    el_dtor   = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                         { log_message("    el_dtor   = %p\n", $el_dtor); }
+    if ($el_dtor == nullptr)                     { log_message("el_dtor     = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
+    else if ($el_poison == STK_POISON.el_dtor)   { log_message("el_dtor     = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("el_dtor     = %p\n", $el_dtor); }
 
-    if ($el_dump == nullptr)                     { log_message("    el_dump   = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
-    else if ($el_poison == STK_POISON.el_poison) { log_message("    el_dump   = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
-    else                                         { log_message("    el_dump   = %p\n", $el_dump); }
+    if ($el_dump == nullptr)                     { log_message("el_dump     = " HTML_COLOR_DARK_ORANGE "nullptr\n" HTML_COLOR_CANCEL); }
+    else if ($el_poison == STK_POISON.el_poison) { log_message("el_dump     = " HTML_COLOR_POISON "POISON\n" HTML_COLOR_CANCEL); }
+    else                                         { log_message("el_dump     = %p\n", $el_dump); }
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -371,7 +375,7 @@ static void stack_data_dump(const stack *const stk)
 
     for (size_t i = 0; i < $size; ++i)
     {
-        log_message("        %lu:\n", i);
+        log_message("%lu:\n", i);
 
         if ($el_dump == nullptr || $el_dump == STK_POISON.el_dump)
         {
