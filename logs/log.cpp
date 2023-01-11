@@ -48,7 +48,7 @@ static void LOG_STREAM_CLOSE()
 
 static void log_tab()
 {
-    for (size_t i = 0; i < LOG_TAB; ++i) log_message("\t");
+    for (size_t i = 0; i < LOG_TAB; ++i) fprintf(LOG_STREAM, "\t");
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
