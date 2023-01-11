@@ -629,11 +629,8 @@ bool stack_empty(stack *const stk)
 void stack_dump(const void *const _stk)
 {
     const stack *const stk = (const stack *) _stk;
-    if (stack_verify(stk) != STK_OK)
-    {
-        stack_static_dump(stk, __FILE__, __PRETTY_FUNCTION__, __LINE__);
-        return;
-    }
+    if (stack_verify(stk) != STK_OK) return;
+
     stack_public_fields_dump(stk);
 
     if      ($data == nullptr)         { log_message("    data     = " HTML_COLOR_DARK_RED "nullptr\n" HTML_COLOR_CANCEL); }
