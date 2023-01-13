@@ -1,1242 +1,613 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
-#include <string.h>
 #include <assert.h>
+#include <string.h>
 
-#include "../var_declaration/var_declaration.h"
+#include "list_static.h"
+
 #include "../logs/log.h"
 #include "../algorithm/algorithm.h"
 
-struct List_elem_info
+//================================================================================================================================
+// STATIC FUNCTION
+//================================================================================================================================
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// list verify
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned list_verify(const list *const lst,  const char *file,
+                                                    const char *func,
+                                                    const int   line)
 {
-    int index;
-    
-    bool is_free;
+    assert(file != nullptr);
+    assert(func != nullptr);
 
-    List_elem_info *next;
-    List_elem_info *prev;
-};
+    unsigned err = LST_OK;
 
-struct List
-{
-    void *data;
-
-    int elem_size;
-    int data_size;
-    int data_capacity;
-    
-    int free;
-
-    bool is_ctor;
-    bool is_linear;
-
-    var_declaration var_info;
-};
-
-const List default_list = 
-{
-    nullptr, // data
-
-          0, // elem_size
-          1, // data_size
-          4, // data_capcity
-
-          1, // free
-
-       true, // is_ctor
-       true, //is_linear
-
+    if (lst == nullptr)
     {
-    nullptr,
-    nullptr,
-    nullptr,
-          0
-    }        // var_info
-};
+        err = err | (1 << LST_NULLPTR);
+        list_log_error(lst, err, file, func, line);
+        return err;
+    }
 
-const List poison_list = 
-{
-    nullptr, // data
+    if ($fictional == LST_POISON.fictional) err = err | (1 << LST_POISON_FICTIONAL );
+    if ($el_size   == LST_POISON.el_size  ) err = err | (1 << LST_POISON_EL_SIZE   );
+    if ($size      == LST_POISON.size     ) err = err | (1 << LST_POISON_SIZE      );
+    if ($el_dtor   == LST_POISON.el_dtor  ) err = err | (1 << LST_POISON_EL_DTOR   );
+    if ($el_dump   == LST_POISON.el_dump  ) err = err | (1 << LST_POISON_EL_DUMP   );
+    if ($fictional ==              nullptr) err = err | (1 << LST_NULLPTR_FICTIONAL);
 
-         -1, // elem_size
-         -1, // data_size
-         -1, // data_capacity
-
-          0, // free
-
-      false, // is_ctor
-      false, // is_linear
-
+    if (!( err & (1 << LST_POISON_FICTIONAL) || err & (1 << LST_NULLPTR_FICTIONAL) ))
     {
-    nullptr,
-    nullptr,
-    nullptr,
-          0
-    }        // var_info
-};
+        err = err | list_fictional_verify(lst);
+    }
 
-enum LIST_ERRORS
+    list_log_error(lst, err, file, func, line);
+    return err;
+}
+
+#define list_verify(lst) list_verify(lst, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+
+#ifdef LIST_DEBUG
+#define list_debug_verify(lst) if (list_verify(lst) != LST_OK) { assert(false && "list verify failed\n"); }
+#else
+#define list_debug_verify(lst) ;
+#endif
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned list_fictional_verify(const list *const lst)
 {
-    OK                      ,
+    assert(lst        != nullptr);
+    assert($fictional != nullptr);
 
-    NULLPTR_LIST            ,
-    NULLPTR_LIST_INFO       ,
+    const list_node *cur_node = $fictional->next;
+    unsigned err = 0;
 
-    ALREADY_CTORED          ,
-    NOT_YET_CTORED          ,
+    for (size_t i = 0; i < $size; ++i)
+    {
+        err = err | list_node_verify(lst, cur_node);
 
-    NEGATIVE_ELEM_SIZE      ,
-    NEGATIVE_DATA_SIZE      ,
-    NEGATIVE_DATA_CAPACITY  ,
-    
-    INVALID_CAPACITY        ,
-    INVALID_FREE            ,
-    INVALID_DATA            ,
-    INVALID_INDEX           ,
+        if (err) break;
+        if (cur_node->prev->next != cur_node) { err = err | (1 << LST_INVALID_CYCLE); break; }
+        if (cur_node == $fictional)           { err = err | (1 << LST_INVALID_CYCLE); break; }
 
-    MEMORY_LIMIT_EXCEEDED   ,
-};
+        cur_node = cur_node->next;
+    }
 
-const char *error_messages[] = 
-{
-    "OK"                                        ,
-
-    "List              is invalid"              ,
-    "List_info pointer is invalid"              ,
-
-    "List is already ctored"                    ,
-    "List is not yet ctored"                    ,
-
-    "Size     of list_element less than zero"   ,
-    "Size     of data         less than zero"   ,
-    "Capacity of data         less than zero"   ,
-
-    "Capacity of data      is invalid"          ,
-    "Free     of list      is invalid"          ,
-    "Data                  is invalid"          ,
-    "Index    of list_info is invalid"          ,
-
-    "Memory limit exceeded"
-};
-
-static const int graph_file_size = 40           ;
-static const int graph_cmd_size  = 100          ;
-
-enum GRAPH_COLOR
-{
-    LIGHT_BLUE      ,
-    LIGHT_RED       ,
-    LIGHT_GREEN     ,
-    LIGHT_GREY      ,
-
-    DARK_BLUE       ,
-    DARK_RED        ,
-    DARK_GREEN      ,
-
-    WHITE           ,
-    BLACK
-};
-
-enum GRAPH_MODE
-{
-    ORDER           ,
-    INDEX
-};
-
-const char *color_names[] =
-{
-    "lightblue"     ,
-    "lightred"      ,
-    "lightgreen"    ,
-    "lightgrey"     ,
-
-    "darkblue"      ,
-    "darkred"       ,
-    "darkgreen"     ,
-
-    "white"         ,
-    "black"
-};
-
-/*_____________________________________MACRO_DEFINITIONS_____________________________________*/
-
-#define List_ctor(lst, elem_size)                                                               \
-       if (true)                                                                                \
-       {                                                                                        \
-            int ret_ctor = _List_ctor(lst, elem_size, __FILE__,                                 \
-                                                      __PRETTY_FUNCTION__,                      \
-                                                      #lst,                                     \
-                                                      __LINE__);                                \
-                                                                                                \
-            if (ret_ctor == -1)                                                                 \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-            if (ret_ctor != OK)                                                                 \
-            {                                                                                   \
-                log_place();                                                                    \
-                List_error(ret_ctor);                                                           \
-                return -1;                                                                      \
-            }                                                                                   \
-       }
-
-#define List_dtor(lst)                                                                          \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_dtor = _List_dtor(lst);                                                     \
-                                                                                                \
-            if (ret_dtor == -1)                                                                 \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_push(lst, index, push_val)                                                         \
-       _List_push(lst, index, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)
-
-#define List_push_order(lst, order, push_val)                                                   \
-       _List_push_order(lst, order, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)          \
-
-#define List_pop(lst, index)                                                                    \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_pop = _List_pop(lst, index);                                                \
-                                                                                                \
-            if (ret_pop != OK)                                                                  \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_pop_order(lst, order)                                                              \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_pop = _List_pop(lst, _List_order_to_index(lst, order + 1));                 \
-                                                                                                \
-            if (ret_pop != OK)                                                                  \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_get(lst, index, pull_val)                                                          \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_get = _List_get(lst, index, pull_val);                                      \
-                                                                                                \
-            if (ret_get != OK)                                                                  \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_get_order(lst, order, pull_val)                                                    \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_get = _List_get(lst, _List_order_to_index(lst, order + 1), pull_val);       \
-                                                                                                \
-            if (ret_get != OK)                                                                  \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_push_front(lst, push_val)                                                          \
-       _List_push_front(lst, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)
-
-#define List_push_back(lst, push_val)                                                           \
-       _List_push_back(lst, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)
-
-#define List_pop_front(lst)                                                                     \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_pop_front = _List_pop_front(lst);                                           \
-                                                                                                \
-            if (ret_pop_front != OK)                                                            \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_pop_back(lst)                                                                      \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_pop_back = _List_pop_back(lst);                                             \
-                                                                                                \
-            if (ret_pop_back != OK)                                                             \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_front(lst, pull_val)                                                               \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_front = _List_front(lst, pull_val);                                         \
-                                                                                                \
-            if (ret_front != OK)                                                                \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_back(lst, pull_val)                                                                \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_back = _List_back(lst, pull_val);                                           \
-                                                                                                \
-            if (ret_back != OK)                                                                 \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_verify(lst)                                                                        \
-        if (true)                                                                               \
-        {                                                                                       \
-            unsigned int ret_verify = _List_verify(lst);                                        \
-                                                                                                \
-            if (ret_verify != OK)                                                               \
-            {                                                                                   \
-                log_place();                                                                    \
-                List_error(ret_verify);                                                         \
-                List_dump(lst);                                                                 \
-                                                                                                \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_fill_free(lst)                                                                     \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_fill_free = _List_fill_free(lst);                                           \
-                                                                                                \
-            if (ret_fill_free != OK)                                                            \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_realloc(lst)                                                                       \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_realloc = _List_realloc(lst);                                               \
-                                                                                                \
-            if (ret_realloc != OK)                                                              \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_line(lst)                                                                          \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_line = _List_line(lst);                                                     \
-                                                                                                \
-            if (ret_line != OK)                                                                 \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_add_free(lst, index)                                                               \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_add_free = _List_add_free(lst, index);                                      \
-                                                                                                \
-            if (ret_add_free != OK)                                                             \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-#define List_del_free(lst)                                                                      \
-        if (true)                                                                               \
-        {                                                                                       \
-            int ret_del_free = _List_del_free(lst);                                             \
-                                                                                                \
-            if (ret_del_free != OK)                                                             \
-            {                                                                                   \
-                log_place();                                                                    \
-                return -1;                                                                      \
-            }                                                                                   \
-        }
-
-/*________________________________USER_FUNCTION_DECLARATIONS_________________________________*/
-
-void              List_dump             (List *const lst);
-void              List_simple_dump      (List *const lst);
-void              List_graph_dump       (List *const lst, GRAPH_MODE mode);
-
-int              _List_line             (List *const lst);
-
-void              List_error            (const unsigned int err);
-int              _List_order_to_index   (List *const lst, int order);
-
-int              _List_ctor             (List *const lst, const int elem_size,  const char    *name_file,
-                                                                                const char    *name_func,
-                                                                                const char    *name_var ,
-                                                                                const int      line);
-int              _List_dtor             (List *const lst);
-
-int              _List_push             (List *const lst, const int index, void *const         push_val ,
-                                                                                 const char   *call_file,
-                                                                                 const char   *call_func,
-                                                                                 const int     call_line);
-
-int              _List_pop              (List *const lst, const int index);
-int              _List_get              (List *const lst, const int index, void *const pull_val);
-
-int              _List_push_front       (List *const lst, void *const push_val, const char   *call_file,
-                                                                                const char   *call_func,
-                                                                                const int     call_line);
-
-int              _List_push_back        (List *const lst, void *const push_val, const char   *call_file,
-                                                                                const char   *call_func,
-                                                                                const int     call_line);
-
-int              _List_pop_front        (List *const lst);
-int              _List_pop_back         (List *const lst);
-
-int              _List_front            (List *const lst, void *const pull_val);
-int              _List_back             (List *const lst, void *const pull_val);
-
-int              _List_push_order       (List *const lst, const int order, void *const       push_val,
-                                                                                 const char *call_file,
-                                                                                 const char *call_func,
-                                                                                 const int   call_line);
-
-/*______________________________ADDITIONAL_FUNCTION_DECLARATIONS_____________________________*/
-
-static unsigned int     _List_verify            (List *const lst);
-static unsigned int     _List_info_verify       (List *const lst);
-
-static void             *List_value_iterator    (List *const lst, const int index);
-static List_elem_info   *List_info_iterator     (List *const lst, const int index);
-
-static int              _List_realloc           (List *const lst);
-static int              _List_fill_free         (List *const lst);
-
-static int               List_cmp               (void *lst_a, void *lst_b);
-
-static int              _List_check_linearity   (List *const lst, const int index);
-
-static int              _List_add_free          (List *const lst, const int index);
-static int              _List_del_free          (List *const lst);
-
-static int              _List_push              (List *const lst, const int index, void *const push_val);
-static int              _List_push_front        (List *const lst,                  void *const push_val);
-static int              _List_push_back         (List *const lst,                  void *const push_val);
-
-static void              List_graph_index_dump  (List *const lst, FILE *const stream);
-static void              List_graph_order_dump  (List *const lst, FILE *const stream);
-
-static void              describe_node          (List_elem_info *info, FILE *const stream, const int number);
-
-/*___________________________________________________________________________________________*/
-
-static unsigned int _List_verify(List *const lst)
-{
-    unsigned int err = OK;
-
-    if (lst          == nullptr)                         return (1 << NULLPTR_LIST)             ;
-    if (lst->is_ctor == false)                           return (1 << NOT_YET_CTORED)           ;
-
-    if (lst->elem_size     < 0)                     err = err | (1 << NEGATIVE_ELEM_SIZE)       ;
-    if (lst->data_size     < 0)                     err = err | (1 << NEGATIVE_DATA_SIZE)       ;
-    if (lst->data_capacity < 0)                     err = err | (1 << NEGATIVE_DATA_CAPACITY)   ;
-
-    if (lst->data_capacity < lst->data_size)        err = err | (1 << INVALID_CAPACITY)         ;
-    if (lst->free          < default_list.free ||
-        lst->free          > lst->data_capacity)    err = err | (1 << INVALID_FREE)             ;
-    if (lst->data         == nullptr)               err = err | (1 << INVALID_DATA)             ;
-
-    err = err | _List_info_verify(lst);
+    if (cur_node != $fictional) err = err | (1 << LST_INVALID_CYCLE);
 
     return err;
 }
 
-static unsigned int _List_info_verify(List *const lst)
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_log_error(const list *const lst, const unsigned err,   const char *file,
+                                                                        const char *func,
+                                                                        const int   line)
 {
-    unsigned int err = 0;
+    assert(file != nullptr);
+    assert(func != nullptr);
 
-    for (int info_index = 0; info_index < lst->data_size; ++info_index)
+    if (err == LST_OK) return;
+
+    log_param_error(file, func, line, "list verify failed\n");
+    log_message(HTML_COLOR_DARK_RED);
+
+    for (size_t i = 1; i * sizeof(char *) < sizeof(LST_STATUS_MESSAGES); ++i)
     {
-        List_elem_info *cur_info = List_info_iterator(lst, info_index);
-
-        if (cur_info->index   != info_index)    err = err | INVALID_INDEX       ;
-        if (cur_info->is_free == false)
-        {
-            if (cur_info->next  == nullptr)     err = err | NULLPTR_LIST_INFO   ;
-            if (cur_info->prev  == nullptr)     err = err | NULLPTR_LIST_INFO   ;
-        }
+        if (err & (1 << i)) log_tab_message("%s\n", LST_STATUS_MESSAGES[i]);
     }
+    log_message(HTML_COLOR_CANCEL);
+
+    list_static_dump(lst, file, func, line);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// list_node verify
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned list_node_verify(const list *const lst, const list_node *const lst_node)
+{
+    assert(lst != nullptr);
+
+    unsigned err = 0;
+    if (lst_node == nullptr)
+    {
+        err = err | (1 << LST_NODE_NULLPTR);
+        return err;
+    }
+
+    if ($data == nullptr) err = err | (1 << LST_NODE_NULLPTR_DATA);
+    if ($prev == nullptr) err = err | (1 << LST_NODE_NULLPTR_PREV);
+    if ($next == nullptr) err = err | (1 << LST_NODE_NULLPTR_NEXT);
 
     return err;
 }
 
-void List_error(const unsigned int err)
-{
-    log_message("\n");
-    log_error  ("LIST_VERIFY_FAILED\n");
+//--------------------------------------------------------------------------------------------------------------------------------
 
-    for (unsigned int err_bit = 0; err_bit < 8 * sizeof(int); ++err_bit)
-    {
-        if (err & (1 << err_bit)) log_error("%s\n", error_messages[err_bit]);
-    }
+#ifdef LIST_DEBUG
+
+static unsigned list_node_debug_verify(const list *const lst, const list_node *const lst_node,  const char *file,
+                                                                                                const char *func,
+                                                                                                const int   line)
+{
+    assert(lst  != nullptr);
+    assert(file != nullptr);
+    assert(func != nullptr);
+
+    unsigned err = list_node_verify(lst, lst_node);
+
+    list_node_log_error(lst, lst_node, err, file, func, line);
+    return err;
 }
 
-/*___________________________________________________________________________________________*/
+#define list_node_debug_verify(lst, lst_node)                                                                                   \
+    if (list_node_debug_verify(lst, lst_node, __FILE__, __PRETTY_FUNCTION__, __LINE__) != LST_OK)                               \
+    {                                                                                                                           \
+        assert(false && "list_node verify failed\n");                                                                           \
+    }
+#else
+#define list_node_debug_verify(lst, lst_node) ;
+#endif //LIST_DEBUG
 
-void List_dump(List *const lst)
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#ifdef LIST_DEBUG
+
+static void list_node_log_error(const list      *const lst,
+                                const list_node *const lst_node, const unsigned err,    const char *file,
+                                                                                        const char *func,
+                                                                                        const int   line)
 {
-    List_simple_dump(lst);  
-    if (lst->data == nullptr) return;
-    
-    log_message("\n"
-                "    index: ");
-    for (int index_cnt = 0; index_cnt < lst->data_capacity; ++index_cnt)
+    assert(lst  != nullptr);
+    assert(file != nullptr);
+    assert(func != nullptr);
+
+    if (err == 0) return;
+
+    log_param_error(file, func, line, "%s\n", "list_node verify failed\n");
+    log_message(HTML_COLOR_DARK_RED);
+
+    for (size_t i = 0; i * sizeof(char *) < sizeof(LST_STATUS_MESSAGES); ++i)
     {
-        log_message("%-8d ", index_cnt);
+        if (err & (1 << i)) log_tab_message("%s\n", LST_STATUS_MESSAGES[i]);
     }
+    log_message(HTML_COLOR_CANCEL);
 
-    log_message("\n\n"
-                "condition: ");
-    for (int index_cnt = 0; index_cnt < lst->data_capacity; ++index_cnt)
-    {
-        List_elem_info *cur_info = List_info_iterator (lst, index_cnt);
-        void           *cur_elem = List_value_iterator(lst, index_cnt);
-
-        if      (cur_info          == nullptr) log_message(RED   "%-8s " CANCEL, "NO INFO");
-        else if (cur_info->is_free == false)   log_message(GREEN "%-8s " CANCEL, "BUSY"   );
-        else                                   log_message(OLIVE "%-8s " CANCEL, "FREE"   );
-    }
-
-    log_message("\n"
-                "     next: ");
-    for (int next_cnt  = 0; next_cnt  < lst->data_capacity; ++next_cnt)
-    {
-        List_elem_info *cur_info = List_info_iterator(lst, next_cnt);
-
-        if      (cur_info       == nullptr)  log_message(RED   "%-8s " CANCEL, "NO INFO");
-        else if (cur_info->next == nullptr)
-        {
-            if  (cur_info->is_free == false) log_message(RED   "%-8s " CANCEL, "NULL"   );
-            else                             log_message(OLIVE "%-8s " CANCEL, "NULL"   );
-        }
-        else                                 log_message(USUAL "%-8d " CANCEL, cur_info->next->index);
-    }
-
-    log_message("\n"
-                "     prev: ");
-    for (int prev_cnt  = 0; prev_cnt  < lst->data_capacity; ++prev_cnt)
-    {
-        List_elem_info *cur_info = List_info_iterator(lst, prev_cnt);
-
-        if      (cur_info       == nullptr)  log_message(RED   "%-8s " CANCEL, "NO_INFO");
-        else if (cur_info->prev == nullptr)
-        {
-            if  (cur_info->is_free == false) log_message(RED   "%-8s " CANCEL, "NULL"   );
-            else                             log_message(OLIVE "%-8s " CANCEL, "NULL"   );
-        }
-        else                                 log_message(USUAL "%-8d " CANCEL, cur_info->prev->index);
-    }
-    log_message("\n");
+    list_node_static_dump(lst, lst_node, file, func, line);
 }
 
-/*___________________________________________________________________________________________*/
+#endif //LIST_DEBUG
 
-void List_simple_dump(List *const lst)
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_static_dump(const list *const lst, const char *file,
+                                                    const char *func,
+                                                    const int   line)
 {
-    log_message("\n"
-                "List[%p]\n", lst);
+    assert(file != nullptr);
+    assert(func != nullptr);
 
+    log_tab_message("list_static_dump called by error in\n"
+                    "    FILE: %s\n"
+                    "FUNCTION: %s\n"
+                    "    LINE: %d\n\n", file, func, line);
+
+    list_public_fields_dump(lst);
     if (lst == nullptr) return;
 
-    var_dump(&lst->var_info);
+    list_fictional_dump(lst);
 
-    log_message("List = {\n"
-                "       data:           %p\n"
-                "       data_size:      %d\n"
-                "       data_capacity:  %d\n"
-                "                         \n"
-                "       elem_size:      %d\n"
-                "                         \n"
-                "       free:           %d\n"
-                "                         \n"
-                "       is_ctor:        %d\n"
-                "       is_linear:      %d\n"
-                "       }\n",
-
-                        lst->data,
-                        lst->data_size,
-                        lst->data_capacity,
-                        
-                        lst->elem_size,
-                        
-                        lst->free,
-                        
-                        lst->is_ctor,
-                        lst->is_linear);
+    LOG_TAB--;
+    log_tab_message("}\n");
 }
 
-/*___________________________________________________________________________________________*/
+//--------------------------------------------------------------------------------------------------------------------------------
 
-void List_graph_dump(List *const lst, GRAPH_MODE mode)
+#define poison_field_dump(field)                         log_tab_message(field " = " HTML_COLOR_POISON      "POISON"       HTML_COLOR_CANCEL "\n")
+
+#define good_field_dump(   field, specified_char, value) log_tab_message(field " = " HTML_COLOR_LIME_GREEN  specified_char HTML_COLOR_CANCEL "\n", value)
+#define warning_field_dump(field, specified_char, value) log_tab_message(field " = " HTML_COLOR_DARK_ORANGE specified_char HTML_COLOR_CANCEL "\n", value)
+#define error_field_dump(  field, specified_char, value) log_tab_message(field " = " HTML_COLOR_DARK_RED    specified_char HTML_COLOR_CANCEL "\n", value)
+#define usual_field_dump(  field, specified_char, value) log_tab_message(field " = "                        specified_char                   "\n", value)
+
+static void list_public_fields_dump(const list *const lst)
 {
-    List_simple_dump(lst);
-    if (lst->data == nullptr) return;
+    log_tab_message("list (address: %p)\n"
+                    "{\n",          lst);
+    LOG_TAB++;
 
-    static int cur_dump = 1;
+    if (lst == nullptr) { LOG_TAB--; log_tab_message("}\n"); return; }
 
-    char    output_file[graph_file_size] = "";
-    sprintf(output_file, "dump_txt/List_graph_dump%d.txt", cur_dump);
+    if ($el_size == LST_POISON.el_size) poison_field_dump ("el_size");
+    else                                usual_field_dump  ("el_size", "%lu", $el_size);
 
-    FILE *stream =  fopen(output_file, "w");
-    if   (stream == nullptr)
-    {
-        log_error("Can't open grah_dump output file\n");
-        return;
-    }
+    if ($el_dtor == LST_POISON.el_dtor) poison_field_dump ("el_dtor");
+    else if ($el_dtor == nullptr)       warning_field_dump("el_dtor", "%p",   nullptr);
+    else                                usual_field_dump  ("el_dtor", "%p",  $el_dtor);
 
-    setvbuf(stream, nullptr, _IONBF, 0);
-    fprintf(stream, "digraph {\n"
-                    "rankdir=LR\n"
-                    "node[shape=record, style=\"rounded, filled\", fontsize=8]\n");
+    if ($el_dump == LST_POISON.el_dump) poison_field_dump ("el_dump");
+    else if ($el_dump == nullptr)       warning_field_dump("el_dump", "%p",   nullptr);
+    else                                usual_field_dump  ("el_dump", "%p",   nullptr);
 
-    if (mode == ORDER)  List_graph_order_dump(lst, stream);
-    else      /*INDEX*/ List_graph_index_dump(lst, stream);
-
-    fprintf(stream, "}\n");
-
-    char cmd[graph_cmd_size] = "";
-    sprintf     (cmd, "dot %s -T png -o dump_png/List_graph_dump%d.png", output_file, cur_dump);
-    system      (cmd);
-    log_message ("<img src=dump_png/List_graph_dump%d.png>\n", cur_dump);
-
-    fclose(stream);
-    ++cur_dump;
+    if ($size == LST_POISON.size)       poison_field_dump ("size   ");
+    else                                usual_field_dump  ("size   ", "%lu",    $size);
 }
 
-static void List_graph_order_dump(List *const lst, FILE *const stream)
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_fictional_dump(const list *const lst)
 {
-    List_elem_info *info = nullptr;
+    assert(lst != nullptr);
 
-    for (int cnt = 0; cnt < lst->data_capacity; ++cnt)
+    log_tab_message("fictional = %p\n"
+                    "{\n", $fictional);
+    LOG_TAB++;
+
+    if ($fictional == nullptr) { LOG_TAB--; log_tab_message("}\n"); return; }
+
+    log_message(HTML_COLOR_MEDIUM_BLUE);
+    list_node_public_fields_dump($fictional);
+    if ($fictional->data != nullptr) error_field_dump("data", "%p", $fictional->data);
+    else                             good_field_dump ("data", "%p", $fictional->data);
+    log_message(HTML_COLOR_CANCEL);
+
+    const list_node *cur_node = $fictional;
+    for (size_t i = 0; i < $size; ++i)
     {
-        info = List_info_iterator(lst, cnt);
-        describe_node(info, stream,    cnt);
+        if (cur_node == nullptr) break;
+        cur_node = cur_node->next;
+
+        log_tab_message("%lu (address: %p):\n", i, cur_node);
+        log_tab_message("{\n");
+        LOG_TAB++;
+
+        list_node_static_dump(lst, cur_node);
+
+        LOG_TAB--;
+        log_tab_message("}\n");
     }
 
-    info = List_info_iterator(lst, 0);
-    for (int cnt = 0;; cnt++)
+    LOG_TAB--;
+    log_tab_message("}\n");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_node_public_fields_dump(const list_node *const lst_node)
+{
+    assert(lst_node != nullptr);
+
+    if ($prev == nullptr || $prev->next != lst_node) error_field_dump("prev", "%p", $prev);
+    else                                             good_field_dump ("prev", "%p", $prev);
+
+    if ($next == nullptr || $next->prev != lst_node) error_field_dump("next", "%p", $next);
+    else                                             good_field_dump ("next", "%p", $next);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_node_static_dump(const list *const lst, const list_node *const lst_node)
+{
+    assert(lst != nullptr);
+
+    list_node_public_fields_dump(lst_node);
+    if ($data == nullptr) error_field_dump("data", "%p", nullptr);
+    else
     {
-        if (info->next != nullptr) 
-        {
-            if (info->next->index != 0) fprintf(stream, "node%d->node%d[weight=10000, color=\"red\"]\n", info->index, info->next->index);
-            else
-            {
-                                        fprintf(stream, "node%d->node%d[weight=0    , color=\"red\"]\n", info->index, info->next->index);
-                break;
-            }
-
-            info = List_info_iterator(lst, info->next->index);
-        }
-        else break;
-
-        if (cnt > lst->data_size) break;
-    }
-
-    info = List_info_iterator(lst, lst->free);
-    for (int cnt = lst->free;; cnt++)
-    {
-        if (info->next != nullptr)
-        {
-            fprintf(stream, "node%d->node%d[weight=10000, color=\"red\"]\n", info->index, info->next->index);
-            info = List_info_iterator(lst, info->next->index);
-        }
-        else break;
-
-        if (cnt > lst->data_capacity - lst->data_size) break;
+        usual_field_dump("data", "%p", $data);
+        if ($el_dump == nullptr) { log_warning("can't dump list elements\n"); }
+        else                     { (*$el_dump)($data); }
     }
 }
 
-static void List_graph_index_dump(List *const lst, FILE *const stream)
+#ifdef LIST_DEBUG
+
+static void list_node_static_dump(const list      *const lst,
+                                  const list_node *const lst_node,  const char *file,
+                                                                    const char *func,
+                                                                    const int   line)
 {
-    List_elem_info *info = nullptr;
-    
-    for (int cnt = 0; cnt < lst->data_capacity;     ++cnt)
-    {
-        info = List_info_iterator(lst, cnt);
-        describe_node(info, stream,    cnt);
-    }
-    for (int cnt = 0; cnt < lst->data_capacity - 1; ++cnt) fprintf(stream, "node%d->node%d[weight=10000, style=\"invis\"]", cnt, cnt + 1);
-    for (int cnt = 0; cnt < lst->data_capacity;     ++cnt)
-    {
-        info = List_info_iterator(lst, cnt);
-        if (info->next != nullptr)  fprintf(stream, "node%d->node%d[weight=0, color=\"red\"]\n", info->index, info->next->index);
-    }
+    assert(lst  != nullptr);
+    assert(file != nullptr);
+    assert(func != nullptr);
+
+    log_tab_message("list_node_static_dump called by error in\n"
+                    "    FILE: %s\n"
+                    "FUNCTION: %s\n"
+                    "    LINE: %d\n\n", file, func, line);
+
+    list_node_static_dump(lst, lst_node);
 }
 
-static void describe_node(List_elem_info *info, FILE *const stream, const int number)
+#endif //LIST_DEBUG
+
+//================================================================================================================================
+// USER FUNCTION
+//================================================================================================================================
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// ctor
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_ctor(list *const lst, const size_t el_size, void (*el_dtor) (      void *const) /* = nullptr */,
+                                                      void (*el_dump) (const void *const) /* = nullptr */)
 {
-    assert(info   != nullptr);
-    assert(stream != nullptr);
+    if (lst == nullptr) { list_log_error(lst, LST_NULLPTR, __FILE__, __PRETTY_FUNCTION__, __LINE__); return false; }
 
-    GRAPH_COLOR fillcolor = WHITE;
-    GRAPH_COLOR     color = WHITE; 
+    $el_size = el_size;
+    $size    =       0;
+    $el_dtor = el_dtor;
+    $el_dump = el_dump;
 
-    if (!number)
+    if (!list_fictional_ctor(lst)) return false;
+
+    list_debug_verify(lst);
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+list *list_new(const size_t el_size,    void (*el_dtor) (      void *const) /* = nullptr */,
+                                        void (*el_dump) (const void *const) /* = nullptr */)
+{
+    list *lst = (list *) log_calloc(1, sizeof(list));
+    if (lst == nullptr)
     {
-        fillcolor = LIGHT_GREY;
-            color = BLACK;
+        log_error("log_calloc(1, sizeof(list)) returns nullptr\n");
+        return nullptr;
     }
-    else if (info->is_free)
+    if (!list_ctor(lst, el_size, el_dtor, el_dump)) { log_free(lst); return nullptr; }
+
+    list_debug_verify(lst);
+    return lst;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool list_fictional_ctor(list *const lst)
+{
+    assert(lst != nullptr);
+
+    $fictional = (list_node *) log_calloc(1, sizeof(list_node));
+    if ($fictional == nullptr)
     {
-        fillcolor = LIGHT_BLUE;
-            color =  DARK_BLUE;
+        log_error("log_calloc(1, sizeof(list_node)) = nullptr\n");
+        return false;
+    }
+
+    $fictional->data =    nullptr;
+    $fictional->prev = $fictional;
+    $fictional->next = $fictional;
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool list_node_ctor(list      *const lst,
+                           list_node *const lst_node,   const void      *const data,
+                                                        const list_node *const prev,
+                                                        const list_node *const next)
+{
+    list_debug_verify(lst);
+    assert(lst_node != nullptr);
+
+    $data = log_calloc(1, $el_size);
+    if ($data == nullptr)
+    {
+        log_error("log_calloc(1, %d /* = el_size */) returns nullptr\n", $el_size);
+        return false;
+    }
+
+    memcpy($data, data, $el_size);
+    $prev = (list_node *) prev;
+    $next = (list_node *) next;
+
+    list_node_debug_verify(lst, lst_node);
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static list_node *list_node_new(list *const lst,    const void      *const data,
+                                                    const list_node *const prev,
+                                                    const list_node *const next)
+{
+    list_node *lst_node = (list_node *) log_calloc(1, sizeof(list_node));
+    if (lst_node == nullptr)
+    {
+        log_error("log_calloc(1, sizeof(list_node)) returns nullptr\n");
+        return nullptr;
+    }
+
+    if (!list_node_ctor(lst, lst_node, data, prev, next)) { log_free(lst_node); return nullptr; }
+
+    list_node_debug_verify(lst, lst_node);
+    return lst_node;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dtor
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void list_dtor(void *const _lst)
+{
+    list *const lst = (list *) _lst;
+    if (list_verify(lst) != LST_OK) return;
+
+    list_fictional_dtor(lst);
+    *lst = LST_POISON;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_fictional_dtor(list *const lst)
+{
+    assert(lst        != nullptr);
+    assert($fictional != nullptr);
+
+    list_node *cur_node = $fictional->next;
+    for (; cur_node != $fictional;)
+    {
+        list_node *next_node = cur_node->next;
+        list_node_dtor(lst, cur_node);
+
+        cur_node = next_node;
+    }
+    log_free($fictional);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_node_dtor(list *const lst, list_node *const lst_node)
+{
+    assert(lst      != nullptr);
+    assert(lst_node != nullptr);
+
+    if ($el_dtor == nullptr) { log_warning("can't dtor list elements\n"); }
+    else (*$el_dtor) ($data);
+
+    log_free($data);
+    log_free(lst_node);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// insert erase
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static list_node *list_get_node(const list *const lst, const size_t index)
+{
+    list_debug_verify(lst);
+    assert(index <  $size);
+
+    list_node *cur_node = $fictional;
+    for (size_t i = 0; i <= index; ++i) cur_node = cur_node->next;
+
+    return cur_node;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_insert(list *const lst, const void *const data, const size_t index)
+{
+    if (list_verify(lst) != LST_OK) return false;
+    if (data == nullptr) { log_error("param data is nullptr");             return false; }
+    if (index >   $size) { log_error("param index more than list size\n"); return false; }
+
+    list_node *prev_node = nullptr;
+    list_node *next_node = nullptr;
+
+    if (index == 0)
+    {
+        prev_node = $fictional;
+        next_node = $fictional->next;
     }
     else
     {
-        fillcolor = LIGHT_GREEN;
-            color =  DARK_GREEN;
+        prev_node = list_get_node(lst, index - 1);
+        next_node = prev_node->next;
     }
 
-    if (info->prev == nullptr)
-    {
-        if (info->next != nullptr)
-            fprintf(stream, "node%d[color=\"%s\", fillcolor=\"%s\""
-                            "label=\"{is_free = %d} \n| {index = %d} \n| {next = %d} \n| {prev = NULL}\"]\n" , number, color_names[color], color_names[fillcolor],
-                                                                                                               info->is_free,
-                                                                                                               info->index,
-                                                                                                               info->next->index);
-        else
-            fprintf(stream, "node%d[color=\"%s\", fillcolor=\"%s\""
-                            "label=\"{is_free = %d} \n| {index = %d} \n| {next = NULL} \n| {prev = NULL}\"]\n" , number, color_names[color], color_names[fillcolor],
-                                                                                                                 info->is_free,
-                                                                                                                 info->index  );
-    }
-    else //info->prev != nullptr
-    {
-        if (info->next != nullptr)
-            fprintf(stream, "node%d[color=\"%s\", fillcolor=\"%s\""
-                            "label=\"{is_free = %d \n}| {index = %d} \n| {next = %d} \n| {prev = %d}\"]\n" , number, color_names[color], color_names[fillcolor],
-                                                                                                             info->is_free,
-                                                                                                             info->index,
-                                                                                                             info->next->index,
-                                                                                                             info->prev->index);
-        else
-            fprintf(stream, "node%d[color=\"%s\", fillcolor=\"%s\""
-                            "label=\"{is_free = %d} \n| {index = %d} \n| {next = NULL} \n| {prev = %d}\"]\n" , number, color_names[color], color_names[fillcolor],
-                                                                                                               info->is_free,
-                                                                                                               info->index,
-                                                                                                               info->prev->index);
-    }
+    list_node *cur_node = list_node_new(lst, data, prev_node, next_node);
+    if (cur_node == nullptr) return false;
+
+    prev_node->next = cur_node;
+    next_node->prev = cur_node;
+    $size += 1;
+
+    return true;
 }
 
-/*___________________________________________________________________________________________*/
+//--------------------------------------------------------------------------------------------------------------------------------
 
-static int _List_realloc(List *const lst)
+bool list_push_front(list *const lst, const void *const data)
 {
-    List_verify(lst);
-
-    if (lst->data_size == lst->data_capacity)
-    {
-        int   future_capacity = 2 * lst->data_capacity;
-        void *temp_lst_data   = calloc(future_capacity, lst->elem_size + sizeof(List_elem_info));
-
-        if (temp_lst_data == nullptr) return 1 << MEMORY_LIMIT_EXCEEDED;
-
-        for (int cnt = 0; cnt < lst->data_size; ++cnt)
-        {
-            List_elem_info *   cur_info =                    List_info_iterator(lst, cnt);
-            List_elem_info *future_info = (List_elem_info *) get_ptr(temp_lst_data , cnt,                  lst->elem_size + sizeof(List_elem_info));
-
-            future_info->prev           = (List_elem_info *) get_ptr(temp_lst_data, cur_info->prev->index, lst->elem_size + sizeof(List_elem_info));
-            future_info->next           = (List_elem_info *) get_ptr(temp_lst_data, cur_info->next->index, lst->elem_size + sizeof(List_elem_info));
-            future_info->index          = cnt;
-            future_info->is_free        = false;
-
-            void *future_value = (char *) get_ptr(temp_lst_data  , cnt, lst->elem_size + sizeof(List_elem_info)) + sizeof(List_elem_info);
-            void *   cur_value =          List_value_iterator(lst, cnt);
-
-            memcpy(future_value, cur_value, lst->elem_size);
-        }
-
-        lst->data_capacity = future_capacity;
-        
-        free(lst->data);
-        lst->data = temp_lst_data;
-
-        List_fill_free(lst);
-        List_verify   (lst);
-    }
-    return OK;
+    return list_insert(lst, data, 0);
 }
 
-/*___________________________________________________________________________________________*/
-
-static int _List_fill_free(List *const lst)
+bool list_push_back(list *const lst, const void *const data)
 {
-    List_verify(lst);
-
-    int elem_cnt = lst->free = lst->data_size;
-    for (; elem_cnt < lst->data_capacity - 1; ++elem_cnt)
-    {
-        List_elem_info * cur_info = List_info_iterator(lst, elem_cnt    );
-        List_elem_info *next_info = List_info_iterator(lst, elem_cnt + 1);
-
-        cur_info->index   = elem_cnt ;
-        cur_info->is_free = true     ;
-        cur_info->next    = next_info;
-        cur_info->prev    = nullptr  ;
-    }
-
-    List_elem_info * last_info = List_info_iterator(lst, elem_cnt);
-
-    last_info->index   = elem_cnt;
-    last_info->is_free = true    ;
-    last_info->next    = nullptr ;
-    last_info->prev    = nullptr ;
-
-    List_verify(lst);
-    return OK;
+    return list_insert(lst, data, $size);
 }
 
-/*___________________________________________________________________________________________*/
+//--------------------------------------------------------------------------------------------------------------------------------
 
-static void *List_value_iterator(List *const lst, const int index)
+bool list_erase(list *const lst, const size_t index, void *const data /* = nullptr */)
 {
-    assert(lst != nullptr);
+    if (list_verify(lst) != LST_OK) return false;
+    if (index >= $size) { log_error("param index equal or more than list size\n"); return false; }
 
-    return (char *) lst->data + index * (lst->elem_size + sizeof(List_elem_info)) + sizeof(List_elem_info);
+    list_node *cur_node = list_get_node(lst, index);
+    if (data != nullptr) memcpy(data, cur_node->data, $el_size);
+
+    cur_node->prev->next = cur_node->next;
+    cur_node->next->prev = cur_node->prev;
+    $size -= 1;
+
+    list_node_dtor(lst, cur_node);
+
+    return true;
 }
 
-static List_elem_info *List_info_iterator(List *const lst, const int index)
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_pop_front(list *const lst, void *const data /* = nullptr */)
 {
-    assert(lst != nullptr);
-
-    return (List_elem_info *) ((char *) lst->data + index * (lst->elem_size + sizeof(List_elem_info)));
+    return list_erase(lst, 0, data);
 }
 
-/*___________________________________________________________________________________________*/
-
-int _List_ctor(List *const lst, const int elem_size,    const char *name_file,
-                                                        const char *name_func,
-                                                        const char *name_var ,
-                                                        const int   line   )
+bool list_pop_back(list *const lst, void *const data /* = nullptr */)
 {
-    if (lst          == nullptr) return 1 << NULLPTR_LIST      ;
-    if (lst->is_ctor == true   ) return 1 << ALREADY_CTORED    ;
-    
-   *lst                = default_list;
-    lst->elem_size     = elem_size   ;
-    lst->data          = calloc(lst->data_capacity, sizeof(List_elem_info) + lst->elem_size);
-    
-    if (lst->data == nullptr) return 1 << MEMORY_LIMIT_EXCEEDED;
-
-    var_ctor(&lst->var_info, name_file, name_func, name_var, line);
-
-    List_elem_info *fictional = List_info_iterator(lst, 0);
-    
-    fictional->index          = 0;
-    fictional->is_free        = false;
-    fictional->next           = fictional;
-    fictional->prev           = fictional;
-
-    List_fill_free(lst);
-    List_verify   (lst);
-    return OK;
+    return list_erase(lst, $size - 1, data);
 }
 
-int _List_dtor(List *const lst)
+//--------------------------------------------------------------------------------------------------------------------------------
+// list get
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_get(const list *const lst, const size_t index, void *const data)
 {
-    List_verify(lst);
+    list_verify(lst);
+    if (index >=   $size) { log_error("param index equql or more than list size\n"); return false; }
+    if (data  == nullptr) { log_error("param data is nullptr\n");                    return false; }
 
-   free(lst->data);
+    const list_node *const lst_node = list_get_node(lst, index);
+    memcpy(data, $data, $el_size);
 
-   *lst = poison_list;
-   var_dtor(&lst->var_info);
-
-   return OK;
+    list_debug_verify(lst);
+    return true;
 }
 
-/*___________________________________________________________________________________________*/
-
-static int List_cmp(void *lst_a, void *lst_b)
+bool list_front(const list *const lst, void *const data)
 {
-    assert(lst_a != nullptr);
-    assert(lst_b != nullptr);
-
-    List_elem_info *a_info = (List_elem_info *) lst_a;
-    List_elem_info *b_info = (List_elem_info *) lst_b;
-
-    if ((long long) a_info->prev < (long long) b_info->prev) return -1;
-    if ((long long) a_info->prev > (long long) b_info->prev) return  1;
-
-    return 0;
+    return list_get(lst, 0, data);
 }
 
-int _List_line(List *const lst)
+bool list_back(const list *const lst, void *const data)
 {
-    List_verify(lst);
-
-    long long       logic_cnt = 0;
-    List_elem_info *cur_info  = List_info_iterator(lst, 0);
-
-    for (; logic_cnt < lst->data_size; ++logic_cnt)
-    {
-        cur_info->prev = (List_elem_info *) logic_cnt;
-        cur_info       = cur_info->next;
-    }
-
-    if (lst->free != lst->data_capacity)
-    {
-        cur_info = List_info_iterator(lst, lst->free);
-
-        for (; cur_info != nullptr; ++logic_cnt)
-        {
-            cur_info->prev = (List_elem_info *) logic_cnt;
-            cur_info       = cur_info->next;
-        }
-    }
-
-    my_quick_sort(lst->data, sizeof(List_elem_info) + lst->elem_size, 0, lst->data_capacity - 1, List_cmp);
-
-    for (int cnt = 0; cnt < lst->data_size; ++cnt)
-    {
-        List_elem_info *cur_info = List_info_iterator(lst, cnt);
-        int prev_index           = (cnt - 1) <               0 ? lst->data_size - 1 : cnt - 1;
-        int next_index           = (cnt + 1) == lst->data_size ?                  0 : cnt + 1;
-
-        cur_info->index = cnt;
-        cur_info->next  = List_info_iterator(lst, next_index);
-        cur_info->prev  = List_info_iterator(lst, prev_index);
-    }
-
-    lst->is_linear = true;
-
-    List_fill_free(lst);
-    List_verify   (lst);
-    return OK;
+    return list_get(lst, $size - 1, data);
 }
 
-/*___________________________________________________________________________________________*/
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
 
-int _List_order_to_index(List *const lst, int order)
+void list_dump(const void *const _lst)
 {
-    assert(lst != nullptr);
+    const list *const lst = (const list *) _lst;
 
-    if (lst->is_linear) return order;
+    list_public_fields_dump(lst);
+    if (lst == nullptr) return;
 
-    int             index = 0;
-    List_elem_info *info  = List_info_iterator(lst, index);
+    list_fictional_dump(lst);
 
-    if (order <= lst->data_size)
-    {
-        while (order--)
-        {
-            info  = info->next;
-            index = info->index;
-        }
-    }
-    else
-    {
-        order = lst->data_size - order;
-        while (order--)
-        {
-            info  = info->prev;
-            index = info->index;
-        }
-    }
-
-    return index;
+    LOG_TAB--;
+    log_tab_message("}\n");
 }
-
-static int _List_check_linearity(List *const lst, const int index)
-{
-    List_verify(lst);
-
-    List_elem_info *cur_info = List_info_iterator(lst, 0);
-
-    if (cur_info->prev->index != index) lst->is_linear = false;
-    return OK;
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_push(List *const lst, const int index, void *const push_val,  const char   *call_file,
-                                                                        const char   *call_func,
-                                                                        const int     call_line)
-{
-    log_param_place(call_file, call_func, call_line);
-    log_header("LIST PUSH\n");
-
-    assert(call_file != nullptr);
-    assert(call_func != nullptr);
-
-    List_verify(lst);
-
-    int ret_push = _List_push(lst, index, push_val);
-    if     (ret_push == -1)
-    {
-        log_param_place(call_file, call_func, call_line);
-        return -1;
-    }
-    List_graph_dump(lst, INDEX);
-    log_message("<hr>");
-
-    return ret_push;
-}
-
-int _List_push(List *const lst, const int index, void *const push_val)
-{
-    List_verify         (lst);
-   _List_check_linearity(lst, index);
-    List_realloc        (lst);
-    
-    
-    void           *pocket_elem = List_value_iterator(lst, index);
-    void           *pushed_elem = List_value_iterator(lst, lst->free);
-    List_elem_info *pocket_info = List_info_iterator (lst, index);
-    List_elem_info *pushed_info = List_info_iterator (lst, lst->free);
-
-    List_del_free(lst);
-
-    memcpy(pushed_elem, push_val, lst->elem_size);
-
-    pushed_info->next = pocket_info->next;
-    pocket_info->next = pushed_info;
-    pushed_info->prev = pocket_info;
-    pushed_info->next->prev = pushed_info;
-
-    ++lst->data_size;
-
-    List_verify(lst);
-
-    return pushed_info->index;
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_push_order(List *const lst, const int order, void *const push_val, const char *call_file,
-                                                                             const char *call_func,
-                                                                             const int   call_line)
-{
-    log_param_place(call_file, call_func, call_line);
-    log_header("LIST PUSH ORDER\n");
-
-    assert(call_file != nullptr);
-    assert(call_func != nullptr);
-
-    List_verify(lst);
-
-    int ret_push = _List_push(lst, _List_order_to_index(lst, order), push_val);
-
-    if (ret_push == -1)
-    {
-        log_param_place(call_file, call_func, call_line);
-        return -1;
-    }
-    List_graph_dump(lst, INDEX);
-    log_message("<hr>");
-
-    return ret_push;
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_pop(List *const lst, const int index)
-{
-    List_verify         (lst);
-   _List_check_linearity(lst, index);
-
-    void           *poped_elem = List_value_iterator(lst, index);
-    List_elem_info *poped_info = List_info_iterator (lst, index);
-
-
-    poped_info->prev->next = poped_info->next;
-    poped_info->next->prev = poped_info->prev;
-
-    --lst->data_size;
-
-    List_add_free(lst, index);
-    List_verify  (lst);
-    return OK;
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_get(List *const lst, const int index, void *const pull_val)
-{
-    List_verify(lst);
-
-    memcpy(pull_val, List_value_iterator(lst, index), lst->elem_size);
-
-    List_verify(lst);
-
-    return OK;
-}
-
-/*___________________________________________________________________________________________*/
-
-static int _List_add_free(List *const lst, const int index)
-{
-    List_verify(lst);
-
-    List_elem_info *coming_info = List_info_iterator(lst, index);
-
-    if (lst->free == lst->data_capacity)
-    {
-        lst->free = index;
-
-        coming_info->next    = nullptr;
-        coming_info->prev    = nullptr;
-    }
-    else 
-    {
-        List_elem_info *free_info = List_info_iterator(lst, lst->free);
-        
-        coming_info->next = free_info;
-        coming_info->prev = nullptr;
-
-        lst->free = index; 
-    }
-
-    coming_info->is_free = true;
-
-    List_verify(lst);
-    return OK;
-}
-
-/*___________________________________________________________________________________________*/
-
-static int _List_del_free(List *const lst)
-{
-    List_verify(lst);
-
-    List_elem_info *free_info = List_info_iterator(lst, lst->free);
-
-    if (free_info->next == nullptr) lst->free = lst      ->data_capacity;
-    else                            lst->free = free_info->next->index  ;
-
-    free_info->is_free = false;
-
-    List_verify(lst);
-    return OK;
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_push_front(List *const lst, void *const push_val, const char   *call_file,
-                                                            const char   *call_func,
-                                                            const int     call_line)
-{
-    log_param_place(call_file, call_func, call_line);
-    log_header("LIST PUSH FRONT\n");
-
-    assert(call_file != nullptr);
-    assert(call_func != nullptr);
-
-    List_verify(lst);
-
-    int ret_push_front = _List_push_front(lst, push_val);
-    if (ret_push_front == -1)
-    {
-        log_param_place(call_file, call_func, call_line);
-        return -1;
-    }
-
-    return ret_push_front;
-}
-
-static int _List_push_front(List *const lst, void *const push_val)
-{
-    List_verify(lst);
-
-    return List_push(lst, 0, push_val);
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_push_back(List *const lst, void *const push_val,  const char   *call_file,
-                                                            const char   *call_func,
-                                                            const int     call_line)
-{
-    log_param_place(call_file, call_func, call_line);
-    log_header("LIST PUSH BACK\n");
-
-    assert(call_file != nullptr);
-    assert(call_func != nullptr);
-
-    List_verify(lst);
-
-    int ret_push_back = _List_push_back(lst, push_val);                             
-    if (ret_push_back == -1)        
-    {
-        log_param_place(call_file, call_func, call_line);
-        return -1;
-    }
-
-    return ret_push_back;
-}
-
-int _List_push_back(List *const lst, void *const push_val)
-{
-    List_verify(lst);
-
-    return List_push(lst, List_info_iterator(lst, 0)->prev->index, push_val);
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_pop_front(List *const lst)
-{
-    List_verify(lst);
-
-    return _List_pop(lst, List_info_iterator(lst, 0)->next->index);
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_pop_back(List *const lst)
-{
-    List_verify(lst);
-
-    return _List_pop(lst, List_info_iterator(lst, 0)->prev->index);
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_front(List *const lst, void *const pull_val)
-{
-    List_verify(lst);
-
-    return _List_get(lst, List_info_iterator(lst, 0)->next->index, pull_val);
-}
-
-/*___________________________________________________________________________________________*/
-
-int _List_back(List *const lst, void *const pull_val)
-{
-    List_verify(lst);
-
-    return _List_get(lst, List_info_iterator(lst, 0)->prev->index, pull_val);
-}
-
-/*___________________________________________________________________________________________*/

@@ -1,273 +1,164 @@
+/** @file */
 #ifndef LIST_H
 #define LIST_H
 
-#include "../var_declaration/var_declaration.h"
-#include "../logs/log.h"
+//================================================================================================================================
+// STRUCT
+//================================================================================================================================
 
-struct List
+/**
+*   @brief Вершина листа
+*/
+struct list_node
 {
-    void *data;
-
-    int32_t elem_size;
-    int32_t data_size;
-    int32_t data_capacity;
-    
-    int32_t free;
-
-    bool is_ctor;
-    bool is_linear;
-
-    var_declaration var_info;
+    void      *data;    ///< указатель на начало элемента листа
+    list_node *prev;    ///< указатель на предыдущую вершину листа
+    list_node *next;    ///< указатель на следующую вершину листа
 };
 
-enum LIST_ERRORS
+/**
+*   @brief Структура данных лист
+*/
+struct list
 {
-    OK                      ,
+    list_node *fictional;                   ///< указатель на фиктивную вершину листа
 
-    NULLPTR_LIST            ,
-    NULLPTR_LIST_INFO       ,
+    size_t el_size;                         ///< размер (в байтах) элемента листа
+    size_t    size;                         ///< количество элементов в листе
 
-    ALREADY_CTORED          ,
-    NOT_YET_CTORED          ,
-
-    NEGATIVE_ELEM_SIZE      ,
-    NEGATIVE_DATA_SIZE      ,
-    NEGATIVE_DATA_CAPACITY  ,
-    
-    INVALID_CAPACITY        ,
-    INVALID_FREE            ,
-    INVALID_DATA            ,
-    INVALID_INDEX           ,
-
-    MEMORY_LIMIT_EXCEEDED   ,
+    void (*el_dtor) (      void *const);    ///< указатель на dtor элемента листа
+    void (*el_dump) (const void *const);    ///< указатель на dump элемента листа
 };
 
-enum GRAPH_MODE
-{
-    ORDER           ,
-    INDEX
-};
+//================================================================================================================================
+// FUNCTION DECLARATION
+//================================================================================================================================
 
-/*__________________________________USER_MACRO_DEFINITIONS___________________________________*/
+//--------------------------------------------------------------------------------------------------------------------------------
+// ctor
+//--------------------------------------------------------------------------------------------------------------------------------
 
-#define List_ctor(lst, elem_size)                                                               \
-       if (true)                                                                                \
-       {                                                                                        \
-            log_place ();                                                                       \
-            log_header("LIST CTOR\n");                                                          \
-                                                                                                \
-            int ret_ctor = _List_ctor(lst, elem_size, __FILE__           ,                      \
-                                                      __PRETTY_FUNCTION__,                      \
-                                                      #lst               ,                      \
-                                                      __LINE__           );                     \
-                                                                                                \
-            if      (ret_ctor == -1) log_place();                                               \
-            else if (ret_ctor != OK)                                                            \
-            {                                                                                   \
-                log_place ();                                                                   \
-                List_error(ret_ctor);                                                           \
-            }                                                                                   \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-       }
+/**
+*   @brief List ctor
+*
+*   @return true, если всё ОК, false в случае ошибки
+*/
+bool list_ctor(list *const lst, const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
+                                                      void (*el_dump) (const void *const) = nullptr);
 
-#define List_dtor(lst)                                                                          \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST DTOR\n");                                                          \
-                                                                                                \
-            int ret_dtor = _List_dtor(lst);                                                     \
-                                                                                                \
-            if (ret_dtor == -1) log_place();                                                    \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief Создаёт лист в динамической памяти
+*
+*   @return указаталь на созданный лист, nullptr в случае ошибки
+*/
+list *list_new(const size_t el_size,    void (*el_dtor) (      void *const) = nullptr,
+                                        void (*el_dump) (const void *const) = nullptr);
 
-#define List_push(lst, index, push_val)                                                         \
-       _List_push(lst, index, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+//--------------------------------------------------------------------------------------------------------------------------------
+// dtor
+//--------------------------------------------------------------------------------------------------------------------------------
 
-#define List_push_order(lst, order, push_val)                                                   \
-       _List_push_order(lst, order, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)          \
+/**
+*   @brief List dtor
+*/
+void list_dtor(void *const lst);
 
-#define List_pop(lst, index)                                                                    \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST POP\n");                                                           \
-                                                                                                \
-            int ret_pop = _List_pop(lst, index);                                                \
-                                                                                                \
-            if (ret_pop != OK)  log_place();                                                    \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+//--------------------------------------------------------------------------------------------------------------------------------
+// insert erase
+//--------------------------------------------------------------------------------------------------------------------------------
 
-#define List_pop_order(lst, order)                                                              \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST POP ORDER\n");                                                     \
-                                                                                                \
-            int ret_pop = _List_pop(lst, _List_order_to_index(lst, order + 1));                 \
-                                                                                                \
-            if (ret_pop != OK) log_place();                                                     \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief List insert
+*
+*   @param lst   [in] - list to insert in
+*   @param data  [in] - указатель на элемент листа, который нужно добавить в лист
+*   @param index [in] - позиция, в которую добавить элемент листа
+*
+*   @return true, если всё ОК, false в случае ошибки
+*/
+bool list_insert(list *const lst, const void *const data, const size_t index);
 
-#define List_get(lst, index, pull_val)                                                          \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST GET\n");                                                           \
-                                                                                                \
-            int ret_get = _List_get(lst, index, pull_val);                                      \
-                                                                                                \
-            if (ret_get != OK) log_place();                                                     \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief List push front
+*   = list_insert(lst, data, 0)
+*
+*   @see bool list_insert(list *const lst, const void *const data, const size_t index)
+*/
+bool list_push_front(list *const lst, const void *const data);
 
-#define List_get_order(lst, order, pull_val)                                                    \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST GET ORDER\n");                                                     \
-                                                                                                \
-            int ret_get = _List_get(lst, _List_order_to_index(lst, order + 1), pull_val);       \
-                                                                                                \
-            if (ret_get != OK) log_place();                                                     \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief List push back
+*   = list_insert(lst, data, <размер листа>)
+*
+*   @see bool list_insert(list *const lst, const void *const data, const size_t index)
+*/
+bool list_push_back(list *const lst, const void *const data);
 
-#define List_push_front(lst, push_val)                                                          \
-       _List_push_front(lst, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+/**
+*   @brief List erase
+*
+*   @param lst   [in]  - list to erase from
+*   @param index [in]  - номер элемента, который нужно удалить из листа
+*   @param data  [out] - указатель на начало массива, куда скопировать данные удаляемого элемента
+*
+*   @return true, если всё ОК, false в случае ошибки
+*/
+bool list_erase(list *const lst, const size_t index, void *const data = nullptr);
 
-#define List_push_back(lst, push_val)                                                           \
-       _List_push_back(lst, push_val, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+/**
+*   @brief List pop front
+*   = list_erase(lst, 0, data)
+*
+*   @see bool list_erase(list *const lst, const size_t index, void *const data)
+*/
+bool list_pop_front(list *const lst, void *const data = nullptr);
 
-#define List_pop_front(lst)                                                                     \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST POP FRONT\n");                                                     \
-                                                                                                \
-            int ret_pop_front = _List_pop_front(lst);                                           \
-                                                                                                \
-            if (ret_pop_front != OK) log_place();                                               \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief List pop back
+*   = list_erase(lst, <размер листа - 1>, data)
+*
+*   @see bool list_erase(list *const lst, const size_t index, void *const data)
+*/
+bool list_pop_back(list *const lst, void *const data = nullptr);
 
-#define List_pop_back(lst)                                                                      \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST POP BACK\n");                                                      \
-                                                                                                \
-            int ret_pop_back = _List_pop_back(lst);                                             \
-                                                                                                \
-            if (ret_pop_back != OK) log_place();                                                \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+//--------------------------------------------------------------------------------------------------------------------------------
+// list get
+//--------------------------------------------------------------------------------------------------------------------------------
 
-#define List_front(lst, pull_val)                                                               \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST FRONT\n");                                                         \
-                                                                                                \
-            int ret_front = _List_front(lst, pull_val);                                         \
-                                                                                                \
-            if (ret_front != OK) log_place();                                                   \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief List get
+*
+*   @param lst   [in]  - list to get from
+*   @param index [in]  - индекс интересующего элемента
+*   @param data  [out] - указатель на начало массива, куда скопировать данные интересующего элемента
+*
+*   @return true, если всё ОК, false в случае ошибки
+*/
+bool list_get(const list *const lst, const size_t index, void *const data);
 
-#define List_back(lst, pull_val)                                                                \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST BACK\n");                                                          \
-                                                                                                \
-            int ret_back = _List_back(lst, pull_val);                                           \
-                                                                                                \
-            if (ret_back != OK) log_place();                                                    \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief List front
+*   = list_get(lst, 0, data)
+*
+*   @see bool list_get(const list *const lst, const size_t index, void *const data)
+*/
+bool list_front(const list *const lst, void *const data);
 
-#define List_line(lst)                                                                          \
-        if (true)                                                                               \
-        {                                                                                       \
-            log_place ();                                                                       \
-            log_header("LIST LINE\n");                                                          \
-                                                                                                \
-            int ret_line = _List_line(lst);                                                     \
-                                                                                                \
-            if (ret_line != OK) log_place();                                                    \
-            else List_graph_dump(lst, INDEX);                                                   \
-                                                                                                \
-            log_message("<hr>\n");                                                              \
-        }
+/**
+*   @brief List back
+*   = list_get(lst, <размер листа - 1>, data)
+*
+*   @see bool list_get(const list *const lst, const size_t index, void *const data)
+*/
+bool list_back(const list *const lst, void *const data);
 
-/*________________________________USER_FUNCTION_DECLARATIONS_________________________________*/
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
 
-void              List_dump             (List *const lst);
-void              List_simple_dump      (List *const lst);
-void              List_graph_dump       (List *const lst, GRAPH_MODE mode);
-
-int              _List_line             (List *const lst);
-
-void              List_error            (const unsigned int err);
-int              _List_order_to_index   (List *const lst, int order);
-
-int              _List_ctor             (List *const lst, const int elem_size,  const char    *name_file,
-                                                                                const char    *name_func,
-                                                                                const char    *name_var ,
-                                                                                const int      line);
-int              _List_dtor             (List *const lst);
-
-int              _List_push             (List *const lst, const int index, void *const         push_val ,
-                                                                                 const char   *call_file,
-                                                                                 const char   *call_func,
-                                                                                 const int     call_line);
-
-int              _List_pop              (List *const lst, const int index);
-int              _List_get              (List *const lst, const int index, void *const pull_val);
-
-int              _List_push_front       (List *const lst, void *const push_val, const char   *call_file,
-                                                                                const char   *call_func,
-                                                                                const int     call_line);
-
-int              _List_push_back        (List *const lst, void *const push_val, const char   *call_file,
-                                                                                const char   *call_func,
-                                                                                const int     call_line);
-
-int              _List_pop_front        (List *const lst);
-int              _List_pop_back         (List *const lst);
-
-int              _List_front            (List *const lst, void *const pull_val);
-int              _List_back             (List *const lst, void *const pull_val);
-
-int              _List_push_order       (List *const lst, const int order, void *const       push_val,
-                                                                                 const char *call_file,
-                                                                                 const char *call_func,
-                                                                                 const int   call_line);
-
-/*___________________________________________________________________________________________*/
+/**
+*   @brief List dump
+*/
+void list_dump(const void *const _lst);
 
 #endif //LIST_H
