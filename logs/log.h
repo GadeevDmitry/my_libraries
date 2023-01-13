@@ -6,7 +6,7 @@
 // GLOBAL
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-extern size_t LOG_TAB; ///< количество табов, необходимое отступить перед записью в лог
+extern size_t LOG_TAB;
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // MACRO DEFENITIONS
@@ -24,30 +24,30 @@ extern size_t LOG_TAB; ///< количество табов, необходим�
 /**
 *   @brief выводит в лог файл имя файла, имя функции, номер строки в точке вызова
 */
-#define log_place()                                                             \
-        log_message("\n"                                                        \
-                    "    FILE: %s\n"                                            \
-                    "FUNCTION: %s\n"                                            \
-                    "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+#define log_place()                                                                 \
+        log_tab_message("\n"                                                        \
+                        "    FILE: %s\n"                                            \
+                        "FUNCTION: %s\n"                                            \
+                        "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 /**
 *   @brief assert с сообщением в лог файл
 */
-#define log_assert(condition)                               \
-            if  (!(condition))                              \
-            {                                               \
-			    log_message(HTML_COLOR_DARK_RED             \
-                                "ASSERT FAILED: %s\n"       \
-					            "         FILE: %s\n"       \
-					            "     FUNCTION: %s\n"       \
-					            "         LINE: %d\n"       \
-                            HTML_COLOR_CANCEL        ,      \
-                                                            \
-				                #condition           ,      \
-						        __FILE__		     ,      \
-						        __PRETTY_FUNCTION__	 ,      \
-						        __LINE__		      );    \
-			abort();                                        \
+#define log_assert(condition)                                   \
+            if  (!(condition))                                  \
+            {                                                   \
+			    log_tab_message(HTML_COLOR_DARK_RED             \
+                                "ASSERT FAILED: %s\n"           \
+					            "         FILE: %s\n"           \
+					            "     FUNCTION: %s\n"           \
+					            "         LINE: %d\n"           \
+                                HTML_COLOR_CANCEL    ,          \
+                                                                \
+				                #condition           ,          \
+						        __FILE__		     ,          \
+						        __PRETTY_FUNCTION__	 ,          \
+						        __LINE__		      );        \
+			abort();                                            \
             }
 
 /**
@@ -57,17 +57,17 @@ extern size_t LOG_TAB; ///< количество табов, необходим�
 *   @see log_message(const char *fmt, ...)
 *   @see log_warning(const char *fmt, ...)
 */
-#define log_param_error(file, func, line, fmt, ...)         \
-        log_message(HTML_COLOR_DARK_RED                     \
-                        "ERROR:\n");                        \
-        log_message(fmt, ## __VA_ARGS__);                   \
-        log_message(    "    FILE: %s\n"                    \
-                        "FUNCTION: %s\n"                    \
-                        "    LINE: %d\n\n"                  \
-                    HTML_COLOR_CANCEL   ,                   \
-                                                            \
-                    file                ,                   \
-                    func                ,                   \
+#define log_param_error(file, func, line, fmt, ...)             \
+        log_tab_message(HTML_COLOR_DARK_RED                     \
+                        "ERROR:\n");                            \
+        log_tab_message(fmt, ## __VA_ARGS__);                   \
+        log_tab_message("    FILE: %s\n"                        \
+                        "FUNCTION: %s\n"                        \
+                        "    LINE: %d\n\n"                      \
+                    HTML_COLOR_CANCEL   ,                       \
+                                                                \
+                    file                ,                       \
+                    func                ,                       \
                     line                 );
 
 /**
@@ -75,9 +75,21 @@ extern size_t LOG_TAB; ///< количество табов, необходим�
 *
 *   @see log_param_error(file, func, line, fmt, ...)
 *   @see log_message(const char *fmt, ...)
+*   @see log_tab_message(const char *fmt, ...)
 *   @see log_warning(const char *fmt, ...)
 */
 #define log_error(fmt, ...) log_param_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ## __VA_ARGS__);
+
+/**
+*   @brief Выводит warning в лог файл
+*
+*   @see log_message(const char *fmt, ...)
+*   @see log_tab_message(const char *fmt, ...)
+*/
+#define log_warning(fmt, ...)                                   \
+        log_tab_message(HTML_COLOR_DARK_ORANGE "WARNING:\n");   \
+        log_tab_message(fmt, ## __VA_ARGS__);                   \
+        log_message    (HTML_COLOR_CANCEL);
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // FUNCTION DECLARATION
@@ -88,20 +100,20 @@ extern size_t LOG_TAB; ///< количество табов, необходим�
 //================================================================================================================================
 
 /**
-*   @brief Эквивалентна fprintf(LOG_STREAM, fmt, ...)
+*   @brief Выводит сообщение в лог файл, используя vfprintf()
+*   Не использует log_tab() перед выводом первой строки
 *
-*   @see log_error(fmt, ...)
-*   @see log_warning(const char *fmt, ...)
+*   @see log_tab_message(const char *fmt, ...)
 */
 void log_message       (const char *fmt, ...);
 
 /**
-*   @brief Выводит warning в лог файл
+*   @brief Выводит сообщение в лог файл, используя vfprintf()
+*   Использует log_tab() перед выводом первой строки
 *
 *   @see log_message(const char *fmt, ...)
-*   @see log_error(fmt, ...)
 */
-void log_warning       (const char *fmt, ...);
+void log_tab_message   (const char *fmt, ...);
 
 /**
 *   @brief HTML-заголовок

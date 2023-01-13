@@ -1,3 +1,4 @@
+/** @file */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -10,7 +11,7 @@
 // GLOBAL
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-size_t LOG_TAB = 0;
+size_t LOG_TAB = 0; ///< количество табов, необходимое отступить перед записью в лог
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // STATIC FUNCTION
@@ -48,7 +49,24 @@ static void LOG_STREAM_CLOSE()
 
 static void log_tab()
 {
-    for (size_t i = 0; i < LOG_TAB; ++i) fprintf(LOG_STREAM, "\t");
+    for (size_t i = 0; i < LOG_TAB; ++i) { fputc('\t', LOG_STREAM); }
+}
+
+static void log_print(const char *log_buff, bool is_tab)
+{
+    assert(log_buff != nullptr);
+
+    if (log_buff[LOG_BUFF_SIZE - 1] != '\0') { log_error("\nLOG_BUFF OVERFLOW\n"); }
+
+    for (const char *log_pos = log_buff; *log_pos != '\0'; log_pos++)
+    {
+        if (*log_pos == '\n') { fputc(*log_pos, LOG_STREAM); is_tab = true; }
+        else
+        {
+            if (is_tab) { log_tab(); is_tab = false; }
+            fputc(*log_pos, LOG_STREAM);
+        }
+    }
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -66,23 +84,23 @@ void log_message(const char *fmt, ...)
     va_list  ap;
     va_start(ap, fmt);
 
-    log_tab ();
-    vfprintf(LOG_STREAM, fmt, ap);
+    char log_buff[LOG_BUFF_SIZE] = {};
+    vsprintf (log_buff, fmt, ap);
+    log_print(log_buff, false);
 
     va_end(ap);
 }
 
-void log_warning(const char *fmt, ...)
+void log_tab_message(const char *fmt, ...)
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
     va_list ap;
     va_start(ap, fmt);
 
-    log_tab ();
-    fprintf (LOG_STREAM, HTML_COLOR_DARK_ORANGE "WARNING: ");
-    vfprintf(LOG_STREAM, fmt, ap);
-    fprintf (LOG_STREAM, HTML_COLOR_CANCEL);
+    char log_buff[LOG_BUFF_SIZE] = {};
+    vsprintf (log_buff, fmt, ap);
+    log_print(log_buff, true);
 
     va_end(ap);
 }
