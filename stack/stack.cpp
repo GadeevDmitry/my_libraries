@@ -114,7 +114,8 @@ static unsigned stack_verify(const stack *const stk,    const char *const file,
     if ($el_dtor   == STK_POISON.el_dtor  ) err = err | (1 << STK_POISON_EL_DTOR        );
     if ($el_dump   == STK_POISON.el_dump  ) err = err | (1 << STK_POISON_EL_DUMP        );
     if ($size      >  $capacity           ) err = err | (1 << STK_INVALID_SIZE_CAPACITY );
-    if (!stack_gap_is_poison(stk))          err = err | (1 << STK_NOT_POISON_GAP        );
+    if (err == STK_OK &&
+        !stack_gap_is_poison(stk)         ) err = err | (1 << STK_NOT_POISON_GAP        );
 
     stack_log_error(stk, err, file, func, line);
     return err;
@@ -176,7 +177,7 @@ static void stack_static_dump(const stack *const stk,   const char *const file,
     log_tab_message("stack_dump called by error in\n"
                     "    FILE: %s\n"
                     "FUNCTION: %s\n"
-                    "    LINE: %s\n", file, func, line);
+                    "    LINE: %d\n", file, func, line);
 
     stack_dump(stk, true);
 }
