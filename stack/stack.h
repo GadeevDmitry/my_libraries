@@ -30,84 +30,72 @@ struct stack
 //================================================================================================================================
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// stack ctor dtor
+// ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Stack ctor
-*
-*   @return true, если всё ОК, false в случае ошибки
+*   @brief stack ctor
 */
-bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison         = nullptr,
-                                                        void (*el_dtor) (      void *const) = nullptr,
-                                                        void (*el_dump) (const void *const) = nullptr);
+bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison                     = nullptr,
+                                                              void (     *el_dtor  )(      void *const) = nullptr,
+                                                              void (     *el_dump  )(const void *const) = nullptr);
 
 /**
-*   @brief Создаёт стек в динамической памяти
-*
-*   @return указаталь на созданный стек, nullptr в случае ошибки
+*   @brief Создает стек в динамической памяти
 */
-void *stack_new(const size_t el_size,   const void *const el_poison         = nullptr,
-                                        void (*el_dtor) (      void *const) = nullptr,
-                                        void (*el_dump) (const void *const) = nullptr);
+stack *stack_new(const size_t el_size, const void *const el_poison                   = nullptr,
+                                           void (     *el_dtor  )(      void *const) = nullptr,
+                                           void (     *el_dump  )(const void *const) = nullptr);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dtor
+//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Stack dtor
 */
-void stack_dtor(void *const stk);
+void stack_dtor(void *const _stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// stack main
+// push pop
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Stack push
 *
-*   @see bool stack_pop(stack *const stk)
+*   @param stk  [in] - стек
+*   @param data [in] - указатель на элемент стека, который нужно запушить
 */
-bool stack_push(stack *const stk, const void *const new_el);
+bool stack_push(stack *const stk, const void *const data);
 
 /**
 *   @brief Stack pop
 *
-*   @param stk  [in]  - stack to pop
-*   @param data [out] - указатель, в который скопировать содержимое последнего элемента стека
-*
-*   @see bool stack_push(stack *const stk, const void *const new_el)
+*   @param stk  [in]  - стек
+*   @param data [out] - указатель, по которому скопировать содержимое вершины стека перед удалением
 */
 bool stack_pop(stack *const stk, void *const data = nullptr);
 
-/**
-*   @brief Возвращает указатель на вершину стека stk
-*/
-void *stack_front(stack *const stk);
-
-/**
-*   @brief Возвращает true, если стек stk пустой, false иначе
-*/
-bool stack_empty(stack *const stk);
-
 //--------------------------------------------------------------------------------------------------------------------------------
-// stack user dump
+// other
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Stack dump
+*   @brief Копирует вершину стека по указателю
 *
-*   @see stack_inline_dump(stk)
+*   @param stk  [in]  - стек
+*   @param data [out] - указатель, по которому скопировать содержимое вершины стека
 */
-void stack_dump(const void *const _stk);
+bool stack_front(const stack *const stk, void *const data);
 
 /**
-*   @brief Stack dump с сообщением о файле, функции, строке в точке вызова
-*
-*   @see void stack_dump(const void *const _stk)
+*   @brief Проверяет, пустой ли стек
 */
-#define stack_inline_dump(stk)                                                      \
-        log_message("stack dump called in\n"                                        \
-                    "    FILE: %s\n"                                                \
-                    "FUNCTION: %s\n"                                                \
-                    "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);     \
-        stack_dump(stk);
+bool stack_is_empty(const stack *const stk);
+
+/**
+*   @brief Дамп стека
+*/
+void stack_dump(const void *const stk);
 
 #endif //STACK_H
