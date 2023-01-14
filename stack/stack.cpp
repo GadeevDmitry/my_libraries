@@ -21,7 +21,8 @@ static void stack_gap_fill_poison(stack *const stk)
     assert(stk   != nullptr);
     assert($data != nullptr);
 
-    if ($el_poison == nullptr) return;
+    if ($el_poison == nullptr)              return;
+    if ($el_poison == STK_POISON.el_poison) return;
 
     for (size_t i = $size; i < $capacity; ++i) { stack_el_fill_poison(stk, i); }
 }
@@ -34,7 +35,8 @@ static void stack_el_fill_poison(stack *const stk, const size_t filled_index)
     assert($data != nullptr);
     assert(filled_index < $capacity);
 
-    if ($el_poison == nullptr) return;
+    if ($el_poison == nullptr)              return;
+    if ($el_poison == STK_POISON.el_poison) return;
 
     memcpy(stack_get(stk, filled_index), $el_poison, $el_size);
 }
@@ -46,7 +48,8 @@ static bool stack_gap_is_poison(const stack *const stk)
     assert(stk   != nullptr);
     assert($data != nullptr);
 
-    if ($el_poison == nullptr) return true;
+    if ($el_poison == nullptr)              return true;
+    if ($el_poison == STK_POISON.el_poison) return true;
 
     for (size_t i = $size; i < $capacity; ++i)
     {
@@ -63,7 +66,8 @@ static bool stack_el_is_poison(const stack *const stk, const size_t check_index)
     assert($data != nullptr);
     assert(check_index < $capacity);
 
-    if ($el_poison == nullptr) return true;
+    if ($el_poison == nullptr)              return true;
+    if ($el_poison == STK_POISON.el_poison) return true;
 
     return is_byte_equal(stack_get(stk, check_index), $el_poison, $el_size);
 }
