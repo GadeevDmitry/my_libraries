@@ -58,17 +58,18 @@ extern size_t LOG_TAB;
 *   @see log_warning(const char *fmt, ...)
 */
 #define log_param_error(file, func, line, fmt, ...)             \
+        {                                                       \
         log_tab_message(HTML_COLOR_DARK_RED                     \
-                        "ERROR:\n");                            \
+                        "\nERROR:\n");                          \
         log_tab_message(fmt, ## __VA_ARGS__);                   \
         log_tab_message("    FILE: %s\n"                        \
                         "FUNCTION: %s\n"                        \
-                        "    LINE: %d\n\n"                      \
-                    HTML_COLOR_CANCEL   ,                       \
-                                                                \
-                    file                ,                       \
-                    func                ,                       \
-                    line                 );
+                        "    LINE: %d"      ,                   \
+                    file                    ,                   \
+                    func                    ,                   \
+                    line                    );                  \
+        log_message    (HTML_COLOR_CANCEL "\n\n");              \
+        }
 
 /**
 *   @brief Выводит сообщение об ошибке в точке вызова в лог файл
@@ -87,9 +88,39 @@ extern size_t LOG_TAB;
 *   @see log_tab_message(const char *fmt, ...)
 */
 #define log_warning(fmt, ...)                                   \
-        log_tab_message(HTML_COLOR_DARK_ORANGE "WARNING:\n");   \
+        {                                                       \
+        log_tab_message(HTML_COLOR_DARK_ORANGE "\nWARNING:\n"); \
         log_tab_message(fmt, ## __VA_ARGS__);                   \
-        log_message    (HTML_COLOR_CANCEL);
+        log_message    (HTML_COLOR_CANCEL);                     \
+        }
+
+/**
+*   @brief Выводит warning c параметрами в лог
+*
+*   @see log_warning(fmt, ...)
+*   @see log_inline_warning(fmt, ...)
+*/
+#define log_param_warning(file, func, line, fmt, ...)           \
+        {                                                       \
+        log_tab_message(HTML_COLOR_DARK_ORANGE                  \
+                        "\nWARNING:\n");                        \
+        log_tab_message(fmt, ## __VA_ARGS__);                   \
+        log_tab_message("    FILE: %s\n"                        \
+                        "FUNCTION: %s\n"                        \
+                        "    LINE: %d\n",                       \
+                    file,                                       \
+                    func,                                       \
+                    line);                                      \
+        log_message(HTML_COLOR_CANCEL);                         \
+        }
+
+/**
+*   @brief warning в точке вызова
+*
+*   @see log_warning(fmt, ...)
+*   @see log_param_warning(file, func, line, fmt, ...)
+*/
+#define log_inline_warning(fmt, ...) log_param_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // FUNCTION DECLARATION
