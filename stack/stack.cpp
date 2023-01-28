@@ -160,13 +160,6 @@ static void stack_log_error(const stack *const stk, const unsigned err, const ch
 // stack static dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define poison_field_dump(field)                         log_tab_message(field " = " HTML_COLOR_POISON      "POISON"       HTML_COLOR_CANCEL "\n")
-
-#define good_field_dump(   field, specified_char, value) log_tab_message(field " = " HTML_COLOR_LIME_GREEN  specified_char HTML_COLOR_CANCEL "\n", value)
-#define warning_field_dump(field, specified_char, value) log_tab_message(field " = " HTML_COLOR_DARK_ORANGE specified_char HTML_COLOR_CANCEL "\n", value)
-#define error_field_dump(  field, specified_char, value) log_tab_message(field " = " HTML_COLOR_DARK_RED    specified_char HTML_COLOR_CANCEL "\n", value)
-#define usual_field_dump(  field, specified_char, value) log_tab_message(field " = "                        specified_char                   "\n", value)
-
 static void stack_static_dump(const stack *const stk,   const char *const file,
                                                         const char *const func,
                                                         const int         line)

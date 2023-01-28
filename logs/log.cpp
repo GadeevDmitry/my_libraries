@@ -81,7 +81,144 @@ static void log_print(const char *log_buff, bool is_tab)
     }
 }
 
-//================================================================================================================================
+//--------------------------------------------------------------------------------------------------------------------------------
+// source_pos
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void source_pos_ctor(source_pos *const src_pos,  const char *const file,
+                                                        const char *const func,
+                                                        const int         line)
+{
+    assert(src_pos != nullptr);
+    assert(file    != nullptr);
+    assert(func    != nullptr);
+
+    src_pos->file = file;
+    src_pos->func = func;
+    src_pos->line = line;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void source_pos_dtor(void *const _src_pos)
+{
+    source_pos *const src_pos = (source_pos *) _src_pos;
+    *src_pos = SOURCE_POS_POISON;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void source_pos_dump(const void *const _src_pos)
+{
+    const source_pos *const src_pos = (const source_pos *) _src_pos;
+
+    log_tab_message("source_pos (address: %p)\n"
+                    "{\n",           src_pos);
+    LOG_TAB++;
+
+    if (src_pos == nullptr) { LOG_TAB--; log_tab_message("}\n"); return; }
+
+    if      (src_pos->file == SOURCE_POS_POISON.file) poison_field_dump("file");
+    else if (src_pos->file == nullptr)                error_field_dump ("file", "%p", src_pos->file);
+    else                                              usual_field_dump ("file", "%p", src_pos->file);
+
+    if      (src_pos->func == SOURCE_POS_POISON.func) poison_field_dump("func");
+    else if (src_pos->func == nullptr)                error_field_dump ("func", "%s", src_pos->func);
+    else                                              usual_field_dump ("func", "%s", src_pos->func);
+
+    if      (src_pos->line == SOURCE_POS_POISON.line) poison_field_dump("line");
+    else                                              usual_field_dump ("line", "%d", src_pos->line);
+
+    LOG_TAB--;
+    log_tab_message("}\n");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// TRACE
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void trace_ctor()
+{
+    stack_ctor(&TRACE, sizeof(source_pos), &SOURCE_POS_POISON, source_pos_dtor, source_pos_dump);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void trace_dtor()
+{
+    stack_dtor(&TRACE);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void trace_push(const char *const file,
+                       const char *const func,
+                       const int         line)
+{
+    assert(file != nullptr);
+    assert(func != nullptr);
+
+    source_pos cur_pos = {};
+    source_pos_ctor(&cur_pos, file, func, line);
+
+    stack_push(&TRACE, &cur_pos);
+    source_pos_dtor   (&cur_pos);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void trace_pop()
+{
+    stack_pop(&TRACE);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void trace_dump(const char *const cur_file,
+                       const char *const cur_func,
+                       const int         cur_line)
+{
+    assert(cur_file != nullptr);
+    assert(cur_func != nullptr);
+
+    source_pos cur_pos = {};
+    source_pos_ctor(&cur_pos, cur_file, cur_func, cur_line);
+    trace_el_dump  (&cur_pos, 0);
+
+    for (size_t i = 1; i < TRACE.size; ++i)
+    {
+        trace_el_dump((const source_pos *) trace_get(TRACE.size - i), i);
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void trace_el_dump(const source_pos *const src_pos, const int index)
+{
+    assert(src_pos != nullptr);
+
+    log_tab_message(HTML_COLOR_MEDIUM_BLUE "#%d:" HTML_COLOR_CANCEL "\n", index);
+    log_tab_message("    FILE: %s\n"
+                    "FUNCTION: %s\n"
+                    "    LINE: %d\n",
+
+                    src_pos->file   ,
+                    src_pos->file   ,
+                    src_pos->line);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void *trace_get(const int index)
+{
+    assert(index < TRACE.capacity);
+
+    return (char *) TRACE.data + TRACE.el_size * index;
+}
+
+//===============================================================================================================================
 // USER FUNCTION
 //================================================================================================================================
 
@@ -145,7 +282,6 @@ void log_param_place(const char   *file,
     assert(file != nullptr);
     assert(func != nullptr);
 
-    log_tab();
     log_message("\n"
                 "    FILE: %s\n"
                 "FUNCTION: %s\n"

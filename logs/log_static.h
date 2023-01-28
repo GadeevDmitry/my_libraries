@@ -2,6 +2,20 @@
 #ifndef LOG_STATIC_H
 #define LOG_STATIC_H
 
+#include "../stack/stack.h"
+#include "../algorithm/algorithm.h"
+
+//================================================================================================================================
+// STRUCT
+//================================================================================================================================
+
+struct source_pos
+{
+    const char *file;
+    const char *func;
+    int         line;
+};
+
 //================================================================================================================================
 // FUNCTION DECLARATION
 //================================================================================================================================
@@ -47,5 +61,16 @@ static FILE  *LOG_STREAM            = nullptr;           ///< лог файл
 static int   _OPEN_CLOSE_LOG_STREAM = LOG_STREAM_OPEN(); ///< равна 0, если не удалось открыть лог файл, равна 1 иначе
 static int    DYNAMIC_MEMORY        = 0;                 ///< счётчик указателей на динамическую память
 static size_t LOG_BUFF_SIZE         = 100000;            ///< максимальное количество символов, которое можно вывести за один запрос log_message()
+static stack  TRACE                 = {};                ///< стек для back trace
+
+/**
+*   @brief POISON-значения source_pos
+*/
+source_pos SOURCE_POS_POISON        =
+{
+    (const char *) 0xABADBABE   ,   // file
+    (const char *) 0xDEADBEEF   ,   // func
+    (int)          0xFEEDFACE   ,   // line
+};
 
 #endif //LOG_STATIC_H
