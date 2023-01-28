@@ -389,6 +389,7 @@ bool stack_push(stack *const stk, const void *const data)
     memcpy(stack_get(stk, $size), data, $el_size);
     $size++;
 
+    stack_debug_verify(stk);
     return true;
 }
 
@@ -410,6 +411,7 @@ bool stack_pop(stack *const stk, void *const data /* = nullptr */)
         stack_resize(stk, new_capacity);
     }
 
+    stack_debug_verify(stk);
     return true;
 }
 
