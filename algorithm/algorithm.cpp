@@ -12,9 +12,9 @@
 
 #include "../logs/log.h"
 
-//================================================================================================================================
+//--------------------------------------------------------------------------------------------------------------------------------
 // USEFUL FUNCTION
-//================================================================================================================================
+//--------------------------------------------------------------------------------------------------------------------------------
 
 int dblcmp(const double a, const double b, const double error_rate /*= DELTA*/)
 {
@@ -23,6 +23,8 @@ int dblcmp(const double a, const double b, const double error_rate /*= DELTA*/)
     if (a < b) return -1;
     return 1;
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 void my_swap(void *a, void *b, size_t elem_size)
 {
@@ -39,6 +41,8 @@ void my_swap(void *a, void *b, size_t elem_size)
         b = (char *) b + 1;
     }
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 bool is_byte_equal(const void *a, const void *b, size_t elem_size)
 {
@@ -59,9 +63,9 @@ bool is_byte_equal(const void *a, const void *b, size_t elem_size)
     return true;
 }
 
-//================================================================================================================================
+//--------------------------------------------------------------------------------------------------------------------------------
 // BUFFER
-//================================================================================================================================
+//--------------------------------------------------------------------------------------------------------------------------------
 
 bool buffer_ctor(buffer *const buff, const size_t buff_size)
 {
@@ -70,7 +74,8 @@ bool buffer_ctor(buffer *const buff, const size_t buff_size)
     buff->buff_beg = (char *) log_calloc(buff_size, sizeof(char));
     if (buff->buff_beg == nullptr)
     {
-        log_error("log_calloc(size, sizeof(char)) returns nullptr\n");
+        log_error("log_calloc(buff_size = %lu, sizeof(char) = %lu) returns nullptr\n",
+                              buff_size,       sizeof(char));
         return false;
     }
 
@@ -79,6 +84,8 @@ bool buffer_ctor(buffer *const buff, const size_t buff_size)
 
     return true;
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 bool buffer_ctor(buffer *const buff, const char *const file_name)
 {
@@ -91,7 +98,8 @@ bool buffer_ctor(buffer *const buff, const char *const file_name)
     buff->buff_beg = (char *) log_calloc(buff->buff_size, sizeof(char));
     if (buff->buff_beg == nullptr)
     {
-        log_error("log_calloc(buff->buff_size, sizeof(char)) returns nullptr\n");
+        log_error("log_calloc(buff->buff_size = %lu, sizeof(char) = %lu) returns nullptr\n",
+                              buff->buff_size,       sizeof(char));
         return false;
     }
 
@@ -102,12 +110,14 @@ bool buffer_ctor(buffer *const buff, const char *const file_name)
         return false;
     }
 
-    fread(buff->buff_beg, sizeof(char), buff->buff_size, stream);
+    fread(buff->buff_beg, sizeof(char), buff->buff_size - 1, stream);
     buff->buff_beg[buff->buff_size - 1] = '\0';
     buff->buff_pos = buff->buff_beg;
 
     return true;
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 static bool get_file_size(const char *file_name, size_t *const file_size)
 {
@@ -124,6 +134,8 @@ static bool get_file_size(const char *file_name, size_t *const file_size)
     *file_size = (size_t) file_info.st_size;
     return true;
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 void buffer_dtor(buffer *const buff)
 {
