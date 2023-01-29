@@ -34,6 +34,8 @@ static int LOG_STREAM_OPEN()
     setvbuf(LOG_STREAM,   nullptr, _IONBF, 0);
     fprintf(LOG_STREAM, "<pre>\n""\"%s\" OPENING IS OK\n\n", LOG_FILE);
 
+    trace_ctor();
+
     atexit(LOG_STREAM_CLOSE);
     return 1;
 }
@@ -51,6 +53,8 @@ static void LOG_STREAM_CLOSE()
 
     fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
+
+    trace_dtor();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -158,6 +162,8 @@ static void trace_push(const char *const file,
     assert(file != nullptr);
     assert(func != nullptr);
 
+    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
+
     source_pos cur_pos = {};
     source_pos_ctor(&cur_pos, file, func, line);
 
@@ -169,6 +175,8 @@ static void trace_push(const char *const file,
 
 static void trace_pop()
 {
+    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
+
     stack_pop(&TRACE);
 }
 
@@ -182,6 +190,8 @@ static void trace_dump(const char *const cur_file,
 {
     assert(cur_file != nullptr);
     assert(cur_func != nullptr);
+
+    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
     source_pos cur_pos = {};
     source_pos_ctor(&cur_pos, cur_file, cur_func, cur_line);
