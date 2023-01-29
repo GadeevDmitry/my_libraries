@@ -46,6 +46,8 @@ static void LOG_STREAM_CLOSE()
 {
     assert (LOG_STREAM != nullptr);
 
+    trace_dtor();
+
     fprintf(LOG_STREAM, "\n");
 
     if (DYNAMIC_MEMORY == 0) log_message(HTML_COLOR_LIME_GREEN "DYNAMIC_MEMORY = 0. \n" HTML_COLOR_CANCEL                );
@@ -54,7 +56,6 @@ static void LOG_STREAM_CLOSE()
     fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
 
-    trace_dtor();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -155,9 +156,9 @@ static void trace_dtor()
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void trace_push(const char *const file,
-                       const char *const func,
-                       const int         line)
+void trace_push(const char *const file,
+                const char *const func,
+                const int         line)
 {
     assert(file != nullptr);
     assert(func != nullptr);
@@ -173,7 +174,7 @@ static void trace_push(const char *const file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void trace_pop()
+void trace_pop()
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
@@ -184,9 +185,9 @@ static void trace_pop()
 // TRACE::dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void trace_dump(const char *const cur_file,
-                       const char *const cur_func,
-                       const int         cur_line)
+void trace_dump(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line)
 {
     assert(cur_file != nullptr);
     assert(cur_func != nullptr);
@@ -197,7 +198,7 @@ static void trace_dump(const char *const cur_file,
     source_pos_ctor(&cur_pos, cur_file, cur_func, cur_line);
     trace_el_dump  (&cur_pos, 0);
 
-    for (size_t i = 1; i < TRACE.size; ++i)
+    for (size_t i = 1; i <= TRACE.size; ++i)
     {
         trace_el_dump((const source_pos *) trace_get(TRACE.size - i), i);
     }
@@ -205,7 +206,7 @@ static void trace_dump(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void trace_el_dump(const source_pos *const src_pos, const int index)
+static void trace_el_dump(const source_pos *const src_pos, const size_t index)
 {
     assert(src_pos != nullptr);
 
@@ -215,13 +216,13 @@ static void trace_el_dump(const source_pos *const src_pos, const int index)
                     "    LINE: %d\n",
 
                     src_pos->file   ,
-                    src_pos->file   ,
+                    src_pos->func   ,
                     src_pos->line);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void *trace_get(const int index)
+static void *trace_get(const size_t index)
 {
     assert(index < TRACE.capacity);
 

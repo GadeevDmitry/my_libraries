@@ -97,36 +97,9 @@ static void trace_ctor();
 */
 static void trace_dtor();
 
-/**
-*   @brief trace push
-*
-*   @param file [in] - имя файла
-*   @param func [in] - имя функции
-*   @param line [in] - номер строки
-*/
-static void trace_push(const char *const file,
-                       const char *const func,
-                       const int         line);
-
-/**
-*   @brief trace pop
-*/
-static void trace_pop();
-
 //--------------------------------------------------------------------------------------------------------------------------------
 // TRACE::dump
 //--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief trace dump
-*
-*   @param cur_file [in] - файл ы точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
-*/
-static void trace_dump(const char *const cur_file,
-                       const char *const cur_func,
-                       const int         cur_line);
 
 /**
 *   @brief Дамп элемента TRACE
@@ -134,12 +107,12 @@ static void trace_dump(const char *const cur_file,
 *   @param src_pos [in] - элемент TRACE
 *   @param index   [in] - номер элемента
 */
-static void trace_el_dump(const source_pos *const src_pos, const int index);
+static void trace_el_dump(const source_pos *const src_pos, const size_t index);
 
 /**
 *   @brief Возвращает указатель на элемент TRACE с номером index
 */
-static void *trace_get(const int index);
+static void *trace_get(const size_t index);
 
 //================================================================================================================================
 // GLOBAL
