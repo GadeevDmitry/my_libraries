@@ -5,7 +5,6 @@
 #include <assert.h>
 
 #include "log_static.h"
-#include "log.h"
 
 //================================================================================================================================
 // GLOBAL
@@ -237,9 +236,15 @@ static void *trace_get(const size_t index)
 // LOG_OUTPUT
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void log_message(const char *fmt, ...)
+#undef log_message
+
+void log_message(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line, const char *fmt, ...)
 {
-    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
+    trace_push(cur_file, cur_func, cur_line);
+
+    if (_OPEN_CLOSE_LOG_STREAM == 0) { trace_pop(); return; }
 
     va_list  ap;
     va_start(ap, fmt);
@@ -249,13 +254,23 @@ void log_message(const char *fmt, ...)
     log_print(log_buff, false);
 
     va_end(ap);
+
+    trace_pop();
 }
+
+#define log_message(    fmt, ...) log_message    (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void log_tab_message(const char *fmt, ...)
+#undef log_tab_message
+
+void log_tab_message(const char *const cur_file,
+                     const char *const cur_func, 
+                     const int         cur_line, const char *fmt, ...)
 {
-    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
+    trace_push(cur_file, cur_func, cur_line);
+
+    if (_OPEN_CLOSE_LOG_STREAM == 0) { trace_pop(); return; }
 
     va_list ap;
     va_start(ap, fmt);
@@ -265,13 +280,23 @@ void log_tab_message(const char *fmt, ...)
     log_print(log_buff, true);
 
     va_end(ap);
+
+    trace_pop();
 }
+
+#define log_tab_message(fmt, ...) log_tab_message(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void log_header(const char *fmt, ...)
+#undef log_header
+
+void log_header(const char *const cur_file,
+                const char *const cur_func, 
+                const int         cur_line, const char *fmt, ...)
 {
-    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
+    trace_push(cur_file, cur_func, cur_line);
+
+    if (_OPEN_CLOSE_LOG_STREAM == 0) { trace_pop(); return; }
 
     va_list ap;
     va_start(ap, fmt);
@@ -282,28 +307,51 @@ void log_header(const char *fmt, ...)
     fprintf (LOG_STREAM, "</h2>\n");
 
     va_end(ap);
+
+    trace_pop();
 }
+
+#define log_header(     fmt, ...) log_header     (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void log_param_place(const char   *file,
-                     const char   *func,
-                     const int     line)
+#undef log_param_place
+
+static void log_param_place(const char *const file,
+                            const char *const func,
+                            const int         line)
 {
     assert(file != nullptr);
     assert(func != nullptr);
 
-    log_message("\n"
-                "    FILE: %s\n"
-                "FUNCTION: %s\n"
-                "    LINE: %d\n", file, func, line);
+    log_tab_message("    FILE: %s\n"
+                    "FUNCTION: %s\n"
+                    "    LINE: %d\n", file, func, line);
 }
+
+void log_param_place(const char *const cur_file,
+                     const char *const cur_func,
+                     const int         cur_line, const char *const param_file,
+                                                 const char *const param_func,
+                                                 const int         param_line)
+{
+    assert(cur_file != nullptr);
+    assert(cur_func != nullptr);
+
+    trace_push(cur_file, cur_func, cur_line);
+    log_param_place(param_file, param_func, param_line);
+    trace_pop();
+}
+
+#define log_param_place(file, func, line) log_param_place(__FILE__, __PRETTY_FUNCTION__, __LINE__, file, func, line)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void *log_calloc(size_t number, size_t size)
+#undef log_calloc
+
+static void *log_calloc(size_t number, size_t size)
 {
     if ((number * size) == 0) return nullptr;
 
@@ -314,9 +362,27 @@ void *log_calloc(size_t number, size_t size)
     return ret;
 }
 
+void *log_calloc(size_t number, size_t size, const char *const cur_file,
+                                             const char *const cur_func,
+                                             const int         cur_line)
+{
+    assert(cur_file != nullptr);
+    assert(cur_func != nullptr);
+
+    trace_push(cur_file, cur_func, cur_line);
+    void *ret = log_calloc(number, size);
+    trace_pop();
+
+    return ret;
+}
+
+#define log_calloc( number, size) log_calloc (number, size, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void *log_realloc(void *ptr, size_t size)
+#undef log_realloc
+
+static void *log_realloc(void *ptr, size_t size)
 {
     void *ret = realloc(ptr, size);
 
@@ -327,12 +393,44 @@ void *log_realloc(void *ptr, size_t size)
     return ret;
 }
 
+void *log_realloc(void *ptr, size_t size, const char *const cur_file,
+                                          const char *const cur_func,
+                                          const int         cur_line)
+{
+    assert(cur_file != nullptr);
+    assert(cur_func != nullptr);
+
+    trace_push(cur_file, cur_func, cur_line);
+    void *ret = log_realloc(ptr, size);
+    trace_pop();
+
+    return ret;
+}
+
+#define log_realloc(ptr   , size) log_realloc(ptr   , size, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void log_free(void *ptr)
+#undef log_free
+
+static void log_free(void *ptr)
 {
     if (ptr == nullptr) return;
 
     --DYNAMIC_MEMORY;
     free(ptr);
 }
+
+void log_free(void *ptr, const char *const cur_file,
+                         const char *const cur_func,
+                         const int         cur_line)
+{
+    assert(cur_file != nullptr);
+    assert(cur_func != nullptr);
+
+    trace_push(cur_file, cur_func, cur_line);
+    log_free(ptr);
+    trace_pop();
+}
+
+#define log_free(   ptr)          log_free   (ptr   ,       __FILE__, __PRETTY_FUNCTION__, __LINE__)

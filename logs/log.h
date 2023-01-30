@@ -137,33 +137,61 @@ extern size_t LOG_TAB;
 *   @brief Выводит сообщение в лог файл, используя vfprintf()
 *   Не использует log_tab() перед выводом первой строки
 *
+*   @param cur_file [in] - файл в точке вызова (для back trace)
+*   @param cur_func [in] - функция в точке вызова (для back trace)
+*   @param cur_line [in] - строка в точке вызова (для back trace)
+*
+*   @param fmt      [in] - формат строки сообщения
+*
 *   @see log_tab_message(const char *fmt, ...)
 */
-void log_message       (const char *fmt, ...);
+void log_message       (const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line, const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение в лог файл, используя vfprintf()
 *   Использует log_tab() перед выводом первой строки
 *
+*   @param cur_file [in] - файл в точке вызова (для back trace)
+*   @param cur_func [in] - функция в точке вызова (для back trace)
+*   @param cur_line [in] - строка в точке вызова (для back trace)
+*
+*   @param fmt      [in] - формат строки сообщения
+*
 *   @see log_message(const char *fmt, ...)
 */
-void log_tab_message   (const char *fmt, ...);
+void log_tab_message   (const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line, const char *fmt, ...);
 
 /**
 *   @brief HTML-заголовок
+*
+*   @param cur_file [in] - файл в точке вызова (для back trace)
+*   @param cur_func [in] - функция в точке вызова (для back trace)
+*   @param cur_line [in] - строка в точке вызова (для back trace)
+*
+*   @param fmt      [in] - формат строки сообщения
 */
-void log_header        (const char *fmt, ...);
+void log_header        (const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line, const char *fmt, ...);
 
 /**
-*   @brief Выводит в лог файл имя файла, имя функции, номер строки
+*   @brief Оболочка для log_param_place(const char *const, const char *const, const int) для back trace.
 *
-*   @param file [in] - имя файла
-*   @param func [in] - имя функции
-*   @param line [in] - номер строки
+*   @param cur_file [in] - файл в точке вызова (для back trace)
+*   @param cur_func [in] - функция в точке вызова (для back trace)
+*   @param cur_line [in] - строка в точке вызова (для back trace)
+*
+*   @see log_param_place(const char*, const char*, const int)
 */
-void log_param_place   (const char *file,
-                        const char *func,
-                        const int   line);
+void log_param_place(const char *const cur_file,
+                     const char *const cur_func,
+                     const int         cur_line, const char *const param_file,
+                                                 const char *const param_func,
+                                                 const int         param_line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // TRACE
@@ -201,30 +229,44 @@ void trace_dump(const char *const cur_file,
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Запрашивает динамическую память, используя calloc(). Увеличивает DYNAMIC_MEMORY, если запрос успешен
+*   @brief Оболочка для log_calloc(size_t, size_t) для back trace
 *
-*   @see DYNAMIC_MEMORY
-*   @see log_realloc(void *, size_t)
-*   @see log_free(void *)
+*   @param cur_file [in] - файл в точке вызова (для back trace)
+*   @param cur_func [in] - функция в точке вызова (для back trace)
+*   @param cur_line [in] - строка в точке вызова (для back trace)
+*
+*   @see log_calloc(size_t, size_t)
 */
-void *log_calloc  (size_t number, size_t size);
+void *log_calloc(size_t number, size_t size, const char *const cur_file,
+                                             const char *const cur_func,
+                                             const int         cur_line);
 
 /**
-*   @brief Меняет размер блока динамической памяти, используя realloc(). Меняет DYNAMIC_MEMORY
+*   @brief Оболочка для log_realloc(void *, size_t) для back trace
 *
-*   @see DYNAMIC_MEMORY
-*   @see log_calloc(size_t, size_t)
-*   @see log_free(void *)
+*   @param cur_file [in] - файл в точке вызова (для back trace)
+*   @param cur_func [in] - функция в точке вызова (для back trace)
+*   @param cur_line [in] - строка в точке вызова (для back trace)
+*
+*   @see log_realloc(void*, size_t)
 */
-void *log_realloc (void *ptr, size_t size);
+void *log_realloc(void *ptr, size_t size, const char *const cur_file,
+                                          const char *const cur_func,
+                                          const int         cur_line);
 
 /**
-*   @brief Освобождает блок динамической памяти, используя free(). Уменяшает DYNAMIC_MEMORY, если блок был не пуст
+*   @brief Оболочка для log_free(void *) для back trace
 *
-*   @see DYNAMIC_MEMORY
-*   @see log_calloc(size_t, size_t)
-*   @see log_realloc(void *, size_t)
+*   @param cur_file [in] - файл в точке вызова (для back trace)
+*   @param cur_func [in] - функция в точке вызова (для back trace)
+*   @param cur_line [in] - строка в точке вызова (для back trace)
+*
+*   @see log_free(void*)
 */
-void  log_free    (void *ptr);
+void log_free(void *ptr, const char *const cur_file,
+                         const char *const cur_func,
+                         const int         cur_line);
+
+#include "log_def.h"
 
 #endif //LOG_H
