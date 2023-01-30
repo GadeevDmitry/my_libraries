@@ -12,6 +12,9 @@ extern size_t LOG_TAB;
 // MACRO DEFENITIONS
 //================================================================================================================================
 
+#include <assert.h>
+#include <stdlib.h>
+
 #define HTML_COLOR_GOLD         "<font color=Gold>"
 #define HTML_COLOR_DARK_RED     "<font color=DarkRed>"
 #define HTML_COLOR_DARK_ORANGE  "<font color=DarkOrange>"
