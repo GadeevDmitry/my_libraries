@@ -6,6 +6,7 @@
 // GLOBAL
 //================================================================================================================================
 
+#include "log_def.h"
 extern size_t LOG_TAB;
 
 //================================================================================================================================
@@ -27,65 +28,28 @@ extern size_t LOG_TAB;
 #define HTML_COLOR_POISON HTML_COLOR_OLIVE
 
 /**
-*   @brief выводит в лог файл имя файла, имя функции, номер строки в точке вызова
+*   @brief выводит в лог имя файла, имя функции, номер строки в точке вызова
 */
-#define log_place()                                                                 \
-        log_tab_message("    FILE: %s\n"                                            \
-                        "FUNCTION: %s\n"                                            \
-                        "    LINE: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+#define log_place() log_param_place(__FILE__, __PRETTY_FUNCTION__, __LINE__, __FILE__, __PRETTY_FUNCTION__, __LINE__)
 
 /**
 *   @brief assert с сообщением в лог файл
 */
-#define log_assert(condition)                                   \
-            if  (!(condition))                                  \
-            {                                                   \
-			    log_tab_message(HTML_COLOR_DARK_RED             \
-                                "ASSERTION FAILED: %s\n"        \
-					            "            FILE: %s\n"        \
-					            "        FUNCTION: %s\n"        \
-					            "            LINE: %d\n"        \
-                                HTML_COLOR_CANCEL    ,          \
-                                                                \
-				                #condition           ,          \
-						        __FILE__		     ,          \
-						        __PRETTY_FUNCTION__	 ,          \
-						        __LINE__		      );        \
-                                                                \
-            fprintf(stderr, "ASSERTION FAILED (check log)\n");  \
-			abort();                                            \
+#define log_assert(condition)                                       \
+            if  (!(condition))                                      \
+            {                                                       \
+			    log_tab_message(HTML_COLOR_DARK_RED "\n"            \
+                                "ASSERTION FAILED: %s\n"            \
+				                #condition);                        \
+                log_tab_message("====================\n");          \
+                trace_dump();                                       \
+                log_tab_message("===================="              \
+                                HTML_COLOR_CANCEL "\n");            \
+                                                                    \
+                fprintf(stderr, "ASSERTION FAILED (check log)\n");  \
+			    abort();                                            \
             }
 
-/**
-*   @brief Выводит сообение об ошике в заданной параметрами точке в лог файл
-*
-*   @see log_error(fmt, ...)
-*   @see log_message(const char *fmt, ...)
-*   @see log_warning(const char *fmt, ...)
-*/
-#define log_param_error(file, func, line, fmt, ...)             \
-        {                                                       \
-        log_tab_message(HTML_COLOR_DARK_RED                     \
-                        "\nERROR:\n");                          \
-        log_tab_message(fmt, ## __VA_ARGS__);                   \
-        log_tab_message("    FILE: %s\n"                        \
-                        "FUNCTION: %s\n"                        \
-                        "    LINE: %d\n"    ,                   \
-                    file                    ,                   \
-                    func                    ,                   \
-                    line                    );                  \
-        log_message(HTML_COLOR_CANCEL "\n");                    \
-        }
-
-/**
-*   @brief Выводит сообщение об ошибке в точке вызова в лог файл
-*
-*   @see log_param_error(file, func, line, fmt, ...)
-*   @see log_message(const char *fmt, ...)
-*   @see log_tab_message(const char *fmt, ...)
-*   @see log_warning(const char *fmt, ...)
-*/
-#define log_error(fmt, ...) log_param_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ## __VA_ARGS__);
 
 /**
 *   @brief Выводит warning в лог файл
@@ -131,6 +95,8 @@ extern size_t LOG_TAB;
 //================================================================================================================================
 // FUNCTION DECLARATION
 //================================================================================================================================
+
+#include "log_undef.h"
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // TRACE
@@ -198,6 +164,59 @@ void log_tab_message(const char *const cur_file,
                      const int         cur_line,
                      
                      const char *fmt, ...);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_ERROR
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Оболочка для static void log_error(const char *, va_list) для trace_push и trace_pop
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @see log_error(const char*, va_list)
+*/
+void log_error(const char *const cur_file,
+               const char *const cur_func,
+               const int         cur_line,
+
+               const char *fmt, ...);
+
+/**
+*   @brief Оболочка для static void log_error_message(const char *, va_list) для trace_push и trace_pop
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @see log_error_message(const char*, va_list)
+*/
+void log_error_message(const char *const cur_file,
+                       const char *const cur_func,
+                       const int         cur_line,
+                       
+                       const char *fmt, ...);
+
+/**
+*   @brief Оболочка для static void log_oneline_error(const char *, const char *, const int, const char *, va_list) для trace_push и trace_pop
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @see log_oneline_error(const char*, const char*, const int, const char*, va_list)
+*/
+void log_oneline_error(const char *const cur_file,
+                       const char *const cur_func,
+                       const int         cur_line,
+
+                       const char *fmt, ...);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_SMTH
+//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Оболчка для static void log_header(const char *, va_list) для trace_push и trace_pop.

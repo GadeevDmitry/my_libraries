@@ -118,12 +118,23 @@ static void log_tab();
 */
 static void log_print(const char *log_buff, bool is_tab);
 
+/**
+*   @brief Выводит сообщения о переполнении log_buff, который используется для вывода сообщений в лог.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*/
+static void log_buff_size_error(const char *const cur_file,
+                                const char *const cur_func,
+                                const int         cur_line);
+
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_OUTPUT
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Выводит сообщение в лог, используя vfprintf.
+*   @brief Выводит сообщение в лог, используя vsprintf.
 *   Не выводит табы перед первой строкой.
 *
 *   @param fmt [in] - формат вывода
@@ -131,7 +142,7 @@ static void log_print(const char *log_buff, bool is_tab);
 static void log_message(const char *fmt, ...);
 
 /**
-*   @brief Выводит сообщение в лог, используя vfprintf.
+*   @brief Выводит сообщение в лог, используя vsprintf.
 *   Не выводит табы перед первой строкой.
 *
 *   @param fmt [in] - формат вывода
@@ -140,7 +151,7 @@ static void log_message(const char *fmt, ...);
 static void log_message(const char *fmt, va_list ap);
 
 /**
-*   @brief Выоводит сообщение в лог, используя vfprintf.
+*   @brief Выоводит сообщение в лог, используя vsprintf.
 *   Выводит табы перед первой строкой.
 *
 *   @param fmt [in] - формат вывода
@@ -148,7 +159,7 @@ static void log_message(const char *fmt, va_list ap);
 static void log_tab_message(const char *fmt, ...);
 
 /**
-*   @brief Выоводит сообщение в лог, используя vfprintf.
+*   @brief Выоводит сообщение в лог, используя vsprintf.
 *   Выводит табы перед первой строкой.
 *
 *   @param fmt [in] - формат вывода
@@ -156,8 +167,63 @@ static void log_tab_message(const char *fmt, ...);
 */
 static void log_tab_message(const char *fmt, va_list ap);
 
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_ERROR
+//--------------------------------------------------------------------------------------------------------------------------------
+
 /**
-*   @brief Делает HTML-заголовок, используя vfprintf.
+*   @brief Выводит сообщение об ошибке и полный back trace.
+*
+*   @param fmt [in] - формат сообщения об ошибке
+*   @param ap  [in] - переменный список аргументов
+*/
+static void log_error(const char *fmt, va_list ap);
+
+/**
+*   @brief Выводит сообщение красным цветом
+*
+*   @param fmt [in] - формат вывода
+*   @param ap  [in] - переменный список аргументов
+*/
+static void log_error_message(const char *fmt, va_list ap);
+
+/**
+*   @brief Выводит сообщение об ошибке в точке вызова (без back trace)
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @param fmt      [in] - формат сообщения об ошибке
+*/
+static void log_oneline_error(const char *const cur_file,
+                              const char *const cur_func,
+                              const char *const cur_line,
+
+                              const char *fmt, ...);
+
+/**
+*   @brief Выводит сообщение об ошибке в точке вызова (без back trace)
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @param fmt      [in] - формат сообщения об ошибке
+*   @param ap       [in] - переменный список аргументов
+*/
+static void log_oneline_error(const char *const cur_file,
+                              const char *const cur_func,
+                              const int         cur_line,
+
+                              const char *fmt, va_list ap);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_SMTH
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Делает HTML-заголовок, используя vsprintf.
 *
 *   @param fmt [in] - формат заголовка
 *   @param ap  [in] - переменный список аргументов

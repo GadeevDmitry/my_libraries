@@ -2,11 +2,30 @@
 #define LOG_DEF_H
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// TRACE
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define trace_dump() trace_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__)
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // LOG_OUTPUT
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define log_message(    fmt, ...)         log_message    (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define log_tab_message(fmt, ...)         log_tab_message(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_message(    fmt, ...) log_message    (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_tab_message(fmt, ...) log_tab_message(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_ERROR
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define log_error(        fmt, ...) log_error        (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_error_message(fmt, ...) log_error_message(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_oneline_error(fmt, ...) log_oneline_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_SMTH
+//--------------------------------------------------------------------------------------------------------------------------------
+
 #define log_header(     fmt, ...)         log_header     (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #define log_param_place(file, func, line) log_param_place(__FILE__, __PRETTY_FUNCTION__, __LINE__, file, func, line  )
 
