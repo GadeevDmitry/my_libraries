@@ -3,28 +3,27 @@ CFLAGS = -D _DEBUG -ggdb3 -std=c++20 -O0 -Wall -Wextra -Weffc++ -Waggressive-loo
 all: test
 
 LOG     = logs/log
-LOG_H   = $(LOG).h $(LOG)_static.h
-LOG_O	= $(LOG).o
-
-$(LOG_O): $(LOG_H)
-
 ALG     = algorithm/algorithm
-ALG_H	= $(ALG).h $(ALG)_static.h
-ALG_O	= $(ALG).o
-
-$(ALG_O): $(ALG_H)
-
 STK     = stack/stack
-STK_H   = $(STK).h $(STK)_static.h
-STK_O   = $(STK).o
-
-$(STK_O): $(STK_H)
-
 LST     = list/list
+
+LOG_H   = $(LOG).h $(LOG)_static.h $(LOG)_def.h $(LOG)_undef.h
+ALG_H	= $(ALG).h $(ALG)_static.h
+STK_H   = $(STK).h $(STK)_static.h
 LST_H   = $(LST).h $(LST)_static.h
+
+LOG_O	= $(LOG).o
+ALG_O	= $(ALG).o
+STK_O   = $(STK).o
 LST_O   = $(LST).o
 
+$(LOG_O): $(LOG_H) $(ALG_H) $(STK_H)
+$(ALG_O): $(ALG_H) $(LOG_H)
+$(STK_O): $(STK_H) $(LOG_H) $(ALG_H)
 $(LST_O): $(LST_H)
+
+#test: test.cpp test.h $(LOG_O) $(ALG_O) $(STK_O)
+#	g++ $(CFLAGS) test.cpp $(LOG_O) $(ALG_O) $(STK_O) -o $@
 
 %.o: %.cpp
 	g++ -c $(CFLAGS) $< -o $@
