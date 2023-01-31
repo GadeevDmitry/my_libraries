@@ -10,8 +10,6 @@
 
 #include "algorithm_static.h"
 
-#include "../logs/log.h"
-
 //--------------------------------------------------------------------------------------------------------------------------------
 // USEFUL FUNCTION
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -113,6 +111,8 @@ bool buffer_ctor(buffer *const buff, const char *const file_name)
     fread(buff->buff_beg, sizeof(char), buff->buff_size - 1, stream);
     buff->buff_beg[buff->buff_size - 1] = '\0';
     buff->buff_pos = buff->buff_beg;
+
+    fclose(stream);
 
     return true;
 }
