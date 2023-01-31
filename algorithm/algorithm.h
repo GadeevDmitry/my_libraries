@@ -43,72 +43,99 @@ struct buffer
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Обменивает значения двух переменных
+*   @brief Оболочка для static int dblcmp(const double, const double, const double) для trace_push и trace_pop
 *
-*   @param a         [in] - указатель на первую переменную
-*   @param b         [in] - указатель на вторую переменную
-*   @param elem_size [in] - размер (в байтах) переменной
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @see dblcmp(const double, const double, const double)
 */
-void my_swap(void *a, void *b, size_t elem_size);
+int dblcmp(const char *const cur_file,
+           const char *const cur_func,
+           const int         cur_line,
+
+           const double a, const double b, const double error_rate = DELTA);
 
 /**
-*   @brief Сравнивает два вещественных числа
+*   @brief Оболочка для static void my_swap(void *, void *, size_t) для trace_push и trace_pop
 *
-*   @param a          [in] - первое число
-*   @param b          [in] - второе число
-*   @param error_rate [in] - погрешность сравнения
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
 *
-*   @return   0, если a = b с учётом погрешности error_rate
-*   @return < 0, если a < b
-*   @return > 0, если a > b
+*   @see my_swap(void*, void*, size_t)
 */
-int dblcmp(const double a, const double b, const double error_rate = DELTA);
+void my_swap(const char *const cur_file,
+             const char *const cur_func,
+             const int         cur_line,
+
+             void *a, void *b, size_t elem_size);
 
 /**
-*   @brief Сравнивает (по байтам) две переменные
+*   @brief Оболочка для static bool is_byte_equal(const void *, const void *, size_t) для trace_push и trace_pop
 *
-*   @param a         [in] - указатель на первую переменную
-*   @param b         [in] - указатель на вторую переменную
-*   @param elem_size [in] - размер (в байтах) переменной
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
 *
-*   @return true, если переменные равны, false иначе
-*
+*   @see is_byte_equal(const void*, const void*, size_t)
 */
-bool is_byte_equal(const void *a, const void *b, size_t elem_size);
+bool is_byte_equal(const char *const cur_file,
+                   const char *const cur_func,
+                   const int         cur_line,
+
+                   const void *a, const void *b, size_t elem_size);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // BUFFER
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Выделяет динамическую память для буфера buff размера buff_size
+*   @brief Оболочка для static bool buffer_ctor(buffer *, const size_t) для trace_push и trace_pop
 *
-*   @param buff      [out] - буфер
-*   @param buff_size [in]  - размер буфера (в байтах)
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
 *
-*   @return true, если всё ОК
-*   @return false в случае ошибки
-*
-*   @see buffer_ctor(buffer *const, const char *const)
+*   @see buffer_ctor(buffer*, const size_t)
 */
-bool buffer_ctor(buffer *const buff, const size_t buff_size);
+bool buffer_ctor(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 buffer *const buff, const size_t buff_size);
 
 /**
-*   @brief Выделяет динамическую память для содержимого файла <file_name>, заполняет поля буфера buff
+*   @brief Оболочка для static bool buffer_ctor_file(buffer *, const char *) для trace_push и trace_pop
 *
-*   @param buff      [out] - буфер
-*   @param file_name [in]  - имя файла
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
 *
-*   @return true если всё ОК
-*   @return false в случае ошибки
-*
-*   @see buffer_ctor(buffer *const, const size_t)
+*   @see buffer_ctor_file(buffer*, const char*)
 */
-bool buffer_ctor(buffer *const buff, const char *const file_name);
+bool buffer_ctor_file(const char *const cur_file,
+                      const char *const cur_func,
+                      const int         cur_line,
+
+                      buffer *const buff, const char *const file_name);
 
 /**
-*   @brief Деструктор буфера
+*   @brief Оболочка для static void buffer_dtor(buffer *) для trace_push и trace_pop
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @see buffer_dtor(buffer*)
 */
-void buffer_dtor(buffer *const buff);
+void buffer_dtor(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 buffer *const buff);
+
+#include "algorithm_def.h"
 
 #endif //ALGORITHM_H
