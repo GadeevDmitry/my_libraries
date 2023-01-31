@@ -91,8 +91,6 @@ static void source_pos_dump(const source_pos *const src_pos)
 
 static bool trace_ctor()
 {
-    assert(_OPEN_CLOSE_LOG_STREAM != 0);
-
     TRACE.data = (source_pos *) log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
     if (TRACE.data == nullptr)
     {
