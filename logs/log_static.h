@@ -178,7 +178,7 @@ static void log_tab_message(const char *fmt, va_list ap);
 static void log_error(const char *fmt, va_list ap);
 
 /**
-*   @brief Выводит сообщение красным цветом
+*   @brief Выводит сообщение HTML_COLOR_DARK_RED цветом
 *
 *   @param fmt [in] - формат вывода
 *   @param ap  [in] - переменный список аргументов
@@ -215,6 +215,57 @@ static void log_oneline_error(const char *const cur_file,
                               const int         cur_line,
 
                               const char *fmt, va_list ap);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_WARNING
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Выводит warning и полный back trace.
+*
+*   @param fmt [in] - формат warning-а
+*   @param ap  [in] - переменный список аргументов
+*/
+static void log_warning(const char *fmt, va_list ap);
+
+/**
+*   @brief Выводит сообщение HTML_COLOR_DARK_ORANGE цветом
+*
+*   @param fmt [in] - формат вывода
+*   @param ap  [in] - переменный список аргументов
+*/
+static void log_warning_message(const char *fmt, va_list ap);
+
+/**
+*   @brief Выводит warning в точке вызова (без back trace)
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @param fmt      [in] - формат warning-а
+*/
+static void log_oneline_warning(const char *const cur_file,
+                                const char *const cur_func,
+                                const char *const cur_line,
+
+                                const char *fmt, ...);
+
+/**
+*   @brief Выводит warning в точке вызова (без back trace)
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @param fmt      [in] - формат warning-а
+*   @param ap       [in] - переменный список аргументов
+*/
+static void log_oneline_warning(const char *const cur_file,
+                                const char *const cur_func,
+                                const int         cur_line,
+
+                                const char *fmt, va_list ap);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_SMTH

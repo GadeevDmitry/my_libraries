@@ -50,48 +50,6 @@ extern size_t LOG_TAB;
 			    abort();                                            \
             }
 
-
-/**
-*   @brief Выводит warning в лог файл
-*
-*   @see log_message(const char *fmt, ...)
-*   @see log_tab_message(const char *fmt, ...)
-*/
-#define log_warning(fmt, ...)                                   \
-        {                                                       \
-        log_tab_message(HTML_COLOR_DARK_ORANGE "\nWARNING:\n"); \
-        log_tab_message(fmt, ## __VA_ARGS__);                   \
-        log_message    (HTML_COLOR_CANCEL);                     \
-        }
-
-/**
-*   @brief Выводит warning c параметрами в лог
-*
-*   @see log_warning(fmt, ...)
-*   @see log_inline_warning(fmt, ...)
-*/
-#define log_param_warning(file, func, line, fmt, ...)           \
-        {                                                       \
-        log_tab_message(HTML_COLOR_DARK_ORANGE                  \
-                        "\nWARNING:\n");                        \
-        log_tab_message(fmt, ## __VA_ARGS__);                   \
-        log_tab_message("    FILE: %s\n"                        \
-                        "FUNCTION: %s\n"                        \
-                        "    LINE: %d\n",                       \
-                    file,                                       \
-                    func,                                       \
-                    line);                                      \
-        log_message(HTML_COLOR_CANCEL);                         \
-        }
-
-/**
-*   @brief warning в точке вызова
-*
-*   @see log_warning(fmt, ...)
-*   @see log_param_warning(file, func, line, fmt, ...)
-*/
-#define log_inline_warning(fmt, ...) log_param_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ## __VA_ARGS__)
-
 //================================================================================================================================
 // FUNCTION DECLARATION
 //================================================================================================================================
@@ -213,6 +171,55 @@ void log_oneline_error(const char *const cur_file,
                        const int         cur_line,
 
                        const char *fmt, ...);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_WARNING
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Оболочка для static void log_warning(const char *, va_list) для trace_push и trace_pop
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @see log_warning(const char*, va_list)
+*/
+void log_warning(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 const char *fmt, ...);
+
+/**
+*   @brief Оболочка для static void log_warning_message(const char *, va_list) для trace_push и trace_pop
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @see log_warning_message(const char*, va_list)
+*/
+void log_warning_message(const char *const cur_file,
+                         const char *const cur_func,
+                         const int         cur_line,
+
+                         const char *fmt, ...);
+
+/**
+*   @brief Оболочка для static void log_oneline_warning(const char *, const char *, const int, const char *, va_list) для trace_push и trace_pop
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @see log_oneline_warning(const char*, const char*, const int, const char*, va_list)
+*/
+void log_oneline_warning(const char *const cur_file,
+                         const char *const cur_func,
+                         const int         cur_line,
+
+                         const char *fmt, ...);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_SMTH

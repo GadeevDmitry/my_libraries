@@ -428,6 +428,110 @@ void log_oneline_error(const char *const cur_file,
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// LOG_WARNING
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void log_warning(const char *fmt, va_list ap)
+{
+    log_tab_message(HTML_COLOR_DARK_ORANGE "\n"
+                    "WARNING:\n");
+    log_tab_message(fmt, ap);
+
+    log_tab_message("====================\n");
+    trace_dump();
+    log_tab_message("===================="
+                    HTML_COLOR_CANCEL "\n");
+}
+
+void log_warning(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 const char *fmt, ...)
+{
+    trace_push(cur_file, cur_func, cur_line);
+
+    va_list  ap;
+    va_start(ap, fmt);
+    log_warning(fmt, ap);
+
+    trace_pop();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void log_warning_message(const char *fmt, va_list ap)
+{
+    log_message(HTML_COLOR_DARK_ORANGE);
+    log_tab_message(fmt, ap);
+    log_message(HTML_COLOR_CANCEL);
+}
+
+void log_warning_message(const char *const cur_file,
+                         const char *const cur_func,
+                         const int         cur_line,
+
+                         const char *fmt, ...)
+{
+    trace_push(cur_file, cur_func, cur_line);
+
+    va_list  ap;
+    va_start(ap, fmt);
+    log_warning_message(fmt, ap);
+
+    trace_pop();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void log_oneline_warning(const char *const cur_file,
+                                const char *const cur_func,
+                                const char *const cur_line,
+
+                                const char *fmt, ...)
+{
+    va_list  ap;
+    va_start(ap, fmt);
+    log_oneline_warning(cur_file, cur_func, cur_line, fmt, ap);
+}
+
+static void log_oneline_warning(const char *const cur_file,
+                                const char *const cur_func,
+                                const int         cur_line,
+
+                                const char *fmt, va_list ap)
+{
+    assert(cur_file != nullptr);
+    assert(cur_func != nullptr);
+
+    log_tab_message(HTML_COLOR_DARK_ORANGE "\n"
+                    "WARNING:\n");
+    log_tab_message(fmt, ap);
+
+    log_tab_message("====================\n");
+    log_param_place(cur_file, cur_func, cur_line);
+    log_tab_message("===================="
+                    HTML_COLOR_CANCEL "\n");
+}
+
+void log_oneline_warning(const char *const cur_file,
+                         const char *const cur_func,
+                         const int         cur_line,
+
+                         const char *fmt, ...)
+{
+    trace_push(cur_file, cur_func, cur_line);
+
+    va_list  ap;
+    va_start(ap, fmt);
+    log_oneline_warning(cur_file, cur_func, cur_line, fmt, ap);
+
+    trace_pop();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_SMTH
+//--------------------------------------------------------------------------------------------------------------------------------
 
 static void log_header(const char *fmt, va_list ap)
 {
@@ -453,8 +557,6 @@ void log_header(const char *const cur_file,
     trace_pop();
 }
 
-//--------------------------------------------------------------------------------------------------------------------------------
-// LOG_SMTH
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static void log_param_place(const char *const file,
