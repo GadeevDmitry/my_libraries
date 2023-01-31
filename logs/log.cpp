@@ -82,7 +82,7 @@ static void source_pos_dump(const source_pos *const src_pos)
     assert(src_pos->file != nullptr);
     assert(src_pos->func != nullptr);
 
-    log_param_place(src_pos->file, src_pos->func, src_pos->line)
+    log_param_place(src_pos->file, src_pos->func, src_pos->line);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ static bool trace_ctor()
 {
     assert(_OPEN_CLOSE_LOG_STREAM != 0);
 
-    TRACE.data = log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
+    TRACE.data = (source_pos *) log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
     if (TRACE.data == nullptr)
     {
         //log_error();
@@ -148,8 +148,8 @@ static bool trace_resize()
         return false;
     }
 
-    TRACE.capacity = new_capacity;
-    TRACE.data     = new_data;
+    TRACE.capacity =                new_capacity;
+    TRACE.data     = (source_pos *) new_data;
 
     return true;
 }
@@ -227,7 +227,8 @@ static void log_message(const char *fmt, ...)
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
-    va_list ap; va_start(ap, fmt);
+    va_list  ap;
+    va_start(ap, fmt);
     log_message(fmt, ap);
 }
 
@@ -251,7 +252,8 @@ void log_message(const char *const cur_file,
                  const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
-    va_list  ap; va_start(ap, fmt);
+    va_list  ap;
+    va_start(ap, fmt);
     log_message(fmt, ap);
     trace_pop();
 }
@@ -262,7 +264,8 @@ static void log_tab_message(const char *fmt, ...)
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
-    va_list ap; va_start(ap, fmt);
+    va_list ap;
+    va_start(ap, fmt);
     log_tab_message(fmt, ap);
 }
 
@@ -286,7 +289,8 @@ void log_tab_message(const char *const cur_file,
                      const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
-    va_list ap; va_start(ap, fmt);
+    va_list ap;
+    va_start(ap, fmt);
     log_tab_message(fmt, ap);
     trace_pop();
 }
@@ -298,7 +302,6 @@ static void log_header(const char *fmt, va_list ap)
     if (_OPEN_CLOSE_LOG_STREAM == 0) { va_end(ap); return; }
 
     fprintf (LOG_STREAM, "<h2>\n");
-    va_list ap; va_start(ap, fmt);
     log_tab_message(fmt, ap);
     fprintf (LOG_STREAM, "</h2>\n");
 }
@@ -310,7 +313,8 @@ void log_header(const char *const cur_file,
                 const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
-    va_list ap; va_start(ap, fmt);
+    va_list  ap;
+    va_start(ap, fmt);
     log_header(fmt, ap);
     trace_pop();
 }
