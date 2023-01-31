@@ -17,7 +17,7 @@ ALG_O	= $(ALG).o
 STK_O   = $(STK).o
 LST_O   = $(LST).o
 
-$(LOG_O): $(LOG_H) $(ALG_H) $(STK_H)
+$(LOG_O): $(LOG_H) $(ALG_H)
 $(ALG_O): $(ALG_H) $(LOG_H)
 $(STK_O): $(STK_H) $(LOG_H) $(ALG_H)
 $(LST_O): $(LST_H)
