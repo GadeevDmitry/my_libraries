@@ -5,7 +5,6 @@
 #include "log.h"
 #include "log_undef.h"
 
-#include "../stack/stack.h"
 #include "../algorithm/algorithm.h"
 
 //================================================================================================================================
@@ -22,6 +21,16 @@ struct source_pos
     int         line;   ///< номер строки
 };
 
+/**
+*   @brief Стек cтруктур source_pos.
+*/
+struct trace
+{
+    source_pos *data;   ///< массив source_pos
+    size_t      size;   ///< размер .data
+    size_t  capacity;   ///< емкость .data
+};
+
 //================================================================================================================================
 // FUNCTION DECLARATION
 //================================================================================================================================
@@ -35,7 +44,7 @@ struct source_pos
 *
 *   @return 0, если не удалось открыть лог файл, 1 иначе
 */
-static int  LOG_STREAM_OPEN  ();
+static int  LOG_STREAM_OPEN();
 
 /**
 *   @brief Закрывает лог файл
@@ -44,7 +53,51 @@ static int  LOG_STREAM_OPEN  ();
 *
 *   @see LOG_STREAM_OPEN()
 */
-static void LOG_STREAM_CLOSE ();
+static void LOG_STREAM_CLOSE();
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// source_pos
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief source_pos ctor
+*/
+static void source_pos_ctor(source_pos *const src_pos,  const char *const file,
+                                                        const char *const func,
+                                                        const int         line);
+
+/**
+*   @brief source_pos dump
+*/
+static void source_pos_dump(const source_pos *const src_pos);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// TRACE
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief tarce ctor
+*
+*   @return true, если все ОК, false, если не удалось выделить память для TRACE.data
+*/
+static bool trace_ctor();
+
+/**
+*   @brief trace dtor
+*/
+static void trace_dtor();
+
+/**
+*   @brief Увеличивает память для TRACE.data в два раза, если TRACE.size = TRACE.capacity
+*
+*   @return true, если все ОК, false, если не удалось выл=делить память для TRACE.data
+*/
+static bool trace_resize();
+
+/**
+*   @brief Дамп элемента TRACE.
+*/
+static void trace_el_dump(const source_pos *const src_pos, const size_t index);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // log_print
@@ -65,68 +118,62 @@ static void log_tab();
 */
 static void log_print(const char *log_buff, bool is_tab);
 
+//--------------------------------------------------------------------------------------------------------------------------------
+// LOG_OUTPUT
+//--------------------------------------------------------------------------------------------------------------------------------
+
 /**
-*   @brief Выводит в лог файл имя файла, имя функции, номер строки
+*   @brief Выводит сообщение в лог, используя vfprintf.
+*   Не выводит табы перед первой строкой.
 *
-*   @param file [in] - имя файла
-*   @param func [in] - имя функции
+*   @param fmt [in] - формат вывода
+*/
+static void log_message(const char *fmt, ...);
+
+/**
+*   @brief Выводит сообщение в лог, используя vfprintf.
+*   Не выводит табы перед первой строкой.
+*
+*   @param fmt [in] - формат вывода
+*   @param ap  [in] - переменный список аргументов
+*/
+static void log_message(const char *fmt, va_list ap);
+
+/**
+*   @brief Выоводит сообщение в лог, используя vfprintf.
+*   Выводит табы перед первой строкой.
+*
+*   @param fmt [in] - формат вывода
+*/
+static void log_tab_message(const char *fmt, ...);
+
+/**
+*   @brief Выоводит сообщение в лог, используя vfprintf.
+*   Выводит табы перед первой строкой.
+*
+*   @param fmt [in] - формат вывода
+*   @param ap  [in] - переменный список аргументов
+*/
+static void log_tab_message(const char *fmt, va_list ap);
+
+/**
+*   @brief Делает HTML-заголовок, используя vfprintf.
+*
+*   @param fmt [in] - формат заголовка
+*   @param ap  [in] - переменный список аргументов
+*/
+static void log_header(const char *fmt, va_list ap);
+
+/**
+*   @brief Выводит сообщение о местоположении с параметрами.
+*
+*   @param file [in] - файл
+*   @param func [in] - функция
 *   @param line [in] - номер строки
 */
-static void log_param_place    (const char *file,
-                                const char *func,
-                                const int   line);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// source_pos
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief source_pos ctor
-*/
-static void source_pos_ctor(source_pos *const src_pos,  const char *const file,
-                                                        const char *const func,
-                                                        const int         line);
-
-/**
-*   @brief source_pos dtor
-*/
-static void source_pos_dtor(void *const _src_pos);
-
-/**
-*   @brief source_pos dump
-*/
-static void source_pos_dump(const void *const _src_pos);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// TRACE
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief trace ctor
-*/
-static void trace_ctor();
-
-/**
-*   @brief trace dtor
-*/
-static void trace_dtor();
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// TRACE::dump
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Дамп элемента TRACE
-*
-*   @param src_pos [in] - элемент TRACE
-*   @param index   [in] - номер элемента
-*/
-static void trace_el_dump(const source_pos *const src_pos, const size_t index);
-
-/**
-*   @brief Возвращает указатель на элемент TRACE с номером index
-*/
-static void *trace_get(const size_t index);
+static void log_param_place(const char *const file,
+                            const char *const func,
+                            const int         line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
@@ -139,7 +186,7 @@ static void *trace_get(const size_t index);
 *   @see log_realloc(void *, size_t)
 *   @see log_free(void *)
 */
-static void *log_calloc  (size_t number, size_t size);
+static void *log_calloc(size_t number, size_t size);
 
 /**
 *   @brief Меняет размер блока динамической памяти, используя realloc(). Меняет DYNAMIC_MEMORY
@@ -148,7 +195,7 @@ static void *log_calloc  (size_t number, size_t size);
 *   @see log_calloc(size_t, size_t)
 *   @see log_free(void *)
 */
-static void *log_realloc (void *ptr, size_t size);
+static void *log_realloc(void *ptr, size_t size);
 
 /**
 *   @brief Освобождает блок динамической памяти, используя free(). Уменяшает DYNAMIC_MEMORY, если блок был не пуст
@@ -157,30 +204,20 @@ static void *log_realloc (void *ptr, size_t size);
 *   @see log_calloc(size_t, size_t)
 *   @see log_realloc(void *, size_t)
 */
-static void  log_free    (void *ptr);
+static void log_free(void *ptr);
 
 //================================================================================================================================
 // GLOBAL
 //================================================================================================================================
 
 #define LOG_FILE "log.html"                              ///< имя лог файла
-
 static FILE  *LOG_STREAM            = nullptr;           ///< лог файл
 static int   _OPEN_CLOSE_LOG_STREAM = LOG_STREAM_OPEN(); ///< равна 0, если не удалось открыть лог файл, равна 1 иначе
+
 static int    DYNAMIC_MEMORY        = 0;                 ///< счётчик указателей на динамическую память
 static size_t LOG_BUFF_SIZE         = 100000;            ///< максимальное количество символов, которое можно вывести за один запрос log_message()
-static stack  TRACE                 = {};                ///< стек для back trace
 
-/**
-*   @brief POISON-значения source_pos
-*/
-source_pos SOURCE_POS_POISON        =
-{
-    (const char *) 0xABADBABE   ,   // file
-    (const char *) 0xDEADBEEF   ,   // func
-    (int)          0xFEEDFACE   ,   // line
-};
-
-#include "log_def.h"
+static trace        TRACE                  = {};         ///< для back trace
+static const size_t DEFAULT_TRACE_CAPACITY =  4;         ///< начальная емкость TRACE
 
 #endif //LOG_STATIC_H

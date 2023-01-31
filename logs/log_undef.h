@@ -8,7 +8,6 @@
 #undef log_message
 #undef log_tab_message
 #undef log_header
-
 #undef log_param_place
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -19,4 +18,4 @@
 #undef log_realloc
 #undef log_free
 
-#endif //LOG_DEF_H
+#endif // not LOG_DEF_H

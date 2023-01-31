@@ -133,142 +133,152 @@ extern size_t LOG_TAB;
 //================================================================================================================================
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// LOG_OUTPUT
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Выводит сообщение в лог файл, используя vfprintf()
-*   Не использует log_tab() перед выводом первой строки
-*
-*   @param cur_file [in] - файл в точке вызова (для back trace)
-*   @param cur_func [in] - функция в точке вызова (для back trace)
-*   @param cur_line [in] - строка в точке вызова (для back trace)
-*
-*   @param fmt      [in] - формат строки сообщения
-*
-*   @see log_tab_message(const char *fmt, ...)
-*/
-void log_message       (const char *const cur_file,
-                        const char *const cur_func,
-                        const int         cur_line, const char *fmt, ...);
-
-/**
-*   @brief Выводит сообщение в лог файл, используя vfprintf()
-*   Использует log_tab() перед выводом первой строки
-*
-*   @param cur_file [in] - файл в точке вызова (для back trace)
-*   @param cur_func [in] - функция в точке вызова (для back trace)
-*   @param cur_line [in] - строка в точке вызова (для back trace)
-*
-*   @param fmt      [in] - формат строки сообщения
-*
-*   @see log_message(const char *fmt, ...)
-*/
-void log_tab_message   (const char *const cur_file,
-                        const char *const cur_func,
-                        const int         cur_line, const char *fmt, ...);
-
-/**
-*   @brief HTML-заголовок
-*
-*   @param cur_file [in] - файл в точке вызова (для back trace)
-*   @param cur_func [in] - функция в точке вызова (для back trace)
-*   @param cur_line [in] - строка в точке вызова (для back trace)
-*
-*   @param fmt      [in] - формат строки сообщения
-*/
-void log_header        (const char *const cur_file,
-                        const char *const cur_func,
-                        const int         cur_line, const char *fmt, ...);
-
-/**
-*   @brief Оболочка для log_param_place(const char *const, const char *const, const int) для back trace.
-*
-*   @param cur_file [in] - файл в точке вызова (для back trace)
-*   @param cur_func [in] - функция в точке вызова (для back trace)
-*   @param cur_line [in] - строка в точке вызова (для back trace)
-*
-*   @see log_param_place(const char*, const char*, const int)
-*/
-void log_param_place(const char *const cur_file,
-                     const char *const cur_func,
-                     const int         cur_line, const char *const param_file,
-                                                 const char *const param_func,
-                                                 const int         param_line);
-
-//--------------------------------------------------------------------------------------------------------------------------------
 // TRACE
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief trace push
+*   @brief Добавляет в TRACE информацию о точке вызова
 *
-*   @param file [in] - имя файла
-*   @param func [in] - имя функции
+*   @param file [in] - файл
+*   @param func [in] - функция
 *   @param line [in] - номер строки
+*
+*   @return true, если все ОК, false, если не удалось выделить память для нового source_pos
 */
-void trace_push(const char *const file,
+bool trace_push(const char *const file,
                 const char *const func,
                 const int         line);
 
 /**
-*   @brief trace pop
+*   @brief Удаляет последний source_pos из TRACE
 */
 void trace_pop();
 
 /**
 *   @brief trace dump
 *
-*   @param cur_file [in] - файл ы точке вызова
+*   @param cur_file [in] - файл в точке вызова
 *   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
 */
 void trace_dump(const char *const cur_file,
                 const char *const cur_func,
                 const int         cur_line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// LOG_OUTPUT
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Оболочка для static void log_message(const char *, va_list) для trace_push и trace_pop.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @see log_message(const char*, va_list)
+*/
+void log_message(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+                 
+                 const char *fmt, ...);
+
+/**
+*   @brief Оболочка для static void log_tab_message(const char *, va_list) для trace_push и trace_pop.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @see log_tab_message(const char*, va_list)
+*/
+void log_tab_message(const char *const cur_file,
+                     const char *const cur_func,
+                     const int         cur_line,
+                     
+                     const char *fmt, ...);
+
+/**
+*   @brief Оболчка для static void log_header(const char *, va_list) для trace_push и trace_pop.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @see log_header(const char*, va_list)
+*/
+void log_header(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
+                
+                const char *fmt, ...);
+
+/**
+*   @brief Оболочка для static void log_param_place(const char *, const char *, const int) для trace_push и trace_pop.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @see log_param_place(const char*, const char*, const int)
+*/
+void log_param_place(const char *const cur_file,
+                     const char *const cur_func,
+                     const int         cur_line,
+
+                     const char *const param_file,
+                     const char *const param_func,
+                     const int         param_line);
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Оболочка для log_calloc(size_t, size_t) для back trace
+*   @brief Оболочка для static void *log_calloc(size_t, size_t) для trace_push и trace_pop.
 *
-*   @param cur_file [in] - файл в точке вызова (для back trace)
-*   @param cur_func [in] - функция в точке вызова (для back trace)
-*   @param cur_line [in] - строка в точке вызова (для back trace)
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
 *
 *   @see log_calloc(size_t, size_t)
 */
-void *log_calloc(size_t number, size_t size, const char *const cur_file,
-                                             const char *const cur_func,
-                                             const int         cur_line);
+void *log_calloc(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+                 
+                 size_t number, size_t size);
 
 /**
-*   @brief Оболочка для log_realloc(void *, size_t) для back trace
+*   @brief Оболочка для static void *log_realloc(void *, size_t) для trace_push и trace_pop.
 *
-*   @param cur_file [in] - файл в точке вызова (для back trace)
-*   @param cur_func [in] - функция в точке вызова (для back trace)
-*   @param cur_line [in] - строка в точке вызова (для back trace)
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
 *
 *   @see log_realloc(void*, size_t)
 */
-void *log_realloc(void *ptr, size_t size, const char *const cur_file,
-                                          const char *const cur_func,
-                                          const int         cur_line);
+void *log_realloc(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  void *ptr, size_t size);
 
 /**
-*   @brief Оболочка для log_free(void *) для back trace
+*   @brief Оболочка для static void log_free(void *) для trace_push и trace_pop.
 *
-*   @param cur_file [in] - файл в точке вызова (для back trace)
-*   @param cur_func [in] - функция в точке вызова (для back trace)
-*   @param cur_line [in] - строка в точке вызова (для back trace)
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
 *
 *   @see log_free(void*)
 */
-void log_free(void *ptr, const char *const cur_file,
-                         const char *const cur_func,
-                         const int         cur_line);
+void log_free(const char *const cur_file,
+              const char *const cur_func,
+              const int         cur_line,
+
+              void *ptr);
 
 #include "log_def.h"
 
