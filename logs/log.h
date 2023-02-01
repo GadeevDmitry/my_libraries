@@ -44,7 +44,7 @@ extern size_t LOG_TAB;
                 log_tab_message("====================\n");          \
                 trace_dump();                                       \
                 log_tab_message("===================="              \
-                                HTML_COLOR_CANCEL "\n");            \
+                                HTML_COLOR_CANCEL "\n\n");          \
                                                                     \
                 fprintf(stderr, "ASSERTION FAILED (check log)\n");  \
 			    abort();                                            \
@@ -62,7 +62,7 @@ extern size_t LOG_TAB;
             log_tab_message("====================\n");              \
             trace_dump();                                           \
             log_tab_message("===================="                  \
-                            HTML_COLOR_CANCEL "\n");                \
+                            HTML_COLOR_CANCEL "\n\n");              \
                                                                     \
             return ret_val;                                         \
         }
