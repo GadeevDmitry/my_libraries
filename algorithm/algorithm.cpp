@@ -184,8 +184,8 @@ bool buffer_ctor_file(const char *const cur_file,
 
 static bool get_file_size(const char *file_name, size_t *const file_size)
 {
-    assert(file_name != nullptr);
-    assert(file_size != nullptr);
+    log_assert(file_name != nullptr);
+    log_assert(file_size != nullptr);
 
     struct stat file_info = {};
     if (stat(file_name, &file_info) == -1)
