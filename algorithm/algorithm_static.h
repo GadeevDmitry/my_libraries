@@ -110,12 +110,38 @@ static bool _get_file_size(const char *const cur_file,
 /**
 *   @brief Деструктор буфера
 */
-static void _buffer_dtor(buffer *const buff);
+static void _buffer_dtor(void *const _buff);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Дамп буффера
+*/
+static void _buffer_dump(const void *const _buff);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Дамп содержимого буффера
+*/
+static void _buffer_content_dump(const buffer *const buff);
+
+/**
+*   @brief Оболочка для static void _buffer_content_dump(const buffer *) для trace_push и trace_pop
+*
+*   @see _buffer_content_dump(const buffer*)
+*/
+static void _buffer_content_dump(const char *const cur_file,
+                                 const char *const cur_func,
+                                 const int         cur_line,
+
+                                 const buffer *const buff);
 
 //================================================================================================================================
 // MACRO DEFINITIONS
 //================================================================================================================================
 
-#define get_file_size(file_name, file_size) _get_file_size(__FILE__, __PRETTY_FUNCTION__, __LINE__, file_name, file_size)
+#define get_file_size(file_name, file_size) _get_file_size      (__FILE__, __PRETTY_FUNCTION__, __LINE__, file_name, file_size)
+#define buffer_content_dump(buff)           _buffer_content_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__,                 buff)
 
 #endif //ALGORITHM_STATIC_H

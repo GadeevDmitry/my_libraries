@@ -122,19 +122,33 @@ bool _buffer_ctor_file(const char *const cur_file,
                        buffer *const buff, const char *const file_name);
 
 /**
-*   @brief Оболочка для static void buffer_dtor(buffer *) для trace_push и trace_pop
+*   @brief Оболочка для static void buffer_dtor(void *) для trace_push и trace_pop
 *
 *   @param cur_file [in] - файл в точке вызова
 *   @param cur_func [in] - функция в точке вызова
 *   @param cur_line [in] - строка в точке вызова
 *
-*   @see buffer_dtor(buffer*)
+*   @see buffer_dtor(void*)
 */
 void _buffer_dtor(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line,
 
-                  buffer *const buff);
+                  void *const _buff);
+
+/**
+*   @brief Оболочка для static void _buffer_dump(const void *) для trace_push и trace_pop
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @see _buffer_dump(const void*)
+*/
+void _buffer_dump(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  const void *const _buff);
 
 #include "algorithm_def.h"
 

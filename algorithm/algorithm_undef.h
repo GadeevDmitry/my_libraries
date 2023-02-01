@@ -16,5 +16,6 @@
 #undef buffer_ctor
 #undef buffer_ctor_file
 #undef buffer_dtor
+#undef buffer_dump
 
 #endif //not ALG_DEF_H

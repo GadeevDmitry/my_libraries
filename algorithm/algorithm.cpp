@@ -213,8 +213,9 @@ static bool _get_file_size(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void _buffer_dtor(buffer *const buff)
+static void _buffer_dtor(void *const _buff)
 {
+    buffer *const buff = (buffer *) _buff;
     if (buff == nullptr) return;
 
     log_free(buff->buff_beg);
@@ -228,9 +229,85 @@ void _buffer_dtor(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line,
 
-                  buffer *const buff)
+                  void *const _buff)
 {
     trace_push(cur_file, cur_func, cur_line);
-    _buffer_dtor(buff);
+    _buffer_dtor(_buff);
+    trace_pop();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _buffer_dump(const void *const _buff)
+{
+    const buffer *const buff = (const buffer *) _buff;
+
+    log_tab_message("buffer (address: %p)\n"
+                    "{\n",          buff);
+    LOG_TAB++;
+
+    if (buff == nullptr) { LOG_TAB--; log_tab_message("}\n"); return; }
+
+    if (buff->buff_beg == nullptr) error_field_dump("buff_beg ", "%p" , buff->buff_beg);
+    else                           usual_field_dump("buff_beg ", "%p" , buff->buff_beg);
+
+    if (buff->buff_pos == nullptr) error_field_dump("buff_pos ", "%p" , buff->buff_pos);
+    else                           usual_field_dump("buff_pos ", "%p" , buff->buff_pos);
+
+    usual_field_dump                               ("buff_size", "%lu", buff->buff_size);
+
+    if (buff->buff_beg != nullptr && buff->buff_pos != nullptr)
+    {
+        log_tab_message(HTML_COLOR_MEDIUM_BLUE "\n"
+                        "buff_pos - buff_beg = %d"
+                        HTML_COLOR_CANCEL "\n", buff->buff_pos - buff->buff_beg);
+    }
+    if (buff->buff_beg != nullptr) buffer_content_dump(buff);
+
+    LOG_TAB--;
+    log_tab_message("\n}\n");
+}
+
+void _buffer_dump(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  const void *const _buff)
+{
+    trace_push(cur_file, cur_func, cur_line);
+    _buffer_dump(_buff);
+    trace_pop();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _buffer_content_dump(const buffer *const buff)
+{
+    log_assert(buff           != nullptr);
+    log_assert(buff->buff_beg != nullptr);
+
+    log_tab_message("buffer_content:\n"
+                    HTML_COLOR_OLIVE "\"" HTML_COLOR_CANCEL);
+
+    for (const char *cur_char = buff->buff_beg; (size_t) (cur_char - buff->buff_beg) < buff->buff_size; ++cur_char)
+    {
+        if      ( cur_char == buff->buff_pos) { log_message(HTML_COLOR_LIME_GREEN "|"); }
+
+        if      (*cur_char ==           '\n') { log_message(HTML_COLOR_OLIVE "\"\n\"" HTML_COLOR_CANCEL); }
+        else if (*cur_char ==           '\0') { log_message(HTML_COLOR_OLIVE "\""     HTML_COLOR_CANCEL); break; }
+        else                                  { log_message("%c", *cur_char); }
+
+        if      ( cur_char == buff->buff_pos) { log_message("|" HTML_COLOR_CANCEL); }
+    }
+}
+
+static void _buffer_content_dump(const char *const cur_file,
+                                 const char *const cur_func,
+                                 const int         cur_line,
+
+                                 const buffer *const buff)
+{
+    trace_push(cur_file, cur_func, cur_line);
+    _buffer_content_dump(buff);
     trace_pop();
 }
