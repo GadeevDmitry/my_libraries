@@ -39,7 +39,7 @@ extern size_t LOG_TAB;
             if  (!(condition))                                      \
             {                                                       \
 			    log_tab_message(HTML_COLOR_DARK_RED "\n"            \
-                                "ASSERTION FAILED: %s\n"            \
+                                "ASSERTION FAILED: %s\n",           \
 				                #condition);                        \
                 log_tab_message("====================\n");          \
                 trace_dump();                                       \
@@ -57,7 +57,7 @@ extern size_t LOG_TAB;
         if (!(condition))                                           \
         {                                                           \
             log_tab_message(HTML_COLOR_DARK_RED "\n"                \
-                            "VERIFY FAILED: %s\n"                   \
+                            "VERIFY FAILED: %s\n",                  \
                             #condition);                            \
             log_tab_message("====================\n");              \
             trace_dump();                                           \
