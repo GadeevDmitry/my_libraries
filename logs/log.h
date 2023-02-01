@@ -50,6 +50,23 @@ extern size_t LOG_TAB;
 			    abort();                                            \
             }
 
+/**
+*   @brief "мягкий" assert с сообщением в лог
+*/
+#define log_verify(condition, ret_val)                              \
+        if (!(condition))                                           \
+        {                                                           \
+            log_tab_message(HTML_COLOR_DARK_RED "\n"                \
+                            "VERIFY FAILED: %s\n"                   \
+                            #condition);                            \
+            log_tab_message("====================\n");              \
+            trace_dump();                                           \
+            log_tab_message("===================="                  \
+                            HTML_COLOR_CANCEL "\n");                \
+                                                                    \
+            return ret_val;                                         \
+        }
+
 //================================================================================================================================
 // FUNCTION DECLARATION
 //================================================================================================================================
