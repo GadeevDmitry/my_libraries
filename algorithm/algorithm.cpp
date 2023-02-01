@@ -14,7 +14,7 @@
 // USEFUL FUNCTION
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static int dblcmp(const double a, const double b, const double error_rate /* = DELTA */)
+static int _dblcmp(const double a, const double b, const double error_rate /* = DELTA */)
 {
     if (fabs(a - b) < error_rate) return 0;
 
@@ -22,14 +22,14 @@ static int dblcmp(const double a, const double b, const double error_rate /* = D
     return 1;
 }
 
-int dblcmp(const char *const cur_file,
-           const char *const cur_func,
-           const int         cur_line,
+int _dblcmp(const char *const cur_file,
+            const char *const cur_func,
+            const int         cur_line,
 
-           const double a, const double b, const double error_rate /* = DELTA */)
+            const double a, const double b, const double error_rate /* = DELTA */)
 {
     trace_push(cur_file, cur_func, cur_line);
-    int ret = dblcmp(a, b, error_rate);
+    int ret = _dblcmp(a, b, error_rate);
     trace_pop();
 
     return ret;
@@ -37,7 +37,7 @@ int dblcmp(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void my_swap(void *a, void *b, size_t elem_size)
+static void _my_swap(void *a, void *b, size_t elem_size)
 {
     log_verify(a != nullptr, ;);
     log_verify(b != nullptr, ;);
@@ -53,20 +53,20 @@ static void my_swap(void *a, void *b, size_t elem_size)
     }
 }
 
-void my_swap(const char *const cur_file,
-             const char *const cur_func,
-             const int         cur_line,
+void _my_swap(const char *const cur_file,
+              const char *const cur_func,
+              const int         cur_line,
 
-             void *a, void *b, size_t elem_size)
+              void *a, void *b, size_t elem_size)
 {
     trace_push(cur_file, cur_func, cur_line);
-    my_swap(a, b, elem_size);
+    _my_swap(a, b, elem_size);
     trace_pop();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool is_byte_equal(const void *a, const void *b, size_t elem_size)
+static bool _is_byte_equal(const void *a, const void *b, size_t elem_size)
 {
     log_verify(a != nullptr, false);
     log_verify(b != nullptr, false);
@@ -85,14 +85,14 @@ static bool is_byte_equal(const void *a, const void *b, size_t elem_size)
     return true;
 }
 
-bool is_byte_equal(const char *const cur_file,
-                   const char *const cur_func,
-                   const int         cur_line,
+bool _is_byte_equal(const char *const cur_file,
+                    const char *const cur_func,
+                    const int         cur_line,
 
-                   const void *a, const void *b, size_t elem_size)
+                    const void *a, const void *b, size_t elem_size)
 {
     trace_push(cur_file, cur_func, cur_line);
-    bool ret = is_byte_equal(a, b, elem_size);
+    bool ret = _is_byte_equal(a, b, elem_size);
     trace_pop();
 
     return ret;
@@ -102,7 +102,7 @@ bool is_byte_equal(const char *const cur_file,
 // BUFFER
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool buffer_ctor(buffer *const buff, const size_t buff_size)
+static bool _buffer_ctor(buffer *const buff, const size_t buff_size)
 {
     log_verify(buff != nullptr, false);
 
@@ -120,14 +120,14 @@ static bool buffer_ctor(buffer *const buff, const size_t buff_size)
     return true;
 }
 
-bool buffer_ctor(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
+bool _buffer_ctor(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-                 buffer *const buff, const size_t buff_size)
+                  buffer *const buff, const size_t buff_size)
 {
     trace_push(cur_file, cur_func, cur_line);
-    bool ret = buffer_ctor(buff, buff_size);
+    bool ret = _buffer_ctor(buff, buff_size);
     trace_pop();
 
     return ret;
@@ -135,12 +135,12 @@ bool buffer_ctor(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool buffer_ctor_file(buffer *const buff, const char *const file_name)
+static bool _buffer_ctor_file(buffer *const buff, const char *const file_name)
 {
     log_verify(file_name != nullptr, false);
     log_verify(buff      != nullptr, false);
 
-    if (!get_file_size(__FILE__, __PRETTY_FUNCTION__, __LINE__, file_name, &buff->buff_size)) return false;
+    if (!get_file_size(file_name, &buff->buff_size)) return false;
     buff->buff_size += 1; //for null character at the end
 
     buff->buff_beg = (char *) log_calloc(buff->buff_size, sizeof(char));
@@ -167,14 +167,14 @@ static bool buffer_ctor_file(buffer *const buff, const char *const file_name)
     return true;
 }
 
-bool buffer_ctor_file(const char *const cur_file,
-                      const char *const cur_func,
-                      const int         cur_line,
+bool _buffer_ctor_file(const char *const cur_file,
+                       const char *const cur_func,
+                       const int         cur_line,
 
-                      buffer *const buff, const char *const file_name)
+                       buffer *const buff, const char *const file_name)
 {
     trace_push(cur_file, cur_func, cur_line);
-    bool ret = buffer_ctor_file(buff, file_name);
+    bool ret = _buffer_ctor_file(buff, file_name);
     trace_pop();
 
     return ret;
@@ -182,7 +182,7 @@ bool buffer_ctor_file(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool get_file_size(const char *file_name, size_t *const file_size)
+static bool _get_file_size(const char *file_name, size_t *const file_size)
 {
     log_assert(file_name != nullptr);
     log_assert(file_size != nullptr);
@@ -198,14 +198,14 @@ static bool get_file_size(const char *file_name, size_t *const file_size)
     return true;
 }
 
-static bool get_file_size(const char *const cur_file,
-                          const char *const cur_func,
-                          const int         cur_line,
+static bool _get_file_size(const char *const cur_file,
+                           const char *const cur_func,
+                           const int         cur_line,
 
-                          const char *const file_name, size_t *const file_size)
+                           const char *const file_name, size_t *const file_size)
 {
     trace_push(cur_file, cur_func, cur_line);
-    bool ret = get_file_size(file_name, file_size);
+    bool ret = _get_file_size(file_name, file_size);
     trace_pop();
 
     return ret;
@@ -213,7 +213,7 @@ static bool get_file_size(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void buffer_dtor(buffer *const buff)
+static void _buffer_dtor(buffer *const buff)
 {
     if (buff == nullptr) return;
 
@@ -224,13 +224,13 @@ static void buffer_dtor(buffer *const buff)
     buff->buff_size = 0;
 }
 
-void buffer_dtor(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
+void _buffer_dtor(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-                 buffer *const buff)
+                  buffer *const buff)
 {
     trace_push(cur_file, cur_func, cur_line);
-    buffer_dtor(buff);
+    _buffer_dtor(buff);
     trace_pop();
 }

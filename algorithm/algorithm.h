@@ -51,11 +51,11 @@ struct buffer
 *
 *   @see dblcmp(const double, const double, const double)
 */
-int dblcmp(const char *const cur_file,
-           const char *const cur_func,
-           const int         cur_line,
+int _dblcmp(const char *const cur_file,
+            const char *const cur_func,
+            const int         cur_line,
 
-           const double a, const double b, const double error_rate = DELTA);
+            const double a, const double b, const double error_rate = DELTA);
 
 /**
 *   @brief Оболочка для static void my_swap(void *, void *, size_t) для trace_push и trace_pop
@@ -66,11 +66,11 @@ int dblcmp(const char *const cur_file,
 *
 *   @see my_swap(void*, void*, size_t)
 */
-void my_swap(const char *const cur_file,
-             const char *const cur_func,
-             const int         cur_line,
+void _my_swap(const char *const cur_file,
+              const char *const cur_func,
+              const int         cur_line,
 
-             void *a, void *b, size_t elem_size);
+              void *a, void *b, size_t elem_size);
 
 /**
 *   @brief Оболочка для static bool is_byte_equal(const void *, const void *, size_t) для trace_push и trace_pop
@@ -81,11 +81,11 @@ void my_swap(const char *const cur_file,
 *
 *   @see is_byte_equal(const void*, const void*, size_t)
 */
-bool is_byte_equal(const char *const cur_file,
-                   const char *const cur_func,
-                   const int         cur_line,
+bool _is_byte_equal(const char *const cur_file,
+                    const char *const cur_func,
+                    const int         cur_line,
 
-                   const void *a, const void *b, size_t elem_size);
+                    const void *a, const void *b, size_t elem_size);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // BUFFER
@@ -100,11 +100,11 @@ bool is_byte_equal(const char *const cur_file,
 *
 *   @see buffer_ctor(buffer*, const size_t)
 */
-bool buffer_ctor(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
+bool _buffer_ctor(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-                 buffer *const buff, const size_t buff_size);
+                  buffer *const buff, const size_t buff_size);
 
 /**
 *   @brief Оболочка для static bool buffer_ctor_file(buffer *, const char *) для trace_push и trace_pop
@@ -115,11 +115,11 @@ bool buffer_ctor(const char *const cur_file,
 *
 *   @see buffer_ctor_file(buffer*, const char*)
 */
-bool buffer_ctor_file(const char *const cur_file,
-                      const char *const cur_func,
-                      const int         cur_line,
+bool _buffer_ctor_file(const char *const cur_file,
+                       const char *const cur_func,
+                       const int         cur_line,
 
-                      buffer *const buff, const char *const file_name);
+                       buffer *const buff, const char *const file_name);
 
 /**
 *   @brief Оболочка для static void buffer_dtor(buffer *) для trace_push и trace_pop
@@ -130,11 +130,11 @@ bool buffer_ctor_file(const char *const cur_file,
 *
 *   @see buffer_dtor(buffer*)
 */
-void buffer_dtor(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
+void _buffer_dtor(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-                 buffer *const buff);
+                  buffer *const buff);
 
 #include "algorithm_def.h"
 
