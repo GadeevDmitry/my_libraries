@@ -2,18 +2,13 @@
 #ifndef STACK_STATIC_H
 #define STACK_STATIC_H
 
-#include "stack_settings.h"
 #include "stack.h"
+
+#include "stack_settings.h"
 
 //================================================================================================================================
 // DSL
 //================================================================================================================================
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// HTML_COLOR
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#define HTML_COLOR_POISON HTML_COLOR_OLIVE
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // STACK
@@ -103,132 +98,240 @@ static const stack STK_POISON =
 // stack poison
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Устанавливает POISON-значения в неиспользуемые ячейки стека
-*
-*   @see stack_el_fill_poison(stack *const stk, const size_t filled_index)
-*/
-static void stack_gap_fill_poison(stack *const stk);
+static void _stack_gap_fill_poison(stack *const stk);
 
-/**
-*   @brief Заполняет POISON-значения в элемент стека
-*
-*   @param stk          [in] - стек
-*   @param filled_index [in] - индекс элемента стека
-*
-*   @see stack_gap_fill_poison(stack *const stk)
-*/
-static void stack_el_fill_poison(stack *const stk, const size_t filled_index);
+static void _stack_gap_fill_poison(const char *const cur_file,
+                                   const char *const cur_func,
+                                   const int         cur_line,
 
-/**
-*   @brief Проверяет наличие POISON-значений в неиспользуемых ячейках стека
-*
-*   @see stack_el_is_poison(const stack *const stk, const size_t check_index)
-*/
-static bool stack_gap_is_poison(const stack *const stk);
+                                   stack *const stk);
 
-/**
-*   @brief Проверяет наличие POISON-значений в элементе стека
-*
-*   @param stk         [in] - стек
-*   @param check_index [in] - индекс элемента стека
-*
-*   @see stack_gap_is_poison(const stack *const stk)
-*/
-static bool stack_el_is_poison(const stack *const stk, const size_t check_index);
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_el_fill_poison(stack *const stk, const size_t filled_index);
+
+static void _stack_el_fill_poison(const char *const cur_file,
+                                  const char *const cur_func,
+                                  const int         cur_line,
+
+                                  stack *const stk, const size_t filled_index);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool _stack_gap_is_poison(const stack *const stk);
+
+static bool _stack_gap_is_poison(const char *const cur_file,
+                                 const char *const cur_func,
+                                 const int         cur_line,
+
+                                 const stack *const stk);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool _stack_el_is_poison(const stack *const stk, const size_t check_index);
+
+static bool _stack_el_is_poison(const char *const cur_file,
+                                const char *const cur_func,
+                                const int         cur_line,
+
+                                const stack *const stk, const size_t check_index);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // stack get
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Возвращает указатель на элемент стека
-*
-*   @param stk   [in] - стек
-*   @param index [in] - индекс элемента стека
-*/
-static void *stack_get(const stack *const stk, const size_t index);
+static void *_stack_get(const stack *const stk, const size_t index);
+
+static void *_stack_get(const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line,
+
+                        const stack *const stk, const size_t index);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // stack verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Верификатор стека
-*
-*   @param stk  [in] - стек
-*   @param file [in] - файл в точке вызова
-*   @param func [in] - функция в точке вызова
-*   @param line [in] - строка в точке вызова
-*
-*   @return битовая маска кодов ошибки из enum STK_STATUS
-*
-*   @see enum STK_STATUS
-*/
-static unsigned stack_verify(const stack *const stk,    const char *const file,
-                                                        const char *const func,
-                                                        const int         line);
+static unsigned _stack_verify(const stack *const stk);
 
-/**
-*   @brief Выводит сообщения об ошибка в стеке в лог. Дампит стек.
-*
-*   @param stk  [in] - стек
-*   @param err  [in] - маска ошибки
-*   @param file [in] - файл, в котором обнаружена ошибка
-*   @param func [in] - функция, в которой обнаружена ошибка
-*   @param line [in] - строка, в которой обнаружена ошибка
-*/
-static void stack_log_error(const stack *const stk, const unsigned err, const char *const file,
-                                                                        const char *const func,
-                                                                        const int         line);
+static unsigned _stack_verify(const char *const cur_file,
+                              const char *const cur_func,
+                              const int         cur_line,
+
+                              const stack *const stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// stack static dump
+
+static void _stack_log_error(const stack *const stk, const unsigned err);
+
+static void _stack_log_error(const char *const cur_file,
+                             const char *const cur_func,
+                             const int         cur_line,
+
+                             const stack *const stk, const unsigned err);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Дамп стека с сообщением об ошибке
-*/
-static void stack_static_dump(const stack *const stk,   const char *const file,
-                                                        const char *const func,
-                                                        const int         line);
+static bool _stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison                     = nullptr,
+                                                                      void (     *el_dtor  )(      void *const) = nullptr,
+                                                                      void (     *el_dump  )(const void *const) = nullptr);
 
-/**
-*   @brief Дамп полей содержимого стека
-*/
-static void stack_dump(const stack *const stk, const bool is_static);
-
-/**
-*   @brief Дамп public-полей стека
-*/
-static void stack_public_fields_dump(const stack *const stk);
-
-/**
-*   @brief Дамп поля .data стека
-*/
-static void stack_data_dump(const stack *const stk, const bool is_static);
-
-/**
-*   @brief Дамп элемента стека
-*/
-static void stack_el_dump(const stack *const stk, const void *const el);
+static stack *_stack_new(const size_t el_size, const void *const el_poison                     = nullptr,
+                                                     void (     *el_dtor  )(      void *const) = nullptr,
+                                                     void (     *el_dump  )(const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief dtor .data поля стека
-*/
-static void stack_data_dtor(stack *const stk);
+static void _stack_dtor(void *const _stk);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_data_dtor(stack *const stk);
+
+
+static void _stack_data_dtor(const char *const cur_file,
+                             const char *const cur_func,
+                             const int         cur_line,
+
+                             stack *const stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // push pop
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Resize стека
-*/
-static bool stack_resize(stack *const stk, const size_t new_capacity);
+static bool _stack_push(stack *const stk, const void *const data);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool _stack_pop(stack *const stk, void *const data = nullptr);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool _stack_resize(stack *const stk, const size_t new_capacity);
+
+static bool _stack_resize(const char *const cur_file,
+                          const char *const cur_func,
+                          const int         cur_line,
+
+                          stack *const stk, const size_t new_capacity);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// other
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool _stack_front(const stack *const stk, void *const data);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool _stack_is_empty(const stack *const stk);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// stack dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_dump(const void *const _stk);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_static_dump(const stack *const stk, const bool is_full);
+
+static void _stack_static_dump(const char *const cur_file,
+                               const char *const cur_func,
+                               const int         cur_line,
+
+                               const stack *const stk, const bool is_full);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_public_fields_dump(const stack *const stk);
+
+static void _stack_public_fields_dump(const char *const cur_file,
+                                      const char *const cur_func,
+                                      const int         cur_line,
+
+                                      const stack *const stk);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_data_dump(const stack *const stk, const bool is_full);
+
+static void _stack_data_dump(const char *const cur_file,
+                             const char *const cur_func,
+                             const int         cur_line,
+
+                             const stack *const stk, const bool is_static);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_el_dump(const stack *const stk, const void *const el);
+
+static void _stack_el_dump(const char *const cur_file,
+                           const char *const cur_func,
+                           const int         cur_line,
+
+                           const stack *const stk, const void *const el);
+
+//================================================================================================================================
+// MACRO DEFINITIONS
+//================================================================================================================================
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// stack poison
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define stack_gap_fill_poison(stk              ) _stack_gap_fill_poison(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk              )
+#define stack_el_fill_poison( stk, filled_index) _stack_el_fill_poison (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk, filled_index)
+#define stack_gap_is_poison(  stk              ) _stack_gap_is_poison  (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk              )
+#define stack_el_is_poison(   stk,  check_index) _stack_el_is_poison   (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk,  check_index)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// stack get
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define stack_get(stk, index) _stack_get(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk, index)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// stack verify
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define stack_verify(stk, ret_val)                                                          \
+    if (_stack_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk) != STK_OK)              \
+    {                                                                                       \
+        return ret_val;                                                                     \
+    }
+
+#ifdef STACK_DEBUG
+#define stack_debug_verify(stk)                                                             \
+        log_assert(_stack_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk) == STK_OK);
+#else
+#define stack_debug_verify(stk) ;
+#endif
+
+#define stack_log_error(stk, err) _stack_log_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk, err)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dtor
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define stack_data_dtor(stk) _stack_data_dtor(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// push pop
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define stack_resize(stk, new_capacity) _stack_resize(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk, new_capacity)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// stack dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define stack_static_dump(       stk, is_full) _stack_static_dump       (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk, is_full)
+#define stack_public_fields_dump(stk         ) _stack_public_fields_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk         )
+#define stack_data_dump(         stk, is_full) _stack_data_dump         (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk, is_full)
+#define stack_el_dump(           stk,      el) _stack_el_dump           (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk,      el)
 
 #endif //STACK_STATIC_H

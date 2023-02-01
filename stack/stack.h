@@ -2,7 +2,8 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "stack_settings.h"
+#include "../logs/log.h"
+#include "../algorithm/algorithm.h"
 
 //================================================================================================================================
 // STRUCT
@@ -33,69 +34,80 @@ struct stack
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief stack ctor
-*/
-bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison                     = nullptr,
-                                                              void (     *el_dtor  )(      void *const) = nullptr,
-                                                              void (     *el_dump  )(const void *const) = nullptr);
+bool _stack_ctor(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
 
-/**
-*   @brief Создает стек в динамической памяти
-*/
-stack *stack_new(const size_t el_size, const void *const el_poison                   = nullptr,
-                                           void (     *el_dtor  )(      void *const) = nullptr,
-                                           void (     *el_dump  )(const void *const) = nullptr);
+                 stack *const stk, const size_t el_size, const void *const el_poison                     = nullptr,
+                                                               void (     *el_dtor  )(      void *const) = nullptr,
+                                                               void (     *el_dump  )(const void *const) = nullptr);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+stack *_stack_new(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  const size_t el_size, const void *const el_poison                     = nullptr,
+                                              void (     *el_dtor  )(      void *const) = nullptr,
+                                              void (     *el_dump  )(const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Stack dtor
-*/
-void stack_dtor(void *const _stk);
+void _stack_dtor(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 void *const _stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // push pop
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Stack push
-*
-*   @param stk  [in] - стек
-*   @param data [in] - указатель на элемент стека, который нужно запушить
-*/
-bool stack_push(stack *const stk, const void *const data);
+bool _stack_push(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
 
-/**
-*   @brief Stack pop
-*
-*   @param stk  [in]  - стек
-*   @param data [out] - указатель, по которому скопировать содержимое вершины стека перед удалением
-*/
-bool stack_pop(stack *const stk, void *const data = nullptr);
+                 stack *const stk, const void *const data);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _stack_pop(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
+
+                stack *const stk, void *const data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // other
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief Копирует вершину стека по указателю
-*
-*   @param stk  [in]  - стек
-*   @param data [out] - указатель, по которому скопировать содержимое вершины стека
-*/
-bool stack_front(const stack *const stk, void *const data);
+bool _stack_front(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-/**
-*   @brief Проверяет, пустой ли стек
-*/
-bool stack_is_empty(const stack *const stk);
+                  const stack *const stk, void *const data);
 
-/**
-*   @brief Дамп стека
-*/
-void stack_dump(const void *const stk);
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _stack_is_empty(const char *const cur_file,
+                     const char *const cur_func,
+                     const int         cur_line,
+
+                     const stack *const stk);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// stack dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void _stack_dump(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 const void *const _stk);
+
+#include "stack_def.h"
 
 #endif //STACK_H
