@@ -39,8 +39,8 @@ int dblcmp(const char *const cur_file,
 
 static void my_swap(void *a, void *b, size_t elem_size)
 {
-    assert(a != nullptr);
-    assert(b != nullptr);
+    log_verify(a != nullptr, ;);
+    log_verify(b != nullptr, ;);
 
     for (; elem_size > 0; elem_size--)
     {
@@ -68,8 +68,8 @@ void my_swap(const char *const cur_file,
 
 static bool is_byte_equal(const void *a, const void *b, size_t elem_size)
 {
-    assert(a != nullptr);
-    assert(b != nullptr);
+    log_verify(a != nullptr, false);
+    log_verify(b != nullptr, false);
 
     for (; elem_size > 0; elem_size--)
     {
@@ -104,7 +104,7 @@ bool is_byte_equal(const char *const cur_file,
 
 static bool buffer_ctor(buffer *const buff, const size_t buff_size)
 {
-    assert(buff != nullptr);
+    log_verify(buff != nullptr, false);
 
     buff->buff_beg = (char *) log_calloc(buff_size, sizeof(char));
     if (buff->buff_beg == nullptr)
@@ -137,8 +137,8 @@ bool buffer_ctor(const char *const cur_file,
 
 static bool buffer_ctor_file(buffer *const buff, const char *const file_name)
 {
-    assert(file_name != nullptr);
-    assert(buff      != nullptr);
+    log_verify(file_name != nullptr, false);
+    log_verify(buff      != nullptr, false);
 
     if (!get_file_size(__FILE__, __PRETTY_FUNCTION__, __LINE__, file_name, &buff->buff_size)) return false;
     buff->buff_size += 1; //for null character at the end
