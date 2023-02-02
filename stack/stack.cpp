@@ -35,7 +35,7 @@ static void _stack_gap_fill_poison(const char *const cur_file,
 
 static void _stack_el_fill_poison(stack *const stk, const size_t filled_index)
 {
-    log_assert(stk != nullptr);
+    log_assert(stk   != nullptr);
     log_assert($data != nullptr);
     log_assert(filled_index < $capacity);
 
@@ -323,7 +323,7 @@ static void _stack_data_dtor(stack *const stk)
     if ($el_dtor == nullptr) { log_warning("can't dtor stack elements\n"); }
     else
     {
-        for (size_t i = 0; i < $size; ++i) { (*$el_dtor)(stack_get(stk, i)); }
+        for (size_t i = 0; i < $size; ++i) { stack_private_el_dtor($el_dtor, stack_get(stk, i)); }
     }
 
     log_free($data);
@@ -337,6 +337,20 @@ static void _stack_data_dtor(const char *const cur_file,
 {
     trace_push(cur_file, cur_func, cur_line);
     _stack_data_dtor(stk);
+    trace_pop();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_private_el_dtor(const char *const cur_file,
+                                   const char *const cur_func,
+                                   const int         cur_line,
+
+                                   void (*el_dtor) (void *const),
+                                                    void *const el)
+{
+    trace_push(cur_file, cur_func, cur_line);
+    (*el_dtor)(el);
     trace_pop();
 }
 
@@ -615,7 +629,7 @@ static void _stack_data_dump(const stack *const stk, const bool is_full)
     {
         for (size_t i = $size; i < $capacity; ++i)
         {
-            log_tab_message(HTML_COLOR_MEDIUM_BLUE "%lu:\n",
+            log_tab_message(HTML_COLOR_MEDIUM_BLUE "%lu:\n"
                             HTML_COLOR_CANCEL      "{\n", i);
             LOG_TAB++;
             stack_el_dump(stk, stack_get(stk, i));
@@ -657,8 +671,8 @@ static void _stack_el_dump(const stack *const stk, const void *const el)
         }
     }
 
-    if ($el_dump != nullptr) { (*$el_dump)(el);                           }
-    else                     { log_warning("can't dump stack element\n"); }
+    if ($el_dump != nullptr) { stack_private_el_dump($el_dump, el);               }
+    else                     { log_warning_message("can't dump stack element\n"); }
 }
 
 static void _stack_el_dump(const char *const cur_file,
@@ -669,5 +683,22 @@ static void _stack_el_dump(const char *const cur_file,
 {
     trace_push(cur_file, cur_func, cur_line);
     _stack_el_dump(stk, el);
+    trace_pop();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void _stack_private_el_dump(const char *const cur_file,
+                                   const char *const cur_func,
+                                   const int         cur_line,
+
+                                   void (*el_dump) (const void *const),
+                                                    const void *const el)
+{
+    log_assert(el_dump != nullptr);
+    log_assert(el      != nullptr);
+
+    trace_push(cur_file, cur_func, cur_line);
+    (*el_dump)(el);
     trace_pop();
 }

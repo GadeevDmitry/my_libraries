@@ -100,6 +100,10 @@ static const stack STK_POISON =
 
 static void _stack_gap_fill_poison(stack *const stk);
 
+/**
+*   @brief Устанавливает POISON-значения в неиспользуемые ячейки стека.
+*   Оболочка для back_trace.
+*/
 static void _stack_gap_fill_poison(const char *const cur_file,
                                    const char *const cur_func,
                                    const int         cur_line,
@@ -110,6 +114,10 @@ static void _stack_gap_fill_poison(const char *const cur_file,
 
 static void _stack_el_fill_poison(stack *const stk, const size_t filled_index);
 
+/**
+*   @brief Заполняет POISON-значения в элемент стека.
+*   Оболочка для back_trace.
+*/
 static void _stack_el_fill_poison(const char *const cur_file,
                                   const char *const cur_func,
                                   const int         cur_line,
@@ -120,6 +128,10 @@ static void _stack_el_fill_poison(const char *const cur_file,
 
 static bool _stack_gap_is_poison(const stack *const stk);
 
+/**
+*   @brief Проверяет наличие POISON-значений в неиспользуемых ячейках стека.
+*   Оболочка для back_trace.
+*/
 static bool _stack_gap_is_poison(const char *const cur_file,
                                  const char *const cur_func,
                                  const int         cur_line,
@@ -130,6 +142,10 @@ static bool _stack_gap_is_poison(const char *const cur_file,
 
 static bool _stack_el_is_poison(const stack *const stk, const size_t check_index);
 
+/**
+*   @brief Проверяет наличие POISON-значений в элементе стека.
+*   Оболочка для back_trace.
+*/
 static bool _stack_el_is_poison(const char *const cur_file,
                                 const char *const cur_func,
                                 const int         cur_line,
@@ -142,6 +158,10 @@ static bool _stack_el_is_poison(const char *const cur_file,
 
 static void *_stack_get(const stack *const stk, const size_t index);
 
+/**
+*   @brief Возвращает указатель на элемент стека.
+*   Оболочка для back_trace.
+*/
 static void *_stack_get(const char *const cur_file,
                         const char *const cur_func,
                         const int         cur_line,
@@ -154,6 +174,14 @@ static void *_stack_get(const char *const cur_file,
 
 static unsigned _stack_verify(const stack *const stk);
 
+/**
+*   @brief Верификатор стека.
+*   Оболочка для back_trace.
+*
+*   @return битовая маска кодов ошибок из enum STK_STATUS
+*
+*   @see enum STK_STATUS
+*/
 static unsigned _stack_verify(const char *const cur_file,
                               const char *const cur_func,
                               const int         cur_line,
@@ -164,6 +192,10 @@ static unsigned _stack_verify(const char *const cur_file,
 
 static void _stack_log_error(const stack *const stk, const unsigned err);
 
+/**
+*   @brief Выводит сообщения об ошибках в стеке в лог.
+*   Оболочка для back_trace.
+*/
 static void _stack_log_error(const char *const cur_file,
                              const char *const cur_func,
                              const int         cur_line,
@@ -192,12 +224,27 @@ static void _stack_dtor(void *const _stk);
 
 static void _stack_data_dtor(stack *const stk);
 
-
+/**
+*   @brief Dtor элементов стека.
+*   Оболочка для back_trace.
+*/
 static void _stack_data_dtor(const char *const cur_file,
                              const char *const cur_func,
                              const int         cur_line,
 
                              stack *const stk);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Оболочка для функции удаления элемента стека для back_trace.
+*/
+static void _stack_private_el_dtor(const char *const cur_file,
+                                   const char *const cur_func,
+                                   const int         cur_line,
+
+                                   void (*el_dtor) (void *const),
+                                                    void *const el);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // push pop
@@ -213,6 +260,10 @@ static bool _stack_pop(stack *const stk, void *const data = nullptr);
 
 static bool _stack_resize(stack *const stk, const size_t new_capacity);
 
+/**
+*   @brief Stack_resize.
+*   Оболочка для back_trace.
+*/
 static bool _stack_resize(const char *const cur_file,
                           const char *const cur_func,
                           const int         cur_line,
@@ -239,6 +290,13 @@ static void _stack_dump(const void *const _stk);
 
 static void _stack_static_dump(const stack *const stk, const bool is_full);
 
+/**
+*   @brief Dump стека.
+*   Оболочка для back_trace.
+*
+*   @param stk     [in] - стек
+*   @param is_full [in] - true, если полный (служебный) дамп, false иначе
+*/
 static void _stack_static_dump(const char *const cur_file,
                                const char *const cur_func,
                                const int         cur_line,
@@ -249,6 +307,10 @@ static void _stack_static_dump(const char *const cur_file,
 
 static void _stack_public_fields_dump(const stack *const stk);
 
+/**
+*   @brief Dump полей стека.
+*   Оболочка для back_trace.
+*/
 static void _stack_public_fields_dump(const char *const cur_file,
                                       const char *const cur_func,
                                       const int         cur_line,
@@ -259,6 +321,10 @@ static void _stack_public_fields_dump(const char *const cur_file,
 
 static void _stack_data_dump(const stack *const stk, const bool is_full);
 
+/**
+*   @brief Dump содержимого стека.
+*   Оболочка для back_trace.
+*/
 static void _stack_data_dump(const char *const cur_file,
                              const char *const cur_func,
                              const int         cur_line,
@@ -269,11 +335,27 @@ static void _stack_data_dump(const char *const cur_file,
 
 static void _stack_el_dump(const stack *const stk, const void *const el);
 
+/**
+*   @brief Dump элемента стека.
+*   Оболочка для back_trace.
+*/
 static void _stack_el_dump(const char *const cur_file,
                            const char *const cur_func,
                            const int         cur_line,
 
                            const stack *const stk, const void *const el);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Оболочка для функции dump-а элемента стека для back_trace.
+*/
+static void _stack_private_el_dump(const char *const cur_file,
+                                   const char *const cur_func,
+                                   const int         cur_line,
+
+                                   void (*el_dump) (const void *const),
+                                                    const void *const el);
 
 //================================================================================================================================
 // MACRO DEFINITIONS
@@ -317,7 +399,8 @@ static void _stack_el_dump(const char *const cur_file,
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define stack_data_dtor(stk) _stack_data_dtor(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk)
+#define stack_data_dtor(      stk        ) _stack_data_dtor      (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk        )
+#define stack_private_el_dtor(el_dtor, el) _stack_private_el_dtor(__FILE__, __PRETTY_FUNCTION__, __LINE__, el_dtor, el)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // push pop
@@ -333,5 +416,6 @@ static void _stack_el_dump(const char *const cur_file,
 #define stack_public_fields_dump(stk         ) _stack_public_fields_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk         )
 #define stack_data_dump(         stk, is_full) _stack_data_dump         (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk, is_full)
 #define stack_el_dump(           stk,      el) _stack_el_dump           (__FILE__, __PRETTY_FUNCTION__, __LINE__, stk,      el)
+#define stack_private_el_dump(   el_dump,  el) _stack_private_el_dump   (__FILE__, __PRETTY_FUNCTION__, __LINE__, el_dump,  el)
 
 #endif //STACK_STATIC_H
