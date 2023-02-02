@@ -7,7 +7,7 @@ LST     = list/list
 
 LOG_H   = $(LOG).h $(LOG)_static.h $(LOG)_def.h $(LOG)_undef.h
 ALG_H	= $(ALG).h $(ALG)_static.h $(ALG)_def.h $(ALG)_undef.h
-STK_H   = $(STK).h $(STK)_static.h
+STK_H   = $(STK).h $(STK)_static.h $(STK)_def.h $(STK)_undef.h $(STK)_settings.h
 LST_H   = $(LST).h $(LST)_static.h
 
 LOG_O	= $(LOG).o
