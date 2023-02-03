@@ -197,6 +197,7 @@ static void _stack_log_error(const stack *const stk, const unsigned err)
     }
 
     stack_static_dump(stk, true);
+    log_message("\n");
 }
 
 static void _stack_log_error(const char *const cur_file,
