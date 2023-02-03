@@ -287,14 +287,14 @@ static void _buffer_content_dump(const buffer *const buff)
     log_assert(buff->buff_beg != nullptr);
 
     log_tab_message("buffer_content:\n"
-                    HTML_COLOR_OLIVE "\"" HTML_COLOR_CANCEL);
+                    HTML_COLOR_MEDIUM_BLUE "\"" HTML_COLOR_CANCEL);
 
     for (const char *cur_char = buff->buff_beg; (size_t) (cur_char - buff->buff_beg) < buff->buff_size; ++cur_char)
     {
         if      ( cur_char == buff->buff_pos) { log_message(HTML_COLOR_LIME_GREEN "|"); }
 
-        if      (*cur_char ==           '\n') { log_message(HTML_COLOR_OLIVE "\"\n\"" HTML_COLOR_CANCEL); }
-        else if (*cur_char ==           '\0') { log_message(HTML_COLOR_OLIVE "\""     HTML_COLOR_CANCEL); break; }
+        if      (*cur_char ==           '\n') { log_message(HTML_COLOR_MEDIUM_BLUE "\"\n\"" HTML_COLOR_CANCEL); }
+        else if (*cur_char ==           '\0') { log_message(HTML_COLOR_MEDIUM_BLUE "\""     HTML_COLOR_CANCEL); break; }
         else                                  { log_message("%c", *cur_char); }
 
         if      ( cur_char == buff->buff_pos) { log_message("|" HTML_COLOR_CANCEL); }
