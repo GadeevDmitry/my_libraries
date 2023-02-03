@@ -349,6 +349,8 @@ static void _stack_private_el_dtor(const char *const cur_file,
                                    void (*el_dtor) (void *const),
                                                     void *const el)
 {
+    log_assert(el_dtor != nullptr);
+
     trace_push(cur_file, cur_func, cur_line);
     (*el_dtor)(el);
     trace_pop();
