@@ -8,7 +8,7 @@ LST     = list/list
 LOG_H   = $(LOG).h $(LOG)_static.h $(LOG)_def.h $(LOG)_undef.h
 ALG_H	= $(ALG).h $(ALG)_static.h $(ALG)_def.h $(ALG)_undef.h
 STK_H   = $(STK).h $(STK)_static.h $(STK)_def.h $(STK)_undef.h $(STK)_settings.h
-LST_H   = $(LST).h $(LST)_static.h
+LST_H   = $(LST).h $(LST)_static.h $(LST)_def.h $(LST)_undef.h $(LST)_settings.h
 
 LOG_O	= $(LOG).o
 ALG_O	= $(ALG).o
@@ -18,7 +18,7 @@ LST_O   = $(LST).o
 $(LOG_O): $(LOG_H)
 $(ALG_O): $(ALG_H) $(LOG_H)
 $(STK_O): $(STK_H) $(LOG_H) $(ALG_H)
-$(LST_O): $(LST_H)
+$(LST_O): $(LST_H) $(LOG_H) $(ALG_H)
 
 %.o: %.cpp
 	g++ -c $(CFLAGS) $< -o $@
