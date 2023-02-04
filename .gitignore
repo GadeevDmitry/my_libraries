@@ -1,0 +1,8 @@
+TEST/
+.vscode/
+
+*.html
+*.txt
+*.o
+*.bak
+**/doc/
