@@ -2,6 +2,9 @@
 #ifndef LIST_H
 #define LIST_H
 
+#include "../logs/log.h"
+#include "../algorithm/algorithm.h"
+
 //================================================================================================================================
 // STRUCT
 //================================================================================================================================
@@ -38,127 +41,118 @@ struct list
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief List ctor
-*
-*   @return true, если всё ОК, false в случае ошибки
-*/
-bool list_ctor(list *const lst, const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
-                                                      void (*el_dump) (const void *const) = nullptr);
+bool _list_ctor(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
 
-/**
-*   @brief Создаёт лист в динамической памяти
-*
-*   @return указаталь на созданный лист, nullptr в случае ошибки
-*/
-list *list_new(const size_t el_size,    void (*el_dtor) (      void *const) = nullptr,
-                                        void (*el_dump) (const void *const) = nullptr);
+                list *const lst, const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
+                                                       void (*el_dump) (const void *const) = nullptr);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+list *_list_new(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
+
+                const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
+                                      void (*el_dump) (const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief List dtor
-*/
-void list_dtor(void *const lst);
+void _list_dtor(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
+
+                void *const _lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // insert erase
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief List insert
-*
-*   @param lst   [in] - list to insert in
-*   @param data  [in] - указатель на элемент листа, который нужно добавить в лист
-*   @param index [in] - позиция, в которую добавить элемент листа
-*
-*   @return true, если всё ОК, false в случае ошибки
-*/
-bool list_insert(list *const lst, const void *const data, const size_t index);
+bool _list_insert(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-/**
-*   @brief List push front
-*   = list_insert(lst, data, 0)
-*
-*   @see bool list_insert(list *const lst, const void *const data, const size_t index)
-*/
-bool list_push_front(list *const lst, const void *const data);
+                  list *const lst, const void *const data, const size_t index);
 
-/**
-*   @brief List push back
-*   = list_insert(lst, data, <размер листа>)
-*
-*   @see bool list_insert(list *const lst, const void *const data, const size_t index)
-*/
-bool list_push_back(list *const lst, const void *const data);
+//--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief List erase
-*
-*   @param lst   [in]  - list to erase from
-*   @param index [in]  - номер элемента, который нужно удалить из листа
-*   @param data  [out] - указатель на начало массива, куда скопировать данные удаляемого элемента
-*
-*   @return true, если всё ОК, false в случае ошибки
-*/
-bool list_erase(list *const lst, const size_t index, void *const data = nullptr);
+bool _list_push_front(const char *const cur_file,
+                      const char *const cur_func,
+                      const int         cur_line,
 
-/**
-*   @brief List pop front
-*   = list_erase(lst, 0, data)
-*
-*   @see bool list_erase(list *const lst, const size_t index, void *const data)
-*/
-bool list_pop_front(list *const lst, void *const data = nullptr);
+                      list *const lst, const void *const data);
 
-/**
-*   @brief List pop back
-*   = list_erase(lst, <размер листа - 1>, data)
-*
-*   @see bool list_erase(list *const lst, const size_t index, void *const data)
-*/
-bool list_pop_back(list *const lst, void *const data = nullptr);
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _list_push_back(const char *const cur_file,
+                     const char *const cur_func,
+                     const int         cur_line,
+
+                     list *const lst, const void *const data);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _list_erase(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 list *const lst, const size_t index, void *const data = nullptr);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _list_pop_front(const char *const cur_file,
+                     const char *const cur_func,
+                     const int         cur_line,
+
+                     list *const lst, void *const data = nullptr);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _list_pop_back(const char *const cur_file,
+                    const char *const cur_func,
+                    const int         cur_line,
+
+                    list *const lst, void *const data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief List get
-*
-*   @param lst   [in]  - list to get from
-*   @param index [in]  - индекс интересующего элемента
-*   @param data  [out] - указатель на начало массива, куда скопировать данные интересующего элемента
-*
-*   @return true, если всё ОК, false в случае ошибки
-*/
-bool list_get(const list *const lst, const size_t index, void *const data);
+bool _list_get(const char *const cur_file,
+               const char *const cur_func,
+               const int         cur_line,
 
-/**
-*   @brief List front
-*   = list_get(lst, 0, data)
-*
-*   @see bool list_get(const list *const lst, const size_t index, void *const data)
-*/
-bool list_front(const list *const lst, void *const data);
+               const list *const lst, const size_t index, void *const data);
 
-/**
-*   @brief List back
-*   = list_get(lst, <размер листа - 1>, data)
-*
-*   @see bool list_get(const list *const lst, const size_t index, void *const data)
-*/
-bool list_back(const list *const lst, void *const data);
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _list_front(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 const list *const lst, void *const data);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool _list_back(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
+
+                const list *const lst, void *const data);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-/**
-*   @brief List dump
-*/
-void list_dump(const void *const _lst);
+void _list_dump(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
+
+                const void *const _lst);
+
+#include "list_def.h"
 
 #endif //LIST_H

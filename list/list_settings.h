@@ -1,6 +1,6 @@
 #ifndef LIST_SETTINGS_H
 #define LIST_SETTINGS_H
 
-//#define LIST_DEBUG
+#define LIST_DEBUG
 
 #endif //LIST_SETTINGS_H
