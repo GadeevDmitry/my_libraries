@@ -43,14 +43,14 @@ static int LOG_STREAM_OPEN()
 
 static void LOG_STREAM_CLOSE()
 {
-    assert (LOG_STREAM != nullptr);
+    assert(LOG_STREAM != nullptr);
 
     trace_dtor();
 
     fprintf(LOG_STREAM, "\n");
 
-    if (DYNAMIC_MEMORY == 0) log_message(HTML_COLOR_LIME_GREEN "DYNAMIC_MEMORY = 0. \n" HTML_COLOR_CANCEL                );
-    else                     log_message(HTML_COLOR_DARK_RED   "DYNAMIC_MEMORY = %d.\n" HTML_COLOR_CANCEL, DYNAMIC_MEMORY);
+    if (DYNAMIC_MEMORY == 0) _stat_log_message(HTML_COLOR_LIME_GREEN "DYNAMIC_MEMORY = 0. \n" HTML_COLOR_CANCEL                );
+    else                     _stat_log_message(HTML_COLOR_DARK_RED   "DYNAMIC_MEMORY = %d.\n" HTML_COLOR_CANCEL, DYNAMIC_MEMORY);
 
     fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
@@ -82,7 +82,7 @@ static void source_pos_dump(const source_pos *const src_pos)
     assert(src_pos->file != nullptr);
     assert(src_pos->func != nullptr);
 
-    log_param_place(src_pos->file, src_pos->func, src_pos->line);
+    _log_param_place(src_pos->file, src_pos->func, src_pos->line);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -91,10 +91,10 @@ static void source_pos_dump(const source_pos *const src_pos)
 
 static bool trace_ctor()
 {
-    TRACE.data = (source_pos *) log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
+    TRACE.data = (source_pos *) _log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
     if (TRACE.data == nullptr)
     {
-        log_oneline_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, "can't allocate memory for TRACE.data");
+        _stat_log_oneline_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, "can't allocate memory for TRACE.data");
         abort();
         return false;
     }
@@ -111,7 +111,7 @@ static void trace_dtor()
 {
     assert(_OPEN_CLOSE_LOG_STREAM != 0);
 
-    log_free(TRACE.data);
+    _log_free(TRACE.data);
     TRACE.size       = 0;
     TRACE.capacity   = 0;
 }
@@ -139,11 +139,11 @@ static bool trace_resize()
     if (TRACE.size != TRACE.capacity) return true;
 
     size_t new_capacity = 2 * TRACE.capacity;
-    void  *new_data     = log_realloc(TRACE.data, new_capacity * sizeof(source_pos));
+    void  *new_data     = _log_realloc(TRACE.data, new_capacity * sizeof(source_pos));
 
     if (new_data == nullptr)
     {
-        log_oneline_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, "can't allocate memory for TRACE.data");
+        _stat_log_oneline_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, "can't allocate memory for TRACE.data");
         abort();
         return false;
     }
@@ -166,9 +166,9 @@ void trace_pop()
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void trace_dump(const char *const cur_file,
-                const char *const cur_func,
-                const int         cur_line)
+void _trace_dump(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line)
 {
     assert(cur_file != nullptr);
     assert(cur_func != nullptr);
@@ -187,11 +187,9 @@ void trace_dump(const char *const cur_file,
 
 static void trace_el_dump(const source_pos *const src_pos, const size_t index)
 {
-    log_tab_message(HTML_COLOR_MEDIUM_BLUE "#%d:" HTML_COLOR_CANCEL "\n", index);
+    _stat_log_tab_message(HTML_COLOR_MEDIUM_BLUE "#%d:" HTML_COLOR_CANCEL "\n", index);
     source_pos_dump(src_pos);
 }
-
-#define trace_dump() trace_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // log_print
@@ -243,16 +241,16 @@ static void log_buff_size_error(const char *const cur_file,
 // LOG_OUTPUT
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_message(const char *fmt, ...)
+static void _stat_log_message(const char *fmt, ...)
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
     va_list  ap;
     va_start(ap, fmt);
-    log_message(fmt, ap);
+    _log_message(fmt, ap);
 }
 
-static void log_message(const char *fmt, va_list ap)
+static void _log_message(const char *fmt, va_list ap)
 {
     assert(fmt != nullptr);
 
@@ -268,33 +266,33 @@ static void log_message(const char *fmt, va_list ap)
     va_end(ap);
 }
 
-void log_message(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-                 
-                 const char *fmt, ...)
+void _log_message(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_message(fmt, ap);
+    _log_message(fmt, ap);
 
     trace_pop();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_tab_message(const char *fmt, ...)
+static void _stat_log_tab_message(const char *fmt, ...)
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
     va_list ap;
     va_start(ap, fmt);
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
 }
 
-static void log_tab_message(const char *fmt, va_list ap)
+static void _log_tab_message(const char *fmt, va_list ap)
 {
     assert(fmt != nullptr);
 
@@ -310,17 +308,17 @@ static void log_tab_message(const char *fmt, va_list ap)
     va_end(ap);
 }
 
-void log_tab_message(const char *const cur_file,
-                     const char *const cur_func,
-                     const int         cur_line,
-                     
-                     const char *fmt, ...)
+void _log_tab_message(const char *const cur_file,
+                      const char *const cur_func,
+                      const int         cur_line,
+
+                      const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list ap;
     va_start(ap, fmt);
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
 
     trace_pop();
 }
@@ -329,11 +327,11 @@ void log_tab_message(const char *const cur_file,
 // LOG_ERROR
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_error(const char *fmt, va_list ap)
+static void _log_error(const char *fmt, va_list ap)
 {
     log_tab_message(HTML_COLOR_DARK_RED "\n"
                     "ERROR:\n");
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
 
     log_tab_message("====================\n");
     trace_dump();
@@ -341,70 +339,70 @@ static void log_error(const char *fmt, va_list ap)
                     HTML_COLOR_CANCEL "\n");
 }
 
-void log_error(const char *const cur_file,
-               const char *const cur_func,
-               const int         cur_line,
+void _log_error(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
 
-               const char *fmt, ...)
+                const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_error(fmt, ap);
+    _log_error(fmt, ap);
 
     trace_pop();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_error_message(const char *fmt, va_list ap)
+static void _log_error_message(const char *fmt, va_list ap)
 {
     log_message(HTML_COLOR_DARK_RED);
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
     log_message(HTML_COLOR_CANCEL);
 }
 
-void log_error_message(const char *const cur_file,
-                       const char *const cur_func,
-                       const int         cur_line,
-                       
-                       const char *fmt, ...)
+void _log_error_message(const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line,
+
+                        const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_error_message(fmt, ap);
+    _log_error_message(fmt, ap);
 
     trace_pop();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_oneline_error(const char *const cur_file,
-                              const char *const cur_func,
-                              const char *const cur_line,
+static void _stat_log_oneline_error(const char *const cur_file,
+                                    const char *const cur_func,
+                                    const int         cur_line,
 
-                              const char *fmt, ...)
+                                    const char *fmt, ...)
 {
     va_list  ap;
     va_start(ap, fmt);
-    log_oneline_error(cur_file, cur_func, cur_line, fmt, ap);
+    _log_oneline_error(cur_file, cur_func, cur_line, fmt, ap);
 }
 
-static void log_oneline_error(const char *const cur_file,
-                              const char *const cur_func,
-                              const int         cur_line,
+static void _log_oneline_error(const char *const cur_file,
+                               const char *const cur_func,
+                               const int         cur_line,
 
-                              const char *fmt, va_list ap)
+                               const char *fmt, va_list ap)
 {
     assert(cur_file != nullptr);
     assert(cur_func != nullptr);
 
     log_tab_message(HTML_COLOR_DARK_RED "\n"
                     "ERROR:\n");
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
 
     log_tab_message("====================\n");
     log_param_place(cur_file, cur_func, cur_line);
@@ -412,17 +410,17 @@ static void log_oneline_error(const char *const cur_file,
                     HTML_COLOR_CANCEL "\n");
 }
 
-void log_oneline_error(const char *const cur_file,
-                       const char *const cur_func,
-                       const int         cur_line,
+void _log_oneline_error(const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line,
 
-                       const char *fmt, ...)
+                        const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_oneline_error(cur_file, cur_func, cur_line, fmt, ap);
+    _log_oneline_error(cur_file, cur_func, cur_line, fmt, ap);
 
     trace_pop();
 }
@@ -431,11 +429,11 @@ void log_oneline_error(const char *const cur_file,
 // LOG_WARNING
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_warning(const char *fmt, va_list ap)
+static void _log_warning(const char *fmt, va_list ap)
 {
     log_tab_message(HTML_COLOR_DARK_ORANGE "\n"
                     "WARNING:\n");
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
 
     log_tab_message("====================\n");
     trace_dump();
@@ -443,70 +441,70 @@ static void log_warning(const char *fmt, va_list ap)
                     HTML_COLOR_CANCEL "\n");
 }
 
-void log_warning(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
+void _log_warning(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-                 const char *fmt, ...)
+                  const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_warning(fmt, ap);
+    _log_warning(fmt, ap);
 
     trace_pop();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_warning_message(const char *fmt, va_list ap)
+static void _log_warning_message(const char *fmt, va_list ap)
 {
     log_message(HTML_COLOR_DARK_ORANGE);
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
     log_message(HTML_COLOR_CANCEL);
 }
 
-void log_warning_message(const char *const cur_file,
-                         const char *const cur_func,
-                         const int         cur_line,
+void _log_warning_message(const char *const cur_file,
+                          const char *const cur_func,
+                          const int         cur_line,
 
-                         const char *fmt, ...)
+                          const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_warning_message(fmt, ap);
+    _log_warning_message(fmt, ap);
 
     trace_pop();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_oneline_warning(const char *const cur_file,
-                                const char *const cur_func,
-                                const char *const cur_line,
+static void _stat_log_oneline_warning(const char *const cur_file,
+                                      const char *const cur_func,
+                                      const int         cur_line,
 
-                                const char *fmt, ...)
+                                      const char *fmt, ...)
 {
     va_list  ap;
     va_start(ap, fmt);
-    log_oneline_warning(cur_file, cur_func, cur_line, fmt, ap);
+    _log_oneline_warning(cur_file, cur_func, cur_line, fmt, ap);
 }
 
-static void log_oneline_warning(const char *const cur_file,
-                                const char *const cur_func,
-                                const int         cur_line,
+static void _log_oneline_warning(const char *const cur_file,
+                                 const char *const cur_func,
+                                 const int         cur_line,
 
-                                const char *fmt, va_list ap)
+                                 const char *fmt, va_list ap)
 {
     assert(cur_file != nullptr);
     assert(cur_func != nullptr);
 
     log_tab_message(HTML_COLOR_DARK_ORANGE "\n"
                     "WARNING:\n");
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
 
     log_tab_message("====================\n");
     log_param_place(cur_file, cur_func, cur_line);
@@ -514,17 +512,17 @@ static void log_oneline_warning(const char *const cur_file,
                     HTML_COLOR_CANCEL "\n");
 }
 
-void log_oneline_warning(const char *const cur_file,
-                         const char *const cur_func,
-                         const int         cur_line,
+void _log_oneline_warning(const char *const cur_file,
+                          const char *const cur_func,
+                          const int         cur_line,
 
-                         const char *fmt, ...)
+                          const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_oneline_warning(cur_file, cur_func, cur_line, fmt, ap);
+    _log_oneline_warning(cur_file, cur_func, cur_line, fmt, ap);
 
     trace_pop();
 }
@@ -533,35 +531,35 @@ void log_oneline_warning(const char *const cur_file,
 // LOG_SMTH
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_header(const char *fmt, va_list ap)
+static void _log_header(const char *fmt, va_list ap)
 {
     if (_OPEN_CLOSE_LOG_STREAM == 0) { va_end(ap); return; }
 
     fprintf (LOG_STREAM, "<h2>\n");
-    log_tab_message(fmt, ap);
+    _log_tab_message(fmt, ap);
     fprintf (LOG_STREAM, "</h2>\n");
 }
 
-void log_header(const char *const cur_file,
-                const char *const cur_func,
-                const int         cur_line,
+void _log_header(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
                 
-                const char *fmt, ...)
+                 const char *fmt, ...)
 {
     trace_push(cur_file, cur_func, cur_line);
 
     va_list  ap;
     va_start(ap, fmt);
-    log_header(fmt, ap);
+    _log_header(fmt, ap);
 
     trace_pop();
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_param_place(const char *const file,
-                            const char *const func,
-                            const int         line)
+static void _log_param_place(const char *const file,
+                             const char *const func,
+                             const int         line)
 {
     assert(file != nullptr);
     assert(func != nullptr);
@@ -571,16 +569,16 @@ static void log_param_place(const char *const file,
                     "    LINE: %d\n", file, func, line);
 }
 
-void log_param_place(const char *const cur_file,
-                     const char *const cur_func,
-                     const int         cur_line,
+void _log_param_place(const char *const cur_file,
+                      const char *const cur_func,
+                      const int         cur_line,
 
-                     const char *const param_file,
-                     const char *const param_func,
-                     const int         param_line)
+                      const char *const param_file,
+                      const char *const param_func,
+                      const int         param_line)
 {
     trace_push(cur_file, cur_func, cur_line);
-    log_param_place(param_file, param_func, param_line);
+    _log_param_place(param_file, param_func, param_line);
     trace_pop();
 }
 
@@ -588,7 +586,7 @@ void log_param_place(const char *const cur_file,
 // LOG_MEMORY
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void *log_calloc(size_t number, size_t size)
+static void *_log_calloc(size_t number, size_t size)
 {
     if ((number * size) == 0) return nullptr;
 
@@ -599,14 +597,14 @@ static void *log_calloc(size_t number, size_t size)
     return ret;
 }
 
-void *log_calloc(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-                 
-                 size_t number, size_t size)
+void *_log_calloc(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  size_t number, size_t size)
 {
     trace_push(cur_file, cur_func, cur_line);
-    void *ret = log_calloc(number, size);
+    void *ret = _log_calloc(number, size);
     trace_pop();
 
     return ret;
@@ -614,7 +612,7 @@ void *log_calloc(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void *log_realloc(void *ptr, size_t size)
+static void *_log_realloc(void *ptr, size_t size)
 {
     void *ret = realloc(ptr, size);
 
@@ -625,14 +623,14 @@ static void *log_realloc(void *ptr, size_t size)
     return ret;
 }
 
-void *log_realloc(const char *const cur_file,
-                  const char *const cur_func,
-                  const int         cur_line,
+void *_log_realloc(const char *const cur_file,
+                   const char *const cur_func,
+                   const int         cur_line,
 
-                  void *ptr, size_t size)
+                   void *ptr, size_t size)
 {
     trace_push(cur_file, cur_func, cur_line);
-    void *ret = log_realloc(ptr, size);
+    void *ret = _log_realloc(ptr, size);
     trace_pop();
 
     return ret;
@@ -640,7 +638,7 @@ void *log_realloc(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void log_free(void *ptr)
+static void _log_free(void *ptr)
 {
     if (ptr == nullptr) return;
 
@@ -648,13 +646,13 @@ static void log_free(void *ptr)
     free(ptr);
 }
 
-void log_free(const char *const cur_file,
-              const char *const cur_func,
-              const int         cur_line,
+void _log_free(const char *const cur_file,
+               const char *const cur_func,
+               const int         cur_line,
 
-              void *ptr)
+               void *ptr)
 {
     trace_push(cur_file, cur_func, cur_line);
-    log_free(ptr);
+    _log_free(ptr);
     trace_pop();
 }

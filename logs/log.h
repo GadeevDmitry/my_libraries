@@ -102,9 +102,9 @@ void trace_pop();
 *   @param cur_func [in] - функция в точке вызова
 *   @param cur_line [in] - номер строки в точке вызова
 */
-void trace_dump(const char *const cur_file,
-                const char *const cur_func,
-                const int         cur_line);
+void _trace_dump(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_OUTPUT
@@ -119,11 +119,11 @@ void trace_dump(const char *const cur_file,
 *
 *   @see log_message(const char*, va_list)
 */
-void log_message(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-                 
-                 const char *fmt, ...);
+void _log_message(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  const char *fmt, ...);
 
 /**
 *   @brief Оболочка для static void log_tab_message(const char *, va_list) для trace_push и trace_pop.
@@ -134,11 +134,11 @@ void log_message(const char *const cur_file,
 *
 *   @see log_tab_message(const char*, va_list)
 */
-void log_tab_message(const char *const cur_file,
-                     const char *const cur_func,
-                     const int         cur_line,
-                     
-                     const char *fmt, ...);
+void _log_tab_message(const char *const cur_file,
+                      const char *const cur_func,
+                      const int         cur_line,
+
+                      const char *fmt, ...);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_ERROR
@@ -153,11 +153,11 @@ void log_tab_message(const char *const cur_file,
 *
 *   @see log_error(const char*, va_list)
 */
-void log_error(const char *const cur_file,
-               const char *const cur_func,
-               const int         cur_line,
+void _log_error(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line,
 
-               const char *fmt, ...);
+                const char *fmt, ...);
 
 /**
 *   @brief Оболочка для static void log_error_message(const char *, va_list) для trace_push и trace_pop
@@ -168,11 +168,11 @@ void log_error(const char *const cur_file,
 *
 *   @see log_error_message(const char*, va_list)
 */
-void log_error_message(const char *const cur_file,
-                       const char *const cur_func,
-                       const int         cur_line,
-                       
-                       const char *fmt, ...);
+void _log_error_message(const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line,
+
+                        const char *fmt, ...);
 
 /**
 *   @brief Оболочка для static void log_oneline_error(const char *, const char *, const int, const char *, va_list) для trace_push и trace_pop
@@ -183,11 +183,11 @@ void log_error_message(const char *const cur_file,
 *
 *   @see log_oneline_error(const char*, const char*, const int, const char*, va_list)
 */
-void log_oneline_error(const char *const cur_file,
-                       const char *const cur_func,
-                       const int         cur_line,
+void _log_oneline_error(const char *const cur_file,
+                        const char *const cur_func,
+                        const int         cur_line,
 
-                       const char *fmt, ...);
+                        const char *fmt, ...);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_WARNING
@@ -202,11 +202,11 @@ void log_oneline_error(const char *const cur_file,
 *
 *   @see log_warning(const char*, va_list)
 */
-void log_warning(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
+void _log_warning(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
 
-                 const char *fmt, ...);
+                  const char *fmt, ...);
 
 /**
 *   @brief Оболочка для static void log_warning_message(const char *, va_list) для trace_push и trace_pop
@@ -217,11 +217,11 @@ void log_warning(const char *const cur_file,
 *
 *   @see log_warning_message(const char*, va_list)
 */
-void log_warning_message(const char *const cur_file,
-                         const char *const cur_func,
-                         const int         cur_line,
+void _log_warning_message(const char *const cur_file,
+                          const char *const cur_func,
+                          const int         cur_line,
 
-                         const char *fmt, ...);
+                          const char *fmt, ...);
 
 /**
 *   @brief Оболочка для static void log_oneline_warning(const char *, const char *, const int, const char *, va_list) для trace_push и trace_pop
@@ -232,11 +232,11 @@ void log_warning_message(const char *const cur_file,
 *
 *   @see log_oneline_warning(const char*, const char*, const int, const char*, va_list)
 */
-void log_oneline_warning(const char *const cur_file,
-                         const char *const cur_func,
-                         const int         cur_line,
+void _log_oneline_warning(const char *const cur_file,
+                          const char *const cur_func,
+                          const int         cur_line,
 
-                         const char *fmt, ...);
+                          const char *fmt, ...);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_SMTH
@@ -251,11 +251,11 @@ void log_oneline_warning(const char *const cur_file,
 *
 *   @see log_header(const char*, va_list)
 */
-void log_header(const char *const cur_file,
-                const char *const cur_func,
-                const int         cur_line,
-                
-                const char *fmt, ...);
+void _log_header(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 const char *fmt, ...);
 
 /**
 *   @brief Оболочка для static void log_param_place(const char *, const char *, const int) для trace_push и trace_pop.
@@ -266,13 +266,13 @@ void log_header(const char *const cur_file,
 *
 *   @see log_param_place(const char*, const char*, const int)
 */
-void log_param_place(const char *const cur_file,
-                     const char *const cur_func,
-                     const int         cur_line,
+void _log_param_place(const char *const cur_file,
+                      const char *const cur_func,
+                      const int         cur_line,
 
-                     const char *const param_file,
-                     const char *const param_func,
-                     const int         param_line);
+                      const char *const param_file,
+                      const char *const param_func,
+                      const int         param_line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
@@ -287,11 +287,11 @@ void log_param_place(const char *const cur_file,
 *
 *   @see log_calloc(size_t, size_t)
 */
-void *log_calloc(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-                 
-                 size_t number, size_t size);
+void *_log_calloc(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line,
+
+                  size_t number, size_t size);
 
 /**
 *   @brief Оболочка для static void *log_realloc(void *, size_t) для trace_push и trace_pop.
@@ -302,11 +302,11 @@ void *log_calloc(const char *const cur_file,
 *
 *   @see log_realloc(void*, size_t)
 */
-void *log_realloc(const char *const cur_file,
-                  const char *const cur_func,
-                  const int         cur_line,
+void *_log_realloc(const char *const cur_file,
+                   const char *const cur_func,
+                   const int         cur_line,
 
-                  void *ptr, size_t size);
+                   void *ptr, size_t size);
 
 /**
 *   @brief Оболочка для static void log_free(void *) для trace_push и trace_pop.
@@ -317,11 +317,11 @@ void *log_realloc(const char *const cur_file,
 *
 *   @see log_free(void*)
 */
-void log_free(const char *const cur_file,
-              const char *const cur_func,
-              const int         cur_line,
+void _log_free(const char *const cur_file,
+               const char *const cur_func,
+               const int         cur_line,
 
-              void *ptr);
+               void *ptr);
 
 #include "log_def.h"
 

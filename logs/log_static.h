@@ -3,7 +3,6 @@
 #define LOG_STATIC_H
 
 #include "log.h"
-#include "log_undef.h"
 
 //================================================================================================================================
 // STRUCT
@@ -137,7 +136,7 @@ static void log_buff_size_error(const char *const cur_file,
 *
 *   @param fmt [in] - формат вывода
 */
-static void log_message(const char *fmt, ...);
+static void _stat_log_message(const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение в лог, используя vsprintf.
@@ -146,7 +145,7 @@ static void log_message(const char *fmt, ...);
 *   @param fmt [in] - формат вывода
 *   @param ap  [in] - переменный список аргументов
 */
-static void log_message(const char *fmt, va_list ap);
+static void _log_message(const char *fmt, va_list ap);
 
 /**
 *   @brief Выоводит сообщение в лог, используя vsprintf.
@@ -154,7 +153,7 @@ static void log_message(const char *fmt, va_list ap);
 *
 *   @param fmt [in] - формат вывода
 */
-static void log_tab_message(const char *fmt, ...);
+static void _stat_log_tab_message(const char *fmt, ...);
 
 /**
 *   @brief Выоводит сообщение в лог, используя vsprintf.
@@ -163,7 +162,7 @@ static void log_tab_message(const char *fmt, ...);
 *   @param fmt [in] - формат вывода
 *   @param ap  [in] - переменный список аргументов
 */
-static void log_tab_message(const char *fmt, va_list ap);
+static void _log_tab_message(const char *fmt, va_list ap);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_ERROR
@@ -175,7 +174,7 @@ static void log_tab_message(const char *fmt, va_list ap);
 *   @param fmt [in] - формат сообщения об ошибке
 *   @param ap  [in] - переменный список аргументов
 */
-static void log_error(const char *fmt, va_list ap);
+static void _log_error(const char *fmt, va_list ap);
 
 /**
 *   @brief Выводит сообщение HTML_COLOR_DARK_RED цветом
@@ -183,7 +182,7 @@ static void log_error(const char *fmt, va_list ap);
 *   @param fmt [in] - формат вывода
 *   @param ap  [in] - переменный список аргументов
 */
-static void log_error_message(const char *fmt, va_list ap);
+static void _log_error_message(const char *fmt, va_list ap);
 
 /**
 *   @brief Выводит сообщение об ошибке в точке вызова (без back trace)
@@ -194,11 +193,11 @@ static void log_error_message(const char *fmt, va_list ap);
 *
 *   @param fmt      [in] - формат сообщения об ошибке
 */
-static void log_oneline_error(const char *const cur_file,
-                              const char *const cur_func,
-                              const char *const cur_line,
+static void _stat_log_oneline_error(const char *const cur_file,
+                                    const char *const cur_func,
+                                    const int         cur_line,
 
-                              const char *fmt, ...);
+                                    const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение об ошибке в точке вызова (без back trace)
@@ -210,11 +209,11 @@ static void log_oneline_error(const char *const cur_file,
 *   @param fmt      [in] - формат сообщения об ошибке
 *   @param ap       [in] - переменный список аргументов
 */
-static void log_oneline_error(const char *const cur_file,
-                              const char *const cur_func,
-                              const int         cur_line,
+static void _log_oneline_error(const char *const cur_file,
+                               const char *const cur_func,
+                               const int         cur_line,
 
-                              const char *fmt, va_list ap);
+                               const char *fmt, va_list ap);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_WARNING
@@ -226,7 +225,7 @@ static void log_oneline_error(const char *const cur_file,
 *   @param fmt [in] - формат warning-а
 *   @param ap  [in] - переменный список аргументов
 */
-static void log_warning(const char *fmt, va_list ap);
+static void _log_warning(const char *fmt, va_list ap);
 
 /**
 *   @brief Выводит сообщение HTML_COLOR_DARK_ORANGE цветом
@@ -234,7 +233,7 @@ static void log_warning(const char *fmt, va_list ap);
 *   @param fmt [in] - формат вывода
 *   @param ap  [in] - переменный список аргументов
 */
-static void log_warning_message(const char *fmt, va_list ap);
+static void _log_warning_message(const char *fmt, va_list ap);
 
 /**
 *   @brief Выводит warning в точке вызова (без back trace)
@@ -245,11 +244,11 @@ static void log_warning_message(const char *fmt, va_list ap);
 *
 *   @param fmt      [in] - формат warning-а
 */
-static void log_oneline_warning(const char *const cur_file,
-                                const char *const cur_func,
-                                const char *const cur_line,
+static void _stat_log_oneline_warning(const char *const cur_file,
+                                      const char *const cur_func,
+                                      const int         cur_line,
 
-                                const char *fmt, ...);
+                                      const char *fmt, ...);
 
 /**
 *   @brief Выводит warning в точке вызова (без back trace)
@@ -261,11 +260,11 @@ static void log_oneline_warning(const char *const cur_file,
 *   @param fmt      [in] - формат warning-а
 *   @param ap       [in] - переменный список аргументов
 */
-static void log_oneline_warning(const char *const cur_file,
-                                const char *const cur_func,
-                                const int         cur_line,
+static void _log_oneline_warning(const char *const cur_file,
+                                 const char *const cur_func,
+                                 const int         cur_line,
 
-                                const char *fmt, va_list ap);
+                                 const char *fmt, va_list ap);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_SMTH
@@ -277,7 +276,7 @@ static void log_oneline_warning(const char *const cur_file,
 *   @param fmt [in] - формат заголовка
 *   @param ap  [in] - переменный список аргументов
 */
-static void log_header(const char *fmt, va_list ap);
+static void _log_header(const char *fmt, va_list ap);
 
 /**
 *   @brief Выводит сообщение о местоположении с параметрами.
@@ -286,9 +285,9 @@ static void log_header(const char *fmt, va_list ap);
 *   @param func [in] - функция
 *   @param line [in] - номер строки
 */
-static void log_param_place(const char *const file,
-                            const char *const func,
-                            const int         line);
+static void _log_param_place(const char *const file,
+                             const char *const func,
+                             const int         line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
@@ -301,7 +300,7 @@ static void log_param_place(const char *const file,
 *   @see log_realloc(void *, size_t)
 *   @see log_free(void *)
 */
-static void *log_calloc(size_t number, size_t size);
+static void *_log_calloc(size_t number, size_t size);
 
 /**
 *   @brief Меняет размер блока динамической памяти, используя realloc(). Меняет DYNAMIC_MEMORY
@@ -310,7 +309,7 @@ static void *log_calloc(size_t number, size_t size);
 *   @see log_calloc(size_t, size_t)
 *   @see log_free(void *)
 */
-static void *log_realloc(void *ptr, size_t size);
+static void *_log_realloc(void *ptr, size_t size);
 
 /**
 *   @brief Освобождает блок динамической памяти, используя free(). Уменяшает DYNAMIC_MEMORY, если блок был не пуст
@@ -319,7 +318,7 @@ static void *log_realloc(void *ptr, size_t size);
 *   @see log_calloc(size_t, size_t)
 *   @see log_realloc(void *, size_t)
 */
-static void log_free(void *ptr);
+static void _log_free(void *ptr);
 
 //================================================================================================================================
 // GLOBAL
