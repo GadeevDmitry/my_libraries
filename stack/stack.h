@@ -71,7 +71,7 @@ bool _stack_ctor(const char *const cur_file,
 *   @param el_dtor   [in]  - указатель на dtor элемента стека
 *   @param el_dump   [in]  - указатель на dump элемента стека
 *
-*   @return указатель на созданный стек
+*   @return указатель на созданный стек или nullptr в случае ошибки
 */
 stack *_stack_new(const char *const cur_file,
                   const char *const cur_func,

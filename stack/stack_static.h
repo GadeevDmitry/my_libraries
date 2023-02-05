@@ -291,7 +291,7 @@ static void _stack_dump(const void *const _stk);
 static void _stack_static_dump(const stack *const stk, const bool is_full);
 
 /**
-*   @brief Dump стека.
+*   @brief Дамп стека.
 *   Оболочка для back_trace.
 *
 *   @param stk     [in] - стек
@@ -308,7 +308,7 @@ static void _stack_static_dump(const char *const cur_file,
 static void _stack_public_fields_dump(const stack *const stk);
 
 /**
-*   @brief Dump полей стека.
+*   @brief Дамп полей стека.
 *   Оболочка для back_trace.
 */
 static void _stack_public_fields_dump(const char *const cur_file,
@@ -322,7 +322,7 @@ static void _stack_public_fields_dump(const char *const cur_file,
 static void _stack_data_dump(const stack *const stk, const bool is_full);
 
 /**
-*   @brief Dump содержимого стека.
+*   @brief Дамп содержимого стека.
 *   Оболочка для back_trace.
 */
 static void _stack_data_dump(const char *const cur_file,
@@ -336,7 +336,7 @@ static void _stack_data_dump(const char *const cur_file,
 static void _stack_el_dump(const stack *const stk, const void *const el);
 
 /**
-*   @brief Dump элемента стека.
+*   @brief Дамп элемента стека.
 *   Оболочка для back_trace.
 */
 static void _stack_el_dump(const char *const cur_file,
@@ -348,7 +348,7 @@ static void _stack_el_dump(const char *const cur_file,
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Оболочка для функции dump-а элемента стека для back_trace.
+*   @brief Оболочка для функции дампа элемента стека для back_trace.
 */
 static void _stack_private_el_dump(const char *const cur_file,
                                    const char *const cur_func,
