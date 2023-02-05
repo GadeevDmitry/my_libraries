@@ -108,6 +108,14 @@ static const list LST_POISON =
 
 static unsigned _list_verify(const list *const lst);
 
+/**
+*   @brief Верификатор листа.
+*   Оболочка для back_trace.
+*
+*   @return битовая маска кодов ошибок из enum LST_STATUS
+*
+*   @see enum LST_STATUS
+*/
 static unsigned _list_verify(const char *const cur_file,
                              const char *const cur_func,
                              const int         cur_line,
@@ -118,6 +126,14 @@ static unsigned _list_verify(const char *const cur_file,
 
 static unsigned _list_fictional_verify(const list *const lst);
 
+/**
+*   @brief Верификатор поля .fictional листа.
+*   Оболочка для back_trace.
+*
+*   @return битовая маска кодов ошибок из enum LST_STATUS
+*
+*   @see enum LST_STATUS
+*/
 static unsigned _list_fictional_verify(const char *const cur_file,
                                        const char *const cur_func,
                                        const int         cur_line,
@@ -128,6 +144,14 @@ static unsigned _list_fictional_verify(const char *const cur_file,
 
 static unsigned _list_data_verify(const list *const lst);
 
+/**
+*   @brief Верификатор содержимого листа. Проверка листа на связность.
+*   Оболочка для back_trace.
+*
+*   @return битовая маска кодов ошибок из enum LST_STATUS
+*
+*   @see enum LST_STATUS
+*/
 static unsigned _list_data_verify(const char *const cur_file,
                                   const char *const cur_func,
                                   const int         cur_line,
@@ -138,6 +162,10 @@ static unsigned _list_data_verify(const char *const cur_file,
 
 static void _list_log_error(const list *const lst, const unsigned err);
 
+/**
+*   @brief Выводит сообщения об ошибках в листе по битовой маске ошибок. Полный дамп листа.
+*   Оболочка для back_trace.
+*/
 static void _list_log_error(const char *const cur_file,
                             const char *const cur_func,
                             const int         cur_line,
@@ -150,6 +178,23 @@ static void _list_log_error(const char *const cur_file,
 
 static unsigned _list_node_verify(const list_node *const lst_node, const bool is_independent);
 
+/**
+*   @brief Верификатор вершины листа.
+*   Оболочка для back_trace.
+*   В "независимом" режиме в случае ошибки вызовет _list_node_log_error() для вывода сообщения об ошибке и дампа вершины листа.
+*   Иначе просто вернет код ошибки.
+*
+*   @param cur_file       [in] - файл в точке вызова
+*   @param cur_func       [in] - функция в точке вызова
+*   @param cur_line       [in] - номер строки в точке вызова
+*
+*   @param lst_node       [in] - вершина листа
+*   @param is_independent [in] - true, если "независимый" режим, false иначе
+*
+*   @return битовая маска кодов ошибок из enum LST_STATUS
+*
+*   @see enum LST_STATUS
+*/
 static unsigned _list_node_verify(const char *const cur_file,
                                   const char *const cur_func,
                                   const int         cur_line,
@@ -162,6 +207,18 @@ static unsigned _list_data_node_verify(const list_node *const fictional_node,
                                        const list_node *const       cur_node,
                                        const list_node *const      prev_node);
 
+/**
+*   @brief Верификатор указателей вершины листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file       [in] - файл в точке вызова
+*   @param cur_func       [in] - функция в точке вызова
+*   @param cur_line       [in] - номер строки в точке вызова
+*
+*   @param fictional_node [in] - фиктивная вершина (поле .fictional) листа, к которому относится данная вершина
+*   @param       cur_node [in] - текущая вершина
+*   @param      prev_node [in] - предыдущая вершина
+*/
 static unsigned _list_data_node_verify(const char *const cur_file,
                                        const char *const cur_func,
                                        const int         cur_line,
@@ -174,6 +231,10 @@ static unsigned _list_data_node_verify(const char *const cur_file,
 
 static void _list_node_log_error(const list_node *const lst_node, const unsigned err);
 
+/**
+*   @brief Выводит сообщения об ошибках в вершине листа по битовой маске ошибок. Дамп вершины листа.
+*   Оболочка для back_trace.
+*/
 static void _list_node_log_error(const char *const cur_file,
                                  const char *const cur_func,
                                  const int         cur_line,
@@ -194,6 +255,10 @@ static list *_list_new(const size_t el_size,    void (*el_dtor) (      void *con
 
 static bool _list_fictional_ctor(list *const lst);
 
+/**
+*   @brief Конструктор поля .fictional листа.
+*   Оболочка для back_trace.
+*/
 static bool _list_fictional_ctor(const char *const cur_file,
                                  const char *const cur_func,
                                  const int         cur_line,
@@ -207,6 +272,22 @@ static bool _list_node_ctor(list      *const lst,
                                                          const list_node *const prev,
                                                          const list_node *const next);
 
+/**
+*   @brief Конструктор вершины листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]  - файл в точке вызова
+*   @param cur_func [in]  - функция в точке вызова
+*   @param cur_line [in]  - номер строки в точке вызова
+*
+*   @param lst      [in]  - лист, к которому относится данная вершина
+*   @param lst_node [out] - вершина листа
+*   @param data     [in]  - поле .data вершины листа
+*   @param prev     [in]  - поле .prev вершины листа
+*   @param next     [in]  - поле .next вершины листа
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 static bool _list_node_ctor(const char *const cur_file,
                             const char *const cur_func,
                             const int         cur_line,
@@ -222,7 +303,21 @@ static list_node *_list_node_new(list *const lst,   const void      *const data,
                                                     const list_node *const prev,
                                                     const list_node *const next);
 
-
+/**
+*   @brief Создает вершину листа в динамической памяти.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @param lst      [in] - лист, к которому относится создаваемая вершина
+*   @param data     [in] - поле .data вершины листа
+*   @param prev     [in] - поле .prev вершины листа
+*   @param next     [in] - поле .next вершины листа
+*
+*   @return указатель на вершину листа, nullptr в случае ошибки
+*/
 static list_node *_list_node_new(const char *const cur_file,
                                  const char *const cur_func,
                                  const int         cur_line,
@@ -241,6 +336,10 @@ static void _list_dtor(void *const _lst);
 
 static void _list_fictional_dtor(list *const lst);
 
+/**
+*   @brief Деструктор пользовательских данных листа.
+*   Оболочка для back_trace.
+*/
 static void _list_fictional_dtor(const char *const cur_file,
                                  const char *const cur_func,
                                  const int         cur_line,
@@ -251,6 +350,10 @@ static void _list_fictional_dtor(const char *const cur_file,
 
 static void _list_node_dtor(list *const lst, list_node *const lst_node);
 
+/**
+*   @brief Деструктор вершины листа.
+*   Оболочка для back_trace.
+*/
 static void _list_node_dtor(const char *const cur_file,
                             const char *const cur_func,
                             const int         cur_line,
@@ -259,6 +362,9 @@ static void _list_node_dtor(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Оболочка для функции удаления элемента листа для back_trace.
+*/
 static void _list_private_el_dtor(const char *const cur_file,
                                   const char *const cur_func,
                                   const int         cur_line,
@@ -272,6 +378,19 @@ static void _list_private_el_dtor(const char *const cur_file,
 
 static list_node *_list_get_node(const list *const lst, const size_t index);
 
+/**
+*   @brief Возвращает указатель на вершину листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова,
+*
+*   @param lst      [in] - лист
+*   @param index    [in] - порядковый номер вершины листа
+*
+*   @return указатель на вершину листа с порядковым номером index
+*/
 static list_node *_list_get_node(const char *const cur_file,
                                  const char *const cur_func,
                                  const int         cur_line,
@@ -326,6 +445,18 @@ static void _list_dump(const void *const _lst);
 
 static void _list_static_dump(const list *const lst, const bool is_full);
 
+/**
+*   @brief Дамп листа.
+*   Оболочка для back_trace.
+*   В "полном" режиме, помимо пользовательских данных, дампит и служебные. Используется для дампа невалидного листа.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @param lst      [in] - лист
+*   @param is_full  [in] - true, если "полный" режим, false иначе
+*/
 static void _list_static_dump(const char *const cur_file,
                               const char *const cur_func,
                               const int         cur_line,
@@ -336,6 +467,10 @@ static void _list_static_dump(const char *const cur_file,
 
 static bool _list_public_fields_dump(const list *const lst);
 
+/**
+*   @brief Дамп полей листа.
+*   Оболочка для back_trace.
+*/
 static bool _list_public_fields_dump(const char *const cur_file,
                                      const char *const cur_func,
                                      const int         cur_line,
@@ -346,6 +481,19 @@ static bool _list_public_fields_dump(const char *const cur_file,
 
 static void _list_data_dump(const list *const lst, const bool are_poison_fields, const bool is_full);
 
+/**
+*   @brief Дамп содержимого листа.
+*   Оболочка для back_trace.
+*   В случае, если хотя бы одно из полей листа является POISON-значением, содержимое выведено не будет.
+*
+*   @param cur_file          [in] - файл в точке вызова
+*   @param cur_func          [in] - функция в точке вызова
+*   @param cur_line          [in] - номер строки в точке вызова
+*
+*   @param lst               [in] - лист
+*   @param are_poison_fields [in] - true, елси хотя бы одно из полей является POISON-значением, false иначе
+*   @param is_full           [in] - true, если "полный" режим
+*/
 static void _list_data_dump(const char *const cur_file,
                             const char *const cur_func,
                             const int         cur_line,
@@ -356,6 +504,10 @@ static void _list_data_dump(const char *const cur_file,
 
 static bool _list_fictional_dump(const list *const lst, bool are_poison_fields, const bool is_full);
 
+/**
+*   @brief Дамп поля .fictional листа
+*   Оболочка для back_trace.
+*/
 static bool _list_fictional_dump(const char *const cur_file,
                                  const char *const cur_func,
                                  const int         cur_line,
@@ -366,6 +518,10 @@ static bool _list_fictional_dump(const char *const cur_file,
 
 static void _list_full_fictional_dump(const list *const lst);
 
+/**
+*   @brief Дамп служебных данных поля .fictional листа (указатели на первую и последнюю вершину).
+*   Оболочка для back_trace.
+*/
 static void _list_full_fictional_dump(const char *const cur_file,
                                       const char *const cur_func,
                                       const int         cur_line,
@@ -376,6 +532,10 @@ static void _list_full_fictional_dump(const char *const cur_file,
 
 static void _list_node_dump(const list *const lst, const list_node *const lst_node, const bool is_full);
 
+/**
+*   @brief Дамп вершины листа.
+*   Оболочка для back_trace.
+*/
 static void _list_node_dump(const char *const cur_file,
                             const char *const cur_func,
                             const int         cur_line,
@@ -384,6 +544,9 @@ static void _list_node_dump(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Оболочка для функции дампа элемента листа для back_trace.
+*/
 static void _list_private_el_dump(const char *const cur_file,
                                   const char *const cur_func,
                                   const int         cur_line,
@@ -395,6 +558,9 @@ static void _list_private_el_dump(const char *const cur_file,
 
 static void _list_node_service_fields_dump(const list_node *const lst_node);
 
+/**
+*   @brief Дамп служебных полей вершины листа (указатели на предыдущую и следующую вершины).
+*/
 static void _list_node_service_fields_dump(const char *const cur_file,
                                            const char *const cur_func,
                                            const int         cur_line,

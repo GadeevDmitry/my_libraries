@@ -41,6 +41,19 @@ struct list
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief List_ctor.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]  - файл в точке вызова
+*   @param cur_func [in]  - функция в точке вызова
+*   @param cur_line [in]  - номер строки в точке вызова
+*
+*   @param lst      [out] - указатель на лист
+*   @param el_size  [in]  - размер элемента листа
+*   @param el_dtor  [in]  - указатель на dtor элемента листа
+*   @param el_dump  [in]  - указатель на dump элемента листа
+*/
 bool _list_ctor(const char *const cur_file,
                 const char *const cur_func,
                 const int         cur_line,
@@ -50,6 +63,20 @@ bool _list_ctor(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Создает лист в динамической памяти.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @param el_size  [in] - размер элемента листа
+*   @param el_dtor  [in] - указатель на dtor элемента листа
+*   @param el_dump  [in] - указатель на dump элемента листа
+*
+*   @return указатель на созданный лист или nullptr в случае ошибки
+*/
 list *_list_new(const char *const cur_file,
                 const char *const cur_func,
                 const int         cur_line,
@@ -61,6 +88,16 @@ list *_list_new(const char *const cur_file,
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief List_dtor.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @param _lst     [in] - указатель на лист
+*/
 void _list_dtor(const char *const cur_file,
                 const char *const cur_func,
                 const int         cur_line,
@@ -71,6 +108,20 @@ void _list_dtor(const char *const cur_file,
 // insert erase
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Добавляет элемент в лист.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]      - файл в точке вызова
+*   @param cur_func [in]      - функция в точке вызова
+*   @param cur_line [in]      - номер строки в точке вызова
+*
+*   @param lst      [in, out] - лист
+*   @param data     [in]      - указатель на элемент
+*   @param index    [in]      - порядковый номер, на который поставить элемент
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_insert(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line,
@@ -79,6 +130,19 @@ bool _list_insert(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Добавляет элемент в начало листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]      - файл в точке вызова
+*   @param cur_func [in]      - функция в точке вызова
+*   @param cur_line [in]      - номер строки в точке вызова
+*
+*   @param lst      [in, out] - лист
+*   @param data     [in]      - указатель на элемент
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_push_front(const char *const cur_file,
                       const char *const cur_func,
                       const int         cur_line,
@@ -87,6 +151,19 @@ bool _list_push_front(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Добавляет элемент в конец листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]      - файл в точке вызова
+*   @param cur_func [in]      - функция в точке вызова
+*   @param cur_line [in]      - номер строки в точке вызова
+*
+*   @param lst      [in, out] - лист
+*   @param data     [in]      - указатель на элемент
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_push_back(const char *const cur_file,
                      const char *const cur_func,
                      const int         cur_line,
@@ -95,6 +172,20 @@ bool _list_push_back(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Удаляет элемент из листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]      - файл в точке вызова
+*   @param cur_func [in]      - функция в точке вызова
+*   @param cur_line [in]      - номер строки в точке вызова
+*
+*   @param lst      [in, out] - лист
+*   @param index    [in]      - порядковый номер удаляемого элемента
+*   @param data     [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_erase(const char *const cur_file,
                  const char *const cur_func,
                  const int         cur_line,
@@ -103,6 +194,19 @@ bool _list_erase(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Удаляет элемент из начала листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]      - файл в точке вызова
+*   @param cur_func [in]      - функция в точке вызова
+*   @param cur_line [in]      - номер строки в точке вызова
+*
+*   @param lst      [in, out] - лист
+*   @param data     [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_pop_front(const char *const cur_file,
                      const char *const cur_func,
                      const int         cur_line,
@@ -111,6 +215,19 @@ bool _list_pop_front(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Удаляет элемент из конца листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]      - файл в точке вызова
+*   @param cur_func [in]      - функция в точке вызова
+*   @param cur_line [in]      - номер строки в точке вызова
+*
+*   @param lst      [in, out] - лист
+*   @param data     [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_pop_back(const char *const cur_file,
                     const char *const cur_func,
                     const int         cur_line,
@@ -121,6 +238,20 @@ bool _list_pop_back(const char *const cur_file,
 // list get
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Показывает содержимое элемента листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]  - файл в точке вызова
+*   @param cur_func [in]  - функция в точке вызова
+*   @param cur_line [in]  - номер строки в точке вызова
+*
+*   @param lst      [in]  - лист
+*   @param index    [in]  - порядковый номер элемента
+*   @param data     [out] - указатель, куда скопировать содержимое элемента
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_get(const char *const cur_file,
                const char *const cur_func,
                const int         cur_line,
@@ -129,6 +260,19 @@ bool _list_get(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Показывает содержимое первого элемента листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]  - файл в точке вызова
+*   @param cur_func [in]  - функция в точке вызова
+*   @param cur_line [in]  - номер строки в точке вызова
+*
+*   @param lst      [in]  - лист
+*   @param data     [out] - указатель, куда скопировать содержимое элемента
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_front(const char *const cur_file,
                  const char *const cur_func,
                  const int         cur_line,
@@ -137,6 +281,19 @@ bool _list_front(const char *const cur_file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Показывает содержимое последнего элемента листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]  - файл в точке вызова
+*   @param cur_func [in]  - функция в точке вызова
+*   @param cur_line [in]  - номер строки в точке вызова
+*
+*   @param lst      [in]  - лист
+*   @param data     [out] - указатель, куда скопировать содержимое элемента
+*
+*   @return true, если все ОК, false в случае ошибки
+*/
 bool _list_back(const char *const cur_file,
                 const char *const cur_func,
                 const int         cur_line,
@@ -147,6 +304,16 @@ bool _list_back(const char *const cur_file,
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
+/**
+*   @brief Дамп листа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - номер строки в точке вызова
+*
+*   @param lst      [in] - указатель на лист
+*/
 void _list_dump(const char *const cur_file,
                 const char *const cur_func,
                 const int         cur_line,
