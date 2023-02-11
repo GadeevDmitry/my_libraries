@@ -30,7 +30,7 @@ extern size_t LOG_TAB;
 /**
 *   @brief выводит в лог имя файла, имя функции, номер строки в точке вызова
 */
-#define log_place() log_param_place(__FILE__, __PRETTY_FUNCTION__, __LINE__, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+#define log_place() log_param_place(__FILE__, __PRETTY_FUNCTION__, __LINE__)
 
 /**
 *   @brief assert с сообщением в лог файл

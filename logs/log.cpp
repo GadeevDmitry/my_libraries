@@ -33,7 +33,9 @@ static int LOG_STREAM_OPEN()
     setvbuf(LOG_STREAM,   nullptr, _IONBF, 0);
     fprintf(LOG_STREAM, "<pre>\n""\"%s\" OPENING IS OK\n\n", LOG_FILE);
 
+    #ifndef NTRACE
     trace_ctor();
+    #endif
 
     atexit(LOG_STREAM_CLOSE);
     return 1;
@@ -45,7 +47,9 @@ static void LOG_STREAM_CLOSE()
 {
     assert(LOG_STREAM != nullptr);
 
+    #ifndef NTRACE
     trace_dtor();
+    #endif
 
     fprintf(LOG_STREAM, "\n");
 
@@ -91,6 +95,10 @@ static void source_pos_dump(const source_pos *const src_pos)
 
 static bool trace_ctor()
 {
+    #ifdef NTRACE
+    return true;
+    #endif
+
     TRACE.data = (source_pos *) _log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
     if (TRACE.data == nullptr)
     {
@@ -109,6 +117,10 @@ static bool trace_ctor()
 
 static void trace_dtor()
 {
+    #ifdef NTRACE
+    return;
+    #endif
+
     assert(_OPEN_CLOSE_LOG_STREAM != 0);
 
     _log_free(TRACE.data);
@@ -122,6 +134,10 @@ bool trace_push(const char *const file,
                 const char *const func,
                 const int         line)
 {
+    #ifdef NTRACE
+    return true;
+    #endif
+
     assert(file != nullptr);
     assert(func != nullptr);
 
@@ -136,6 +152,10 @@ bool trace_push(const char *const file,
 
 static bool trace_resize()
 {
+    #ifdef NTRACE
+    return true;
+    #endif
+
     if (TRACE.size != TRACE.capacity) return true;
 
     size_t new_capacity = 2 * TRACE.capacity;
@@ -158,6 +178,10 @@ static bool trace_resize()
 
 void trace_pop()
 {
+    #ifdef NTRACE
+    return;
+    #endif
+
     assert(TRACE.size <= TRACE.capacity);
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
@@ -178,6 +202,10 @@ void _trace_dump(const char *const cur_file,
     source_pos cur_pos = {};
     source_pos_ctor(&cur_pos, cur_file, cur_func, cur_line);
     trace_el_dump  (&cur_pos, 0);
+
+    #ifdef NTRACE
+    return;
+    #endif
 
     for (size_t i = 1; i <= TRACE.size; ++i)
     {
