@@ -611,7 +611,7 @@ static void _list_node_service_fields_dump(const char *const cur_file,
 #define list_node_debug_verify(lst_node)                                                                            \
     log_assert(_list_node_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst_node, true) == LST_OK);
 #else
-#define list_node_debug_verify(lst, lst_node) ;
+#define list_node_debug_verify(lst_node) ;
 #endif
 
 #define list_node_log_error(lst_node, err)                                                                          \
