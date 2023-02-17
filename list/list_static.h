@@ -575,13 +575,17 @@ static void _list_node_service_fields_dump(const char *const cur_file,
 // list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#ifndef LIST_NVERIFY
 #define list_verify(lst, ret_val)                                                                                   \
     if (_list_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst) != LST_OK)                                       \
     {                                                                                                               \
         return ret_val;                                                                                             \
     }
+#else
+#define list_verify(lst, ret_val) ;
+#endif
 
-#ifdef LIST_DEBUG
+#if defined(LIST_DEBUG) && !defined(LIST_NVERIFY)
 #define list_debug_verify(lst)                                                                                      \
         log_assert(_list_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst) == LST_OK);
 #else
@@ -603,7 +607,7 @@ static void _list_node_service_fields_dump(const char *const cur_file,
 #define list_data_node_verify(fictional_node, cur_node, prev_node)                                                  \
        _list_data_node_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, fictional_node, cur_node, prev_node)
 
-#ifdef LIST_DEBUG
+#if defined(LIST_DEBUG) && !defined(LIST_NVERIFY)
 #define list_node_debug_verify(lst_node)                                                                            \
     log_assert(_list_node_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst_node, true) == LST_OK);
 #else

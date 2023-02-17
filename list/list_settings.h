@@ -2,5 +2,6 @@
 #define LIST_SETTINGS_H
 
 #define LIST_DEBUG
+//#define LIST_NVERIFY
 
 #endif //LIST_SETTINGS_H
