@@ -380,13 +380,17 @@ static void _stack_private_el_dump(const char *const cur_file,
 // stack verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#ifndef STACK_NVERIFY
 #define stack_verify(stk, ret_val)                                                          \
     if (_stack_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk) != STK_OK)              \
     {                                                                                       \
         return ret_val;                                                                     \
     }
+#else
+#define stack_verify(stk, ret_val) ;
+#endif
 
-#ifdef STACK_DEBUG
+#if defined(STACK_DEBUG) && !defined(STACK_NVERIFY)
 #define stack_debug_verify(stk)                                                             \
         log_assert(_stack_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, stk) == STK_OK);
 #else
