@@ -101,6 +101,44 @@ bool _is_byte_equal(const char *const cur_file,
 
                     const void *a, const void *b, size_t elem_size);
 
+/**
+*   @brief Читает слово из не более max_size - 1 символов в массив str из потока stream.
+*   Игнорирует space-символы в начале.
+*   Слово - последовательность подряд идущих not_space-символов.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in]  - файл в точке вызова
+*   @param cur_func [in]  - функция в точке вызова
+*   @param cur_line [in]  - строка в точке вызова
+*
+*   @param str      [out] - массив, куда читать 
+*   @param max_size [in]  - максимальное число символов
+*   @param stream   [in]  - поток
+*/
+int _get_word(const char *const cur_file,
+              const char *const cur_func,
+              const int         cur_line,
+
+              char *const str, const size_t max_size, FILE *const stream);
+
+/**
+*   @brief Считывает space-символы до первого not_space-символа.
+*   Оболочка для back_trace.
+*
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @param stream   [in] - поток
+*
+*   @return EOF, если после space-символов встретился конец файла, и 0 иначе
+*/
+int _skip_spaces(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 FILE *const stream);
+
 //--------------------------------------------------------------------------------------------------------------------------------
 // BUFFER
 //--------------------------------------------------------------------------------------------------------------------------------

@@ -14,6 +14,10 @@
 // USEFUL FUNCTION
 //--------------------------------------------------------------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------------------------------------------------------------
+// dblcmp
+//--------------------------------------------------------------------------------------------------------------------------------
+
 static int _dblcmp(const double a, const double b, const double error_rate /* = DELTA */)
 {
     if (fabs(a - b) < error_rate) return 0;
@@ -35,6 +39,8 @@ int _dblcmp(const char *const cur_file,
     return ret;
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------
+// my_swap
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static void _my_swap(void *a, void *b, size_t elem_size)
@@ -65,6 +71,8 @@ void _my_swap(const char *const cur_file,
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// is_byte_equal
+//--------------------------------------------------------------------------------------------------------------------------------
 
 static bool _is_byte_equal(const void *a, const void *b, size_t elem_size)
 {
@@ -93,6 +101,91 @@ bool _is_byte_equal(const char *const cur_file,
 {
     trace_push(cur_file, cur_func, cur_line);
     bool ret = _is_byte_equal(a, b, elem_size);
+    trace_pop();
+
+    return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// get_word
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static int _get_word(char *const str, const size_t max_size, FILE *const stream)
+{
+    log_verify(str    != nullptr, EOF);
+    log_verify(stream != nullptr, EOF);
+
+    if (skip_spaces(stream) == EOF) return EOF;
+
+    unsigned int cur_char = 0;
+    int                 i = 0;
+
+    for (; i < max_size - 1; ++i)
+    {
+        cur_char = getc(stream);
+
+        if (cur_char == EOF) break;
+        if (isspace(cur_char))
+        {
+            ungetc(cur_char, stream);
+            break;
+        }
+        str[i] = cur_char;
+    }
+    str[i] = '\0';
+
+    if (i == max_size - 1)
+    {
+        cur_char = getc(stream);
+        if (cur_char != EOF && !isspace(cur_char)) { ungetc(cur_char, stream); return 1; }
+        else if (               isspace(cur_char)) { ungetc(cur_char, stream);           }
+    }
+
+    return 0;
+}
+
+int _get_word(const char *const cur_file,
+              const char *const cur_func,
+              const int         cur_line,
+
+              char *const str, const size_t max_size, FILE *const stream)
+{
+    trace_push(cur_file, cur_func, cur_line);
+    int ret = _get_word(str, max_size, stream);
+    trace_pop();
+
+    return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// skip_spaces
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static int _skip_spaces(FILE *const stream)
+{
+    log_verify(stream != nullptr, ;);
+
+    unsigned int cur_char = 0;
+    while ((cur_char = getc(stream)) != EOF)
+    {
+        if (!isspace(cur_char))
+        {
+            ungetc(cur_char, stream);
+            break;
+        }
+    }
+
+    return cur_char == EOF ? EOF : 0;
+}
+
+int _skip_spaces(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line,
+
+                 FILE *const stream)
+{
+    trace_push(cur_file, cur_func, cur_line);
+    int ret = _skip_spaces(stream);
     trace_pop();
 
     return ret;

@@ -3,7 +3,6 @@
 #define ALGORITHM_STATIC_H
 
 #include "algorithm.h"
-#include "algorithm_undef.h"
 
 //================================================================================================================================
 // FUNCTION DECLARATION
@@ -16,6 +15,11 @@
 static int _dblcmp        (const double a, const double b, const double error_rate = DELTA);
 static void _my_swap      (       void *a,        void *b,       size_t elem_size         );
 static bool _is_byte_equal(const  void *a, const  void *b,       size_t elem_size         );
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static int _get_word   (char *const str, const size_t max_size, FILE *const stream);
+static int _skip_spaces(                                        FILE *const stream);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // BUFFER
