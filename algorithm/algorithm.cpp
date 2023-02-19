@@ -117,8 +117,8 @@ static int _get_word(char *const str, const size_t max_size, FILE *const stream)
 
     if (skip_spaces(stream) == EOF) return EOF;
 
-    unsigned int cur_char = 0;
-    int                 i = 0;
+    int cur_char = 0;
+    size_t     i = 0;
 
     for (; i < max_size - 1; ++i)
     {
@@ -130,7 +130,7 @@ static int _get_word(char *const str, const size_t max_size, FILE *const stream)
             ungetc(cur_char, stream);
             break;
         }
-        str[i] = cur_char;
+        str[i] = (char) cur_char;
     }
     str[i] = '\0';
 
@@ -163,9 +163,9 @@ int _get_word(const char *const cur_file,
 
 static int _skip_spaces(FILE *const stream)
 {
-    log_verify(stream != nullptr, ;);
+    log_verify(stream != nullptr, EOF);
 
-    unsigned int cur_char = 0;
+    int cur_char = 0;
     while ((cur_char = getc(stream)) != EOF)
     {
         if (!isspace(cur_char))
