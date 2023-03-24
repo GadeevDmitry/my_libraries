@@ -35,6 +35,7 @@ extern size_t LOG_TAB;
 /**
 *   @brief assert с сообщением в лог файл
 */
+#ifndef LOG_NDEBUG
 #define log_assert(condition)                                       \
             if  (!(condition))                                      \
             {                                                       \
@@ -49,10 +50,14 @@ extern size_t LOG_TAB;
                 fprintf(stderr, "ASSERTION FAILED (check log)\n");  \
 			    abort();                                            \
             }
+#else //defined LOG_NDEBUG
+#define log_assert(condition) ;
+#endif
 
 /**
 *   @brief "мягкий" assert с сообщением в лог
 */
+#ifndef LOG_NVERIFY
 #define log_verify(condition, ret_val)                              \
         if (!(condition))                                           \
         {                                                           \
@@ -66,6 +71,9 @@ extern size_t LOG_TAB;
                                                                     \
             return ret_val;                                         \
         }
+#else //defined LOG_NVERIFY
+#define log_verify(condition, ret_val) ;
+#endif
 
 //================================================================================================================================
 // FUNCTION DECLARATION
