@@ -22,3 +22,11 @@ $(LST_O): $(LST_H) $(LOG_H) $(ALG_H)
 
 %.o: %.cpp
 	g++ -c $(CFLAGS) $< -o $@
+
+clean:
+	rm -f $(LOG_O)
+	rm -f $(ALG_O)
+	rm -f $(STK_O)
+	rm -f $(LST_O)
+
+.PHONY: clean
