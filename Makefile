@@ -20,6 +20,8 @@ $(ALG_O): $(ALG_H) $(LOG_H)
 $(STK_O): $(STK_H) $(LOG_H) $(ALG_H)
 $(LST_O): $(LST_H) $(LOG_H) $(ALG_H)
 
+all: $(LOG_O) $(ALG_O) $(STK_O) $(LST_O)
+
 %.o: %.cpp
 	g++ -c $(CFLAGS) $< -o $@
 
