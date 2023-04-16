@@ -75,6 +75,9 @@ extern size_t LOG_TAB;
 #define log_verify(condition, ret_val) ;
 #endif
 
+#define $^  trace_push();
+#define $<  trace_upd (__FILE__, __PRETTY_FUNCTION__, __LINE__);
+
 //================================================================================================================================
 // FUNCTION DECLARATION
 //================================================================================================================================
@@ -127,12 +130,13 @@ void _trace_dump(const char *const cur_file,
 *
 *   @see log_message(const char*, va_list)
 */
+/*
 void _log_message(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line,
 
                   const char *fmt, ...);
-
+*/
 /**
 *   @brief Оболочка для static void log_tab_message(const char *, va_list) для trace_push и trace_pop.
 *
@@ -142,12 +146,13 @@ void _log_message(const char *const cur_file,
 *
 *   @see log_tab_message(const char*, va_list)
 */
+/*
 void _log_tab_message(const char *const cur_file,
                       const char *const cur_func,
                       const int         cur_line,
 
                       const char *fmt, ...);
-
+*/
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_ERROR
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -161,12 +166,13 @@ void _log_tab_message(const char *const cur_file,
 *
 *   @see log_error(const char*, va_list)
 */
+/*
 void _log_error(const char *const cur_file,
                 const char *const cur_func,
                 const int         cur_line,
 
                 const char *fmt, ...);
-
+*/
 /**
 *   @brief Оболочка для static void log_error_message(const char *, va_list) для trace_push и trace_pop
 *
@@ -176,12 +182,13 @@ void _log_error(const char *const cur_file,
 *
 *   @see log_error_message(const char*, va_list)
 */
+/*
 void _log_error_message(const char *const cur_file,
                         const char *const cur_func,
                         const int         cur_line,
 
                         const char *fmt, ...);
-
+*/
 /**
 *   @brief Оболочка для static void log_oneline_error(const char *, const char *, const int, const char *, va_list) для trace_push и trace_pop
 *
@@ -191,12 +198,13 @@ void _log_error_message(const char *const cur_file,
 *
 *   @see log_oneline_error(const char*, const char*, const int, const char*, va_list)
 */
+/*
 void _log_oneline_error(const char *const cur_file,
                         const char *const cur_func,
                         const int         cur_line,
 
                         const char *fmt, ...);
-
+*/
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_WARNING
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -210,12 +218,13 @@ void _log_oneline_error(const char *const cur_file,
 *
 *   @see log_warning(const char*, va_list)
 */
+/*
 void _log_warning(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line,
 
                   const char *fmt, ...);
-
+*/
 /**
 *   @brief Оболочка для static void log_warning_message(const char *, va_list) для trace_push и trace_pop
 *
@@ -225,12 +234,13 @@ void _log_warning(const char *const cur_file,
 *
 *   @see log_warning_message(const char*, va_list)
 */
+/*
 void _log_warning_message(const char *const cur_file,
                           const char *const cur_func,
                           const int         cur_line,
 
                           const char *fmt, ...);
-
+*/
 /**
 *   @brief Оболочка для static void log_oneline_warning(const char *, const char *, const int, const char *, va_list) для trace_push и trace_pop
 *
@@ -240,12 +250,13 @@ void _log_warning_message(const char *const cur_file,
 *
 *   @see log_oneline_warning(const char*, const char*, const int, const char*, va_list)
 */
+/*
 void _log_oneline_warning(const char *const cur_file,
                           const char *const cur_func,
                           const int         cur_line,
 
                           const char *fmt, ...);
-
+*/
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_SMTH
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -259,12 +270,13 @@ void _log_oneline_warning(const char *const cur_file,
 *
 *   @see log_header(const char*, va_list)
 */
+/*
 void _log_header(const char *const cur_file,
                  const char *const cur_func,
                  const int         cur_line,
 
                  const char *fmt, ...);
-
+*/
 /**
 *   @brief Оболочка для static void log_param_place(const char *, const char *, const int) для trace_push и trace_pop.
 *
@@ -274,6 +286,7 @@ void _log_header(const char *const cur_file,
 *
 *   @see log_param_place(const char*, const char*, const int)
 */
+/*
 void _log_param_place(const char *const cur_file,
                       const char *const cur_func,
                       const int         cur_line,
@@ -281,7 +294,7 @@ void _log_param_place(const char *const cur_file,
                       const char *const param_file,
                       const char *const param_func,
                       const int         param_line);
-
+*/
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -295,12 +308,13 @@ void _log_param_place(const char *const cur_file,
 *
 *   @see log_calloc(size_t, size_t)
 */
+/*
 void *_log_calloc(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line,
 
                   size_t number, size_t size);
-
+*/
 /**
 *   @brief Оболочка для static void *log_realloc(void *, size_t) для trace_push и trace_pop.
 *
@@ -310,12 +324,13 @@ void *_log_calloc(const char *const cur_file,
 *
 *   @see log_realloc(void*, size_t)
 */
+/*
 void *_log_realloc(const char *const cur_file,
                    const char *const cur_func,
                    const int         cur_line,
 
                    void *ptr, size_t size);
-
+*/
 /**
 *   @brief Оболочка для static void log_free(void *) для trace_push и trace_pop.
 *
@@ -325,12 +340,13 @@ void *_log_realloc(const char *const cur_file,
 *
 *   @see log_free(void*)
 */
+/*
 void _log_free(const char *const cur_file,
                const char *const cur_func,
                const int         cur_line,
 
                void *ptr);
-
+*/
 #include "log_def.h"
 
 #endif //LOG_H

@@ -4,6 +4,7 @@
 
 #include "log_settings.h"
 #include "log.h"
+#include "log_undef.h"
 
 //================================================================================================================================
 // STRUCT
@@ -88,12 +89,12 @@ static void trace_dtor();
 /**
 *   @brief Увеличивает память для TRACE.data в два раза, если TRACE.size = TRACE.capacity
 *
-*   @return true, если все ОК, false, если не удалось выл=делить память для TRACE.data
+*   @return true, если все ОК, false, если не удалось выделить память для TRACE.data
 */
 static bool trace_resize();
 
 /**
-*   @brief Дамп элемента TRACE.
+*   @brief Дамп элемента TRACE
 */
 static void trace_el_dump(const source_pos *const src_pos, const size_t index);
 
@@ -123,10 +124,11 @@ static void log_print(const char *log_buff, bool is_tab);
 *   @param cur_func [in] - функция в точке вызова
 *   @param cur_line [in] - строка в точке вызова
 */
+/*
 static void log_buff_size_error(const char *const cur_file,
                                 const char *const cur_func,
                                 const int         cur_line);
-
+*/
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_OUTPUT
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -137,8 +139,9 @@ static void log_buff_size_error(const char *const cur_file,
 *
 *   @param fmt [in] - формат вывода
 */
+/*
 static void _stat_log_message(const char *fmt, ...);
-
+*/
 /**
 *   @brief Выводит сообщение в лог, используя vsprintf.
 *   Не выводит табы перед первой строкой.
@@ -154,8 +157,9 @@ static void _log_message(const char *fmt, va_list ap);
 *
 *   @param fmt [in] - формат вывода
 */
+/*
 static void _stat_log_tab_message(const char *fmt, ...);
-
+*/
 /**
 *   @brief Выоводит сообщение в лог, используя vsprintf.
 *   Выводит табы перед первой строкой.
@@ -194,12 +198,13 @@ static void _log_error_message(const char *fmt, va_list ap);
 *
 *   @param fmt      [in] - формат сообщения об ошибке
 */
+/*
 static void _stat_log_oneline_error(const char *const cur_file,
                                     const char *const cur_func,
                                     const int         cur_line,
 
                                     const char *fmt, ...);
-
+*/
 /**
 *   @brief Выводит сообщение об ошибке в точке вызова (без back trace)
 *
@@ -245,12 +250,13 @@ static void _log_warning_message(const char *fmt, va_list ap);
 *
 *   @param fmt      [in] - формат warning-а
 */
+/*
 static void _stat_log_oneline_warning(const char *const cur_file,
                                       const char *const cur_func,
                                       const int         cur_line,
 
                                       const char *fmt, ...);
-
+*/
 /**
 *   @brief Выводит warning в точке вызова (без back trace)
 *
