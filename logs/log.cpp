@@ -20,7 +20,7 @@ static int LOG_STREAM_OPEN()
                         "\"%s\" OPENING IS OK\n\n", LOG_FILE);
 
     #ifndef LOG_NTRACE
-    trace_ctor(&TRACE);
+    IS_TRACE_VALID = _trace_ctor(&TRACE);
     #endif
 
     atexit(LOG_STREAM_CLOSE);
@@ -34,7 +34,7 @@ static void LOG_STREAM_CLOSE()
     assert(LOG_STREAM != nullptr);
 
     #ifndef LOG_NTRACE
-    trace_dtor(&TRACE);
+    if (IS_TRACE_VALID) _trace_dtor(&TRACE);
     #endif
 
     fprintf(LOG_STREAM, "\n");
@@ -45,6 +45,42 @@ static void LOG_STREAM_CLOSE()
     fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
 }
+
+#ifndef LOG_NTRACE
+//--------------------------------------------------------------------------------------------------------------------------------
+// TRACE SHELL
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void _trace_push(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line)
+{
+    log_assert(cur_file != nullptr);
+    log_assert(cur_func != nullptr);
+
+    log_verify(IS_TRACE_VALID == true, (void) 0);
+
+    IS_TRACE_VALID = _trace_push(&TRACE, cur_file, cur_func, cur_line);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void _trace_pop()
+{
+    log_verify(IS_TRACE_VALID == true, (void) 0);
+
+    _trace_pop(&TRACE);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void _trace_dump()
+{
+    log_verify(IS_TRACE_VALID == true, (void) 0);
+
+    _trace_dump(&TRACE);
+}
+#endif //!LOG_NTRACE
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // log_print
@@ -133,9 +169,13 @@ static inline void _log_tab_message(const char *fmt, va_list ap)
 // LOG_ERROR
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void _log_error(const char *fmt, ...)
+void _log_error(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line, const char *fmt, ...)
 {
-    log_verify(fmt != nullptr, (void) 0);
+    log_assert(cur_file != nullptr);
+    log_assert(cur_func != nullptr);
+    log_verify(fmt      != nullptr, (void) 0);
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
@@ -147,8 +187,9 @@ void _log_error(const char *fmt, ...)
 
     log_tab_message("====================\n");
 
+    log_param_place(cur_file, cur_func, cur_line);
     #ifndef LOG_NTRACE
-    trace_dump(&TRACE);
+    _trace_dump();
     #endif
 
     log_tab_message("====================" HTML_COLOR_CANCEL "\n");
@@ -177,8 +218,8 @@ void _log_oneline_error(const char *const cur_file,
                         const char *const cur_func,
                         const int         cur_line, const char *fmt, ...)
 {
-    log_verify(cur_file != nullptr, (void) 0);
-    log_verify(cur_func != nullptr, (void) 0);
+    log_assert(cur_file != nullptr);
+    log_assert(cur_func != nullptr);
     log_verify(fmt      != nullptr, (void) 0);
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
@@ -199,9 +240,13 @@ void _log_oneline_error(const char *const cur_file,
 // LOG_WARNING
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void _log_warning(const char *fmt, ...)
+void _log_warning(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line, const char *fmt, ...)
 {
-    log_verify(fmt != nullptr, (void) 0);
+    log_assert(cur_file != nullptr);
+    log_assert(cur_func != nullptr);
+    log_verify(fmt      != nullptr, (void) 0);
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
@@ -214,6 +259,7 @@ void _log_warning(const char *fmt, ...)
 
     _log_tab_message("====================\n");
 
+    log_param_place(cur_file, cur_func, cur_line);
     #ifndef LOG_NTRACE
     _trace_dump();
     #endif
@@ -244,8 +290,9 @@ void _log_oneline_warning(const char *const cur_file,
                           const char *const cur_func,
                           const int         cur_line, const char *fmt, ...)
 {
-    log_verify(cur_file != nullptr, (void) 0);
-    log_verify(cur_func != nullptr, (void) 0);
+    log_assert(cur_file != nullptr);
+    log_assert(cur_func != nullptr);
+    log_verify(fmt      != nullptr, (void) 0);
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 

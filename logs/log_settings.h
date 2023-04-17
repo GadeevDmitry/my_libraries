@@ -1,7 +1,7 @@
 #ifndef LOG_SETTINGS_H
 #define LOG_SETTINGS_H
 
-#define LOG_NTRACE
+//#define LOG_NTRACE
 //#define NLOG
 
 //#define LOG_NVERIFY

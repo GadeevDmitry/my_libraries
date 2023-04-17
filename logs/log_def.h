@@ -9,16 +9,14 @@
 
 #if !defined(NLOG) && !defined(LOG_NTRACE)
 
-#define $u              _trace_upd (__FILE__, __PRETTY_FUNCTION__, __LINE__);
-#define $h              _trace_push();
-#define $p              _trace_pop ();
-#define trace_dump() $u _trace_dump()
+#define $            _trace_push(__FILE__, __PRETTY_FUNCTION__, __LINE__);
+#define $$           _trace_pop ();
+#define trace_dump() _trace_dump()
 
 #else
 
-#define $u
-#define $h
-#define $p
+#define $
+#define $$
 #define trace_dump()
 
 #endif
@@ -40,7 +38,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #ifndef NLOG
-#define log_error(        fmt, ...) _log_error        (fmt, ##__VA_ARGS__)
+#define log_error(        fmt, ...) _log_error        (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #define log_error_message(fmt, ...) _log_error_message(fmt, ##__VA_ARGS__)
 #define log_oneline_error(fmt, ...) _log_oneline_error(fmt, ##__VA_ARGS__)
 #else
@@ -54,7 +52,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #ifndef NLOG
-#define log_warning(        fmt, ...) _log_warning        (fmt, ##__VA_ARGS__)
+#define log_warning(        fmt, ...) _log_warning        (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 #define log_warning_message(fmt, ...) _log_warning_message(fmt, ##__VA_ARGS__)
 #define log_oneline_warning(fmt, ...) _log_oneline_warning(fmt, ##__VA_ARGS__)
 #else

@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "log_settings.h"
 extern size_t LOG_TAB;
 
 //================================================================================================================================
@@ -40,16 +41,57 @@ void _log_message(const char *fmt, ...);
 void _log_tab_message(const char *fmt, ...);
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// TRACE SHELL
+//--------------------------------------------------------------------------------------------------------------------------------
+#ifndef LOG_NTRACE
+
+/**
+*   @brief Оболочка для _trace_push(trace*, const char*, const char*, const int).
+*   Создана с целью скрыть глобальную trace переменную.
+*
+*   @see _trace_push(trace*, const char*, const char*, const int)
+*/
+void _trace_push(const char *const cur_file,
+                 const char *const cur_func,
+                 const int         cur_line);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Оболочка для _trace_pop(trace*).
+*   Создана с целью скрыть глобальную trace переменную.
+*
+*   @see _trace_pop(trace*)
+*/
+void _trace_pop();
+
+/**
+*   @brief Оболочка для _trace_dump(const trace*).
+*   Создана с целью скрыть глобальную trace переменную.
+*
+*   @see _trace_dump(const trace*)
+*/
+void _trace_dump();
+
+#endif //!LOG_NTRACE
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // LOG_ERROR
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Выводит сообщение об ошибке. Делает TRACE dump, если не определен LOG_NTRACE.
+*   @brief Выводит сообщение об ошибке в точке вызова. Делает TRACE dump, если не определен LOG_NTRACE.
 *   Правила задания аргументов аналогичны функции printf.
 *
-*   @param fmt [in] - формат вывода
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @param fmt      [in] - формат вывода
 */
-void _log_error(const char *fmt, ...);
+void _log_error(const char *const cur_file,
+                const char *const cur_func,
+                const int         cur_line, const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение HTML_COLOR_DARK_RED цветом.
@@ -80,12 +122,18 @@ void _log_oneline_error(const char *const cur_file,
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Выводит warning. Делает TRACE dump, если не определен LOG_NTRACE.
+*   @brief Выводит warning в точке вызова. Делает TRACE dump, если не определен LOG_NTRACE.
 *   Правила задания аргументов аналогичны функции printf.
 *
-*   @param fmt [in] - формат вывода
+*   @param cur_file [in] - файл в точке вызова
+*   @param cur_func [in] - функция в точке вызова
+*   @param cur_line [in] - строка в точке вызова
+*
+*   @param fmt      [in] - формат вывода
 */
-void _log_warning(const char *fmt, ...);
+void _log_warning(const char *const cur_file,
+                  const char *const cur_func,
+                  const int         cur_line, const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение HTML_COLOR_DARK_ORANGE цветом.
@@ -121,7 +169,7 @@ void _log_oneline_warning(const char *const cur_file,
 *
 *   @param fmt [in] - формат заголовка
 */
-static void _log_header(const char *fmt, ...);
+void _log_header(const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение о местоположении с параметрами.
@@ -130,9 +178,9 @@ static void _log_header(const char *fmt, ...);
 *   @param func [in] - функция
 *   @param line [in] - номер строки
 */
-static void _log_param_place(const char *const file,
-                             const char *const func,
-                             const int         line);
+void _log_param_place(const char *const file,
+                      const char *const func,
+                      const int         line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
@@ -145,7 +193,7 @@ static void _log_param_place(const char *const file,
 *   @see log_realloc(void *, size_t)
 *   @see log_free(void *)
 */
-static void *_log_calloc(size_t number, size_t size);
+void *_log_calloc(size_t number, size_t size);
 
 /**
 *   @brief Меняет размер блока динамической памяти, используя realloc(). Меняет DYNAMIC_MEMORY.
@@ -154,7 +202,7 @@ static void *_log_calloc(size_t number, size_t size);
 *   @see log_calloc(size_t, size_t)
 *   @see log_free(void *)
 */
-static void *_log_realloc(void *ptr, size_t size);
+void *_log_realloc(void *ptr, size_t size);
 
 /**
 *   @brief Освобождает блок динамической памяти, используя free(). Уменяшает DYNAMIC_MEMORY, если блок был не пуст.
@@ -163,7 +211,7 @@ static void *_log_realloc(void *ptr, size_t size);
 *   @see log_calloc(size_t, size_t)
 *   @see log_realloc(void *, size_t)
 */
-static void _log_free(void *ptr);
+void _log_free(void *ptr);
 
 //================================================================================================================================
 // MACRO DEFENITIONS
@@ -197,6 +245,7 @@ static void _log_free(void *ptr);
                                 "ASSERTION FAILED: %s\n",           \
 				                #condition);                        \
                 log_tab_message("====================\n");          \
+                log_place ();                                       \
                 trace_dump();                                       \
                 log_tab_message("===================="              \
                                 HTML_COLOR_CANCEL "\n\n");          \
@@ -205,7 +254,7 @@ static void _log_free(void *ptr);
 			    abort();                                            \
             }
 #else //defined LOG_NDEBUG
-#define log_assert(condition) ;
+#define log_assert(condition)
 #endif
 
 /**
@@ -219,6 +268,7 @@ static void _log_free(void *ptr);
                             "VERIFY FAILED: %s\n",                  \
                             #condition);                            \
             log_tab_message("====================\n");              \
+            log_place ();                                           \
             trace_dump();                                           \
             log_tab_message("===================="                  \
                             HTML_COLOR_CANCEL "\n\n");              \
@@ -226,7 +276,7 @@ static void _log_free(void *ptr);
             return ret_val;                                         \
         }
 #else //defined LOG_NVERIFY
-#define log_verify(condition, ret_val) ;
+#define log_verify(condition, ret_val)
 #endif
 
 #endif //LOG_H

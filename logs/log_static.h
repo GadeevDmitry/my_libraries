@@ -83,8 +83,6 @@ static inline void _log_tab_message(const char *fmt, va_list ap);
 // GLOBAL
 //================================================================================================================================
 
-#pragma GCC diagnostic ignored "-Wunused-function"
-
 #define LOG_FILE "log.html"                              ///< имя лог файла
 size_t  LOG_TAB = 0;                                     ///< количество табов, необходимое отступить перед записью в лог
 
@@ -96,6 +94,7 @@ static size_t LOG_BUFF_SIZE         = 100000;            ///< максималь
 
 #ifndef LOG_NTRACE
 static trace        TRACE           = {};                ///< для back trace
+static bool      IS_TRACE_VALID     = true;              ///< равна true, если стек валидный, false иначе
 #endif
 
 #endif //LOG_STATIC_H
