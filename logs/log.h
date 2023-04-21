@@ -220,6 +220,12 @@ void _log_free(void *ptr);
 // MACRO DEFENITIONS
 //================================================================================================================================
 
+#include "log_def.h"
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// COLORS
+//--------------------------------------------------------------------------------------------------------------------------------
+
 #define HTML_COLOR_GOLD         "<font color=Gold>"         ///< HTML директива установки цвета шрифта: Gold        (#FFD700)
 #define HTML_COLOR_DARK_RED     "<font color=DarkRed>"      ///< HTML директива установки цвета шрифта: DarkRed     (#8B0000)
 #define HTML_COLOR_DARK_ORANGE  "<font color=DarkOrange>"   ///< HTML директива установки цвета шрифта: DarkOrange  (#FF8C00)
@@ -230,7 +236,17 @@ void _log_free(void *ptr);
 #define HTML_COLOR_CANCEL       "</font>"                   ///< HTML директива сброса цвета шрифта к предыдущему
 #define HTML_COLOR_POISON       HTML_COLOR_OLIVE            ///< <=> HTML_COLOR_OLIVE
 
-#include "log_def.h"
+#define BASH_COLOR_RED          "\033[1;31m"                ///< BASH директива установки цвета шрифта: light red
+#define BASH_COLOR_GREEN        "\033[1;32m"                ///< BASH директива установки цвета шрифта: light green
+#define BASH_COLOR_YELLOW       "\033[1;33m"                ///< BASH директива установки цвета шрифта: yellow
+#define BASH_COLOR_BLUE         "\033[1;34m"                ///< BASH директива установки цвета шрифта: light blue
+#define BASH_COLOR_PURPLE       "\033[1;35m"                ///< BASH директива установки цвета шрифта: light purple
+#define BASH_COLOR_CYAN         "\033[1;36m"                ///< BASH директива установки цвета шрифта: light cyan
+#define BASH_COLOR_WHITE        "\033[0m"                   ///< BASH директива установки цвета шрифта: white
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// EXCEPTIONS
+//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief выводит в лог имя файла, имя функции, номер строки в точке вызова.
@@ -253,7 +269,11 @@ void _log_free(void *ptr);
                 log_tab_message("===================="              \
                                 HTML_COLOR_CANCEL "\n\n");          \
                                                                     \
-                fprintf(stderr, "ASSERTION FAILED (check log)\n");  \
+                fprintf(stderr, BASH_COLOR_RED                      \
+                                "ASSERTION FAILED "                 \
+                                BASH_COLOR_CYAN                     \
+                                "(check log)\n"                     \
+                                BASH_COLOR_WHITE);                  \
 			    abort();                                            \
             }
 
