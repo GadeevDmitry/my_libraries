@@ -19,6 +19,19 @@ static inline void source_pos_ctor(source_pos *const src_pos, const char *const 
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+static inline void source_pos_ctor(source_pos *const src_pos, const source_pos *const sample)
+{
+    log_assert(src_pos != nullptr);
+    log_assert(sample  != nullptr);
+
+    log_assert(sample->file != nullptr);
+    log_assert(sample->func != nullptr);
+
+    memcpy(src_pos, sample, sizeof(source_pos));
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 static inline void source_pos_dump(const source_pos *const src_pos)
 {
     log_assert(src_pos != nullptr);
@@ -35,6 +48,8 @@ static inline void source_pos_dump(const source_pos *const src_pos)
 bool _trace_ctor(trace *const trc)
 {
     log_assert(trc != nullptr);
+
+    source_pos_ctor(&$front, __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
     $stk = (source_pos *) log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
     if ($stk == nullptr)
@@ -60,17 +75,13 @@ void _trace_dtor(trace *const trc)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool _trace_push(trace *const trc, const char *const file,
-                                   const char *const func,
-                                   const int         line)
+bool _trace_push(trace *const trc)
 {
-    log_assert(trc  != nullptr);
-    log_assert(file != nullptr);
-    log_assert(func != nullptr);
+    log_assert(trc != nullptr);
 
     if (!trace_resize(trc)) return false;
 
-    source_pos_ctor($stk + $size, file, func, line);
+    source_pos_ctor($stk + $size, &$front);
     $size++;
 
     return true;
@@ -102,6 +113,19 @@ static bool trace_resize(trace *const trc)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void trace_front_upd(trace *const trc, const char *const file,
+                                       const char *const func,
+                                       const int         line)
+{
+    log_assert(trc  != nullptr);
+    log_assert(file != nullptr);
+    log_assert(func != nullptr);
+
+    source_pos_ctor(&$front, file, func, line);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 void _trace_pop(trace *const trc)
 {
     log_assert(trc != nullptr);
@@ -117,6 +141,8 @@ void _trace_pop(trace *const trc)
 void _trace_dump(const trace *const trc)
 {
     log_assert(trc != nullptr);
+
+    trace_el_dump(&$front, 0);
 
     for (size_t i = 1; i <= $size; ++i)
     {

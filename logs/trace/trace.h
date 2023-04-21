@@ -21,6 +21,7 @@ struct source_pos
 */
 struct trace
 {
+    source_pos  front_trace;    ///< попадет в стек при следующем вызове trace_push
     source_pos *stack_trace;    ///< стек вызовов
 
     size_t      size;           ///< размер  .data
@@ -48,22 +49,35 @@ void _trace_dtor(trace *const trc);
 *
 *   @param trc  [in][out] - trace to push the frame in
 *
-*   @param file [in]      - имя файла в точке вызова
+*   @param file [in]      - имя файла
 *   @param func [in]      - имя функции
 *   @param line [in]      - номер строки
 */
-bool _trace_push(trace *const trc, const char *const file,
-                                   const char *const func,
-                                   const int         line);
+bool _trace_push(trace *const trc);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет frame из стека вызовов.
 *
-*   @param trc [in] - trace to pop the frame from
+*   @param trc [in][out] - trace to pop the frame from
 */
 void _trace_pop(trace *const trc);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Обновляет значение для push.
+*
+*   @param trc  [in][out] - trace to update the front frame
+*
+*   @param file [in]      - имя файла
+*   @param func [in]      - имя функции
+*   @param line [in]      - номер строки
+*/
+void trace_front_upd(trace *const trc, const char *const file,
+                                       const char *const func,
+                                       const int         line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

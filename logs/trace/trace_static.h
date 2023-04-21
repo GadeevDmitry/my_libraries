@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "trace.h"
 #include "trace_settings.h"
@@ -32,6 +33,16 @@
 static inline void source_pos_ctor(source_pos *const src_pos, const char *const file,
                                                               const char *const func,
                                                               const int         line);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief source_pos ctor.
+*
+*   @param src_pos [out] - source_pos to ctor
+*   @param sample  [in]  - source_pos with fields for assignment
+*/
+static inline void source_pos_ctor(source_pos *const src_pos, const source_pos *const sample);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -71,6 +82,7 @@ static inline void trace_el_dump(const source_pos *const src_pos, const size_t i
 #define $func       (src_pos->func)
 #define $line       (src_pos->line)
 
+#define $front      (trc->front_trace)
 #define $stk        (trc->stack_trace)
 #define $size       (trc->size)
 #define $capacity   (trc->capacity)
