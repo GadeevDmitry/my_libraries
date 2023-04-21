@@ -89,14 +89,18 @@
 // LOG_MEMORY
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#ifndef NLOG
+#if !defined(NLOG) && !defined(LOG_NLEAK)
+
 #define log_calloc(number, size) _log_calloc (number, size)
 #define log_realloc(  ptr, size) _log_realloc(   ptr, size)
 #define log_free(     ptr      ) _log_free   (   ptr      )
+
 #else
+
 #define log_calloc(number, size) calloc (number, size)
 #define log_realloc(  ptr, size) realloc(   ptr, size)
 #define log_free(     ptr      ) free   (   ptr      )
+
 #endif
 
 #endif //LOG_DEF_H
