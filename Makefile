@@ -40,5 +40,6 @@ clean:
 	rm -f $(ALG_O)
 	rm -f $(STK_O)
 	rm -f $(LST_O)
+	rm -f $(TRC_O)
 
 .PHONY: clean

@@ -46,41 +46,62 @@ static void LOG_STREAM_CLOSE()
     fclose (LOG_STREAM);
 }
 
-#ifndef LOG_NTRACE
 //--------------------------------------------------------------------------------------------------------------------------------
 // TRACE SHELL
 //--------------------------------------------------------------------------------------------------------------------------------
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 void _trace_push(const char *const cur_file,
                  const char *const cur_func,
                  const int         cur_line)
 {
+    #ifdef LOG_NTRACE
+    return;
+    #else
+
     log_assert(cur_file != nullptr);
     log_assert(cur_func != nullptr);
 
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
     IS_TRACE_VALID = _trace_push(&TRACE, cur_file, cur_func, cur_line);
+
+    #endif //!LOG_NTRACE
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 void _trace_pop()
 {
+    #ifdef LOG_NTRACE
+    return;
+    #else
+
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
     _trace_pop(&TRACE);
+
+    #endif //!LOG_NTRACE
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 void _trace_dump()
 {
+    #ifdef LOG_NTRACE
+    return;
+    #else
+
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
     _trace_dump(&TRACE);
+
+    #endif //!LOG_NTRACE
 }
-#endif //!LOG_NTRACE
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // log_print
@@ -119,7 +140,7 @@ void _log_message(const char *fmt, ...)
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
-    va_list ap;
+    va_list  ap;
     va_start(ap, fmt);
 
     _log_message(fmt, ap);
@@ -146,7 +167,7 @@ void _log_tab_message(const char *fmt, ...)
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
-    va_list ap;
+    va_list  ap;
     va_start(ap, fmt);
 
     _log_tab_message(fmt, ap);
@@ -169,9 +190,12 @@ static inline void _log_tab_message(const char *fmt, va_list ap)
 // LOG_ERROR
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 void _log_error(const char *const cur_file,
                 const char *const cur_func,
-                const int         cur_line, const char *fmt, ...)
+                const int         cur_line, const bool is_local_trace, const char *fmt, ...)
 {
     log_assert(cur_file != nullptr);
     log_assert(cur_func != nullptr);
@@ -186,14 +210,16 @@ void _log_error(const char *const cur_file,
     _log_tab_message(fmt, ap);
 
     log_tab_message("====================\n");
-
     log_param_place(cur_file, cur_func, cur_line);
+
     #ifndef LOG_NTRACE
-    _trace_dump();
+    if (is_local_trace) _trace_dump();
     #endif
 
     log_tab_message("====================" HTML_COLOR_CANCEL "\n");
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -240,9 +266,12 @@ void _log_oneline_error(const char *const cur_file,
 // LOG_WARNING
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 void _log_warning(const char *const cur_file,
                   const char *const cur_func,
-                  const int         cur_line, const char *fmt, ...)
+                  const int         cur_line, const bool is_local_trace, const char *fmt, ...)
 {
     log_assert(cur_file != nullptr);
     log_assert(cur_func != nullptr);
@@ -250,22 +279,24 @@ void _log_warning(const char *const cur_file,
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
-    _log_tab_message(HTML_COLOR_DARK_ORANGE "\n"
-                                            "WARNING:\n");
+    log_tab_message(HTML_COLOR_DARK_ORANGE "\n"
+                                           "WARNING:\n");
 
     va_list ap;
     va_start(ap, fmt);
     _log_tab_message(fmt, ap);
 
-    _log_tab_message("====================\n");
-
+    log_tab_message("====================\n");
     log_param_place(cur_file, cur_func, cur_line);
+
     #ifndef LOG_NTRACE
-    _trace_dump();
+    if (is_local_trace) _trace_dump();
     #endif
 
-    _log_tab_message("====================" HTML_COLOR_CANCEL "\n");
+    log_tab_message("====================" HTML_COLOR_CANCEL "\n");
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

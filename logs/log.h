@@ -43,7 +43,6 @@ void _log_tab_message(const char *fmt, ...);
 //--------------------------------------------------------------------------------------------------------------------------------
 // TRACE SHELL
 //--------------------------------------------------------------------------------------------------------------------------------
-#ifndef LOG_NTRACE
 
 /**
 *   @brief Оболочка для _trace_push(trace*, const char*, const char*, const int).
@@ -65,6 +64,8 @@ void _trace_push(const char *const cur_file,
 */
 void _trace_pop();
 
+//--------------------------------------------------------------------------------------------------------------------------------
+
 /**
 *   @brief Оболочка для _trace_dump(const trace*).
 *   Создана с целью скрыть глобальную trace переменную.
@@ -72,8 +73,6 @@ void _trace_pop();
 *   @see _trace_dump(const trace*)
 */
 void _trace_dump();
-
-#endif //!LOG_NTRACE
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_ERROR
@@ -83,15 +82,17 @@ void _trace_dump();
 *   @brief Выводит сообщение об ошибке в точке вызова. Делает TRACE dump, если не определен LOG_NTRACE.
 *   Правила задания аргументов аналогичны функции printf.
 *
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
+*   @param cur_file       [in] - файл в точке вызова
+*   @param cur_func       [in] - функция в точке вызова
+*   @param cur_line       [in] - строка в точке вызова
 *
-*   @param fmt      [in] - формат вывода
+*   @param is_local_trace [in] - false, если в точке вызова режим LOG_NTRACE, true - иначе
+*
+*   @param fmt            [in] - формат вывода
 */
 void _log_error(const char *const cur_file,
                 const char *const cur_func,
-                const int         cur_line, const char *fmt, ...);
+                const int         cur_line, const bool is_local_trace, const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение HTML_COLOR_DARK_RED цветом.
@@ -125,15 +126,17 @@ void _log_oneline_error(const char *const cur_file,
 *   @brief Выводит warning в точке вызова. Делает TRACE dump, если не определен LOG_NTRACE.
 *   Правила задания аргументов аналогичны функции printf.
 *
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
+*   @param cur_file       [in] - файл в точке вызова
+*   @param cur_func       [in] - функция в точке вызова
+*   @param cur_line       [in] - строка в точке вызова
 *
-*   @param fmt      [in] - формат вывода
+*   @param is_local_trace [in] - false, если в точке вызова режим LOG_NTRACE, true - иначе
+*
+*   @param fmt            [in] - формат вывода
 */
 void _log_warning(const char *const cur_file,
                   const char *const cur_func,
-                  const int         cur_line, const char *fmt, ...);
+                  const int         cur_line, const bool is_local_trace, const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение HTML_COLOR_DARK_ORANGE цветом.
@@ -237,7 +240,8 @@ void _log_free(void *ptr);
 /**
 *   @brief assert с сообщением в лог файл
 */
-#ifndef LOG_NDEBUG
+#if !defined(LOG_NDEBUG) && !defined(NLOG)
+
 #define log_assert(condition)                                       \
             if  (!(condition))                                      \
             {                                                       \
@@ -253,14 +257,16 @@ void _log_free(void *ptr);
                 fprintf(stderr, "ASSERTION FAILED (check log)\n");  \
 			    abort();                                            \
             }
-#else //defined LOG_NDEBUG
-#define log_assert(condition)
+
+#else //defined(LOG_NDEBUG) || defined(NLOG)
+#define log_assert(condition) assert(condition)
 #endif
 
 /**
 *   @brief "мягкий" assert с сообщением в лог
 */
-#ifndef LOG_NVERIFY
+#if !defined(LOG_NVERIFY) && !defined(NLOG)
+
 #define log_verify(condition, ret_val)                              \
         if (!(condition))                                           \
         {                                                           \
@@ -275,7 +281,8 @@ void _log_free(void *ptr);
                                                                     \
             return ret_val;                                         \
         }
-#else //defined LOG_NVERIFY
+
+#else //defined(LOG_NVERIFY) || defined(NLOG)
 #define log_verify(condition, ret_val)
 #endif
 

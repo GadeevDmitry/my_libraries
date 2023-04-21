@@ -34,31 +34,42 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// LOG_ERROR
+// LOG_ERROR/WARNING
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#ifndef NLOG
-#define log_error(        fmt, ...) _log_error        (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define log_error_message(fmt, ...) _log_error_message(fmt, ##__VA_ARGS__)
-#define log_oneline_error(fmt, ...) _log_oneline_error(fmt, ##__VA_ARGS__)
+#if   !defined(NLOG) && !defined(LOG_NTRACE)
+
+#define log_error(  fmt, ...) _log_error  (__FILE__, __PRETTY_FUNCTION__, __LINE__, true, fmt, ##__VA_ARGS__)
+#define log_warning(fmt, ...) _log_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, true, fmt, ##__VA_ARGS__)
+
+#elif !defined(NLOG) && defined(LOG_NTRACE)
+
+#define log_error(  fmt, ...) _log_error  (__FILE__, __PRETTY_FUNCTION__, __LINE__, false, fmt, ##__VA_ARGS__)
+#define log_warning(fmt, ...) _log_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, false, fmt, ##__VA_ARGS__)
+
 #else
+
 #define log_error(        fmt, ...)
-#define log_error_message(fmt, ...)
 #define log_oneline_error(fmt, ...)
+
 #endif
 
-//--------------------------------------------------------------------------------------------------------------------------------
-// LOG_WARNING
-//--------------------------------------------------------------------------------------------------------------------------------
-
 #ifndef NLOG
-#define log_warning(        fmt, ...) _log_warning        (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+
+#define log_error_message(fmt, ...) _log_error_message(fmt, ##__VA_ARGS__)
+#define log_oneline_error(fmt, ...) _log_oneline_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+
 #define log_warning_message(fmt, ...) _log_warning_message(fmt, ##__VA_ARGS__)
-#define log_oneline_warning(fmt, ...) _log_oneline_warning(fmt, ##__VA_ARGS__)
+#define log_oneline_warning(fmt, ...) _log_oneline_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+
 #else
-#define log_warning(        fmt, ...)
+
+#define log_error_message(fmt, ...)
+#define log_oneline_error(fmt, ...)
+
 #define log_warning_message(fmt, ...)
 #define log_oneline_warning(fmt, ...)
+
 #endif
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -79,7 +90,7 @@
 
 #ifndef NLOG
 #define log_calloc(number, size) _log_calloc (number, size)
-#define log_realloc(  ptr, size) _log_realloc(_  ptr, size)
+#define log_realloc(  ptr, size) _log_realloc(   ptr, size)
 #define log_free(     ptr      ) _log_free   (   ptr      )
 #else
 #define log_calloc(number, size) calloc (number, size)
