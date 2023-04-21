@@ -1,3 +1,4 @@
+/** @file */
 #ifndef LOG_DEF_H
 #define LOG_DEF_H
 
@@ -9,9 +10,9 @@
 
 #if !defined(NLOG) && !defined(LOG_NTRACE)
 
-#define $            _trace_push(__FILE__, __PRETTY_FUNCTION__, __LINE__);
-#define $$           _trace_pop ();
-#define trace_dump() _trace_dump()
+#define $            _trace_push(__FILE__, __PRETTY_FUNCTION__, __LINE__);  ///< push текущей позиции стек trace
+#define $$           _trace_pop ();                                         ///< pop из стека trace
+#define trace_dump() _trace_dump()                                          ///< dump стека trace
 
 #else
 

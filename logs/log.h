@@ -220,15 +220,15 @@ void _log_free(void *ptr);
 // MACRO DEFENITIONS
 //================================================================================================================================
 
-#define HTML_COLOR_GOLD         "<font color=Gold>"
-#define HTML_COLOR_DARK_RED     "<font color=DarkRed>"
-#define HTML_COLOR_DARK_ORANGE  "<font color=DarkOrange>"
-#define HTML_COLOR_LIME_GREEN   "<font color=LimeGreen>"
-#define HTML_COLOR_MEDIUM_BLUE  "<font color=MediumBlue>"
-#define HTML_COLOR_OLIVE        "<font color=Olive>"
-#define HTML_COLOR_BLACK        "<font color=Black>"
-#define HTML_COLOR_CANCEL       "</font>"
-#define HTML_COLOR_POISON       HTML_COLOR_OLIVE
+#define HTML_COLOR_GOLD         "<font color=Gold>"         ///< HTML директива установки цвета шрифта: Gold        (#FFD700)
+#define HTML_COLOR_DARK_RED     "<font color=DarkRed>"      ///< HTML директива установки цвета шрифта: DarkRed     (#8B0000)
+#define HTML_COLOR_DARK_ORANGE  "<font color=DarkOrange>"   ///< HTML директива установки цвета шрифта: DarkOrange  (#FF8C00)
+#define HTML_COLOR_LIME_GREEN   "<font color=LimeGreen>"    ///< HTML директива установки цвета шрифта: LimeGreen   (#32CD32)
+#define HTML_COLOR_MEDIUM_BLUE  "<font color=MediumBlue>"   ///< HTML директива установки цвета шрифта: MediumBlue  (#0000CD)
+#define HTML_COLOR_OLIVE        "<font color=Olive>"        ///< HTML директива установки цвета шрифта: Olive       (#808000)
+#define HTML_COLOR_BLACK        "<font color=Black>"        ///< HTML директива установки цвета шрифта: Black       (#000000)
+#define HTML_COLOR_CANCEL       "</font>"                   ///< HTML директива сброса цвета шрифта к предыдущему
+#define HTML_COLOR_POISON       HTML_COLOR_OLIVE            ///< <=> HTML_COLOR_OLIVE
 
 #include "log_def.h"
 
@@ -237,11 +237,10 @@ void _log_free(void *ptr);
 */
 #define log_place() log_param_place(__FILE__, __PRETTY_FUNCTION__, __LINE__)
 
+#if !defined(LOG_NDEBUG) && !defined(NLOG)
 /**
 *   @brief assert с сообщением в лог файл
 */
-#if !defined(LOG_NDEBUG) && !defined(NLOG)
-
 #define log_assert(condition)                                       \
             if  (!(condition))                                      \
             {                                                       \
@@ -259,14 +258,16 @@ void _log_free(void *ptr);
             }
 
 #else //defined(LOG_NDEBUG) || defined(NLOG)
+/**
+*   @brief <=> assert
+*/
 #define log_assert(condition) assert(condition)
 #endif
 
+#if !defined(LOG_NVERIFY) && !defined(NLOG)
 /**
 *   @brief "мягкий" assert с сообщением в лог
 */
-#if !defined(LOG_NVERIFY) && !defined(NLOG)
-
 #define log_verify(condition, ret_val)                              \
         if (!(condition))                                           \
         {                                                           \
