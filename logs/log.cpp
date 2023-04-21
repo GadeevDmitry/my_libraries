@@ -50,25 +50,38 @@ static void LOG_STREAM_CLOSE()
 // TRACE SHELL
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-void _trace_push(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line)
+void _trace_push()
 {
     #ifdef LOG_NTRACE
     return;
     #else
 
-    log_assert(cur_file != nullptr);
-    log_assert(cur_func != nullptr);
+    log_verify(IS_TRACE_VALID == true, (void) 0);
+
+    IS_TRACE_VALID = _trace_push(&TRACE);
+
+    #endif //!LOG_NTRACE
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+void _trace_upd(const char *const file,
+                const char *const func,
+                const int         line)
+{
+    #ifdef LOG_NTRACE
+    return;
+    #endif
+
+    log_assert(file != nullptr);
+    log_assert(func != nullptr);
 
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    IS_TRACE_VALID = _trace_push(&TRACE, cur_file, cur_func, cur_line);
-
-    #endif //!LOG_NTRACE
+    _trace_front_upd(&TRACE, file, func, line);
 }
 
 #pragma GCC diagnostic pop
@@ -83,7 +96,7 @@ void _trace_pop()
 
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    _trace_pop(&TRACE);
+    IS_TRACE_VALID = _trace_pop(&TRACE);
 
     #endif //!LOG_NTRACE
 }

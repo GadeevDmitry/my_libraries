@@ -45,20 +45,30 @@ void _log_tab_message(const char *fmt, ...);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Оболочка для _trace_push(trace*, const char*, const char*, const int).
-*   Создана с целью скрыть глобальную trace переменную.
+*   @brief Оболочка для _trace_push(trace*).
+*   Создана с целью скрыть глобальную переменную TRACE.
 *
-*   @see _trace_push(trace*, const char*, const char*, const int)
+*   @see _trace_push(trace*)
 */
-void _trace_push(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line);
+void _trace_push();
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Оболочка для _trace_front_upd(const char* const file, const char* const func, const int line).
+*   Создана с целью скрыть глобальную переменную TRACE.
+*
+*   @see _trace_front_upd(const char* const file, const char* const func, const int line)
+*/
+void _trace_upd(const char *const file,
+                const char *const func,
+                const int         line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Оболочка для _trace_pop(trace*).
-*   Создана с целью скрыть глобальную trace переменную.
+*   Создана с целью скрыть глобальную переменную TRACE.
 *
 *   @see _trace_pop(trace*)
 */
@@ -68,7 +78,7 @@ void _trace_pop();
 
 /**
 *   @brief Оболочка для _trace_dump(const trace*).
-*   Создана с целью скрыть глобальную trace переменную.
+*   Создана с целью скрыть глобальную переменную TRACE.
 *
 *   @see _trace_dump(const trace*)
 */

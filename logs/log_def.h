@@ -10,14 +10,16 @@
 
 #if !defined(NLOG) && !defined(LOG_NTRACE)
 
-#define $            _trace_push(__FILE__, __PRETTY_FUNCTION__, __LINE__);  ///< push текущей позиции стек trace
-#define $$           _trace_pop ();                                         ///< pop из стека trace
+#define $            _trace_upd (__FILE__, __PRETTY_FUNCTION__, __LINE__);  ///< обновление строки для следующего push
+#define $i           _trace_push();                                         ///< push в стек trace
+#define $o           _trace_pop ();                                         ///< pop из стека trace
 #define trace_dump() _trace_dump()                                          ///< dump стека trace
 
 #else
 
 #define $
-#define $$
+#define $i
+#define $o
 #define trace_dump()
 
 #endif

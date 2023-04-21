@@ -52,6 +52,8 @@ void _trace_dtor(trace *const trc);
 *   @param file [in]      - имя файла
 *   @param func [in]      - имя функции
 *   @param line [in]      - номер строки
+*
+*   @return true, если все ок, false - иначе
 */
 bool _trace_push(trace *const trc);
 
@@ -61,8 +63,10 @@ bool _trace_push(trace *const trc);
 *   @brief Удаляет frame из стека вызовов.
 *
 *   @param trc [in][out] - trace to pop the frame from
+*
+*   @return true, если все ок, false - иначе
 */
-void _trace_pop(trace *const trc);
+bool _trace_pop(trace *const trc);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -75,9 +79,9 @@ void _trace_pop(trace *const trc);
 *   @param func [in]      - имя функции
 *   @param line [in]      - номер строки
 */
-void trace_front_upd(trace *const trc, const char *const file,
-                                       const char *const func,
-                                       const int         line);
+void _trace_front_upd(trace *const trc, const char *const file,
+                                        const char *const func,
+                                        const int         line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

@@ -54,7 +54,7 @@ bool _trace_ctor(trace *const trc)
     $stk = (source_pos *) log_calloc(DEFAULT_TRACE_CAPACITY, sizeof(source_pos));
     if ($stk == nullptr)
     {
-        log_error("can't allocate memory for TRACE.data");
+        log_error("can't allocate memory for TRACE.srack_trace");
         return false;
     }
 
@@ -92,7 +92,6 @@ bool _trace_push(trace *const trc)
 static bool trace_resize(trace *const trc)
 {
     log_assert(trc != nullptr);
-    log_assert($size <= $capacity);
 
     if ($size != $capacity) return true;
 
@@ -101,7 +100,7 @@ static bool trace_resize(trace *const trc)
     void  *new_stk = realloc($stk, new_capacity * sizeof(source_pos));
     if    (new_stk == nullptr)
     {
-        log_error("can't allocate memory for TRACE.data");
+        log_error("can't allocate memory for TRACE.stack_trace");
         return false;
     }
 
@@ -113,9 +112,9 @@ static bool trace_resize(trace *const trc)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void trace_front_upd(trace *const trc, const char *const file,
-                                       const char *const func,
-                                       const int         line)
+void _trace_front_upd(trace *const trc, const char *const file,
+                                        const char *const func,
+                                        const int         line)
 {
     log_assert(trc  != nullptr);
     log_assert(file != nullptr);
@@ -126,14 +125,13 @@ void trace_front_upd(trace *const trc, const char *const file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void _trace_pop(trace *const trc)
+bool _trace_pop(trace *const trc)
 {
     log_assert(trc != nullptr);
 
-    log_assert($size <= $capacity);
-    log_assert($size != 0);
-
     $size--;
+
+    return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -154,6 +152,8 @@ void _trace_dump(const trace *const trc)
 
 static inline void trace_el_dump(const source_pos *const src_pos, const size_t index)
 {
+    log_assert(src_pos != nullptr);
+
     log_tab_message(HTML_COLOR_MEDIUM_BLUE "#%d:" HTML_COLOR_CANCEL "\n", index);
     source_pos_dump(src_pos);
 }

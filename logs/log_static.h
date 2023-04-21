@@ -7,6 +7,9 @@
 #include <stdarg.h>
 #include <assert.h>
 
+#define LOG_NDEBUG
+#define LOG_NVERIFY
+#define NDEBUG
 #include "log.h"
 #include "log_settings.h"
 
