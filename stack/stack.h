@@ -36,11 +36,6 @@ struct stack
 
 /**
 *   @brief Stack_ctor.
-*   Оболочка для back trace.
-*
-*   @param cur_file  [in] - файл в точке вызова
-*   @param cur_func  [in] - функция в точке вызова
-*   @param cur_line  [in] - строка в точке вызова
 *
 *   @param stk       [out] - указатель на стек
 *   @param el_size   [in]  - размер элемента стека
@@ -48,23 +43,14 @@ struct stack
 *   @param el_dtor   [in]  - указатель на dtor элемента стека
 *   @param el_dump   [in]  - указатель на dump элемента стека
 */
-bool _stack_ctor(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-
-                 stack *const stk, const size_t el_size, const void *const el_poison                     = nullptr,
-                                                               void (     *el_dtor  )(      void *const) = nullptr,
-                                                               void (     *el_dump  )(const void *const) = nullptr);
+bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison                     = nullptr,
+                                                              void (     *el_dtor  )(      void *const) = nullptr,
+                                                              void (     *el_dump  )(const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Создает стек в динамической памяти.
-*   Оболочка для back trace.
-*
-*   @param cur_file  [in] - файл в точке вызова
-*   @param cur_func  [in] - функция в точке вызова
-*   @param cur_line  [in] - строка в точке вызова
 *
 *   @param el_size   [in]  - размер элемента стека
 *   @param el_poison [in]  - указатель на POISON-элемент стека
@@ -73,13 +59,9 @@ bool _stack_ctor(const char *const cur_file,
 *
 *   @return указатель на созданный стек или nullptr в случае ошибки
 */
-stack *_stack_new(const char *const cur_file,
-                  const char *const cur_func,
-                  const int         cur_line,
-
-                  const size_t el_size, const void *const el_poison                     = nullptr,
-                                              void (     *el_dtor  )(      void *const) = nullptr,
-                                              void (     *el_dump  )(const void *const) = nullptr);
+stack *stack_new(const size_t el_size, const void *const el_poison                     = nullptr,
+                                             void (     *el_dtor  )(      void *const) = nullptr,
+                                             void (     *el_dump  )(const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
@@ -87,19 +69,10 @@ stack *_stack_new(const char *const cur_file,
 
 /**
 *   @brief Stack_dtor.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
 *
 *   @param stk      [in] - указатель на стек
 */
-void _stack_dtor(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-
-                 void *const _stk);
+void stack_dtor(void *const _stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // push pop
@@ -107,43 +80,25 @@ void _stack_dtor(const char *const cur_file,
 
 /**
 *   @brief Кладет элемент стека в конец.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in]      - файл в точке вызова
-*   @param cur_func [in]      - функция в точке вызова
-*   @param cur_line [in]      - строка в точке вызова
 *
 *   @param stk      [in, out] - стек
 *   @param data     [in]      - указатель на элемент
 *
 *   @return true, если все ОК, false в случае ошибки
 */
-bool _stack_push(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-
-                 stack *const stk, const void *const data);
+bool stack_push(stack *const stk, const void *const data);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет последний элемент стека.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in]      - файл в точке вызова
-*   @param cur_func [in]      - функция в точке вызова
-*   @param cur_line [in]      - строка в точке вызова
 *
 *   @param stk      [in, out] - стек
 *   @param data     [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
 *
 *   @return true, если все ОК, false в случае ошибки
 */
-bool _stack_pop(const char *const cur_file,
-                const char *const cur_func,
-                const int         cur_line,
-
-                stack *const stk, void *const data = nullptr);
+bool stack_pop(stack *const stk, void *const data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // other
@@ -151,42 +106,24 @@ bool _stack_pop(const char *const cur_file,
 
 /**
 *   @brief Показывает содержимое последнего элемента стека.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in]  - файл в точке вызова
-*   @param cur_func [in]  - функция в точке вызова
-*   @param cur_line [in]  - строка в точке вызова
 *
 *   @param stk      [in]  - стек
 *   @param data     [out] - указатель, куда скопировать содержимое удаляемого элемента
 *
 *   @return true, если все ОК, false в случае ошибки
 */
-bool _stack_front(const char *const cur_file,
-                  const char *const cur_func,
-                  const int         cur_line,
-
-                  const stack *const stk, void *const data);
+bool stack_front(const stack *const stk, void *const data);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Проверяет, пустой ли стек.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
 *
 *   @param stk      [in] - стек
 *
 *   @return true, если стек пустой, false иначе, или в случае ошибки
 */
-bool _stack_is_empty(const char *const cur_file,
-                     const char *const cur_func,
-                     const int         cur_line,
-
-                     const stack *const stk);
+bool stack_is_empty(const stack *const stk);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // stack dump
@@ -194,20 +131,9 @@ bool _stack_is_empty(const char *const cur_file,
 
 /**
 *   @brief Stack_dump.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
 *
 *   @param _stk     [in] - стек
 */
-void _stack_dump(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
-
-                 const void *const _stk);
-
-#include "stack_def.h"
+void stack_dump(const void *const _stk);
 
 #endif //STACK_H

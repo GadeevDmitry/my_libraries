@@ -287,6 +287,7 @@ bool _trace_pop(trace *const trc)
     #endif
 
     $size--;
+    source_pos_ctor(&$front, $stk + $size);
 
     return true;
 }
