@@ -2,10 +2,9 @@
 #ifndef TRACE_SETTINGS_H
 #define TRACE_SETTINGS_H
 
-#define LOG_NDEBUG
-#define LOG_NVERIFY
-#define LOG_NLEAK
 #define NDEBUG
+#define NVERIFY
+#define LOG_NLEAK
 
 static const size_t DEFAULT_TRACE_CAPACITY = 4; ///< емкость стека по умолчанию
 

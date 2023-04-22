@@ -75,24 +75,28 @@
 #define log_warning_message(fmt, end, ...) log_message(HTML_COLOR_DARK_ORANGE fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_message, но DARK_ORANGE цветом
 #define log_service_message(fmt, end, ...) log_message(HTML_COLOR_MEDIUM_BLUE fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_message, но MEDIUM_BLUE цветом
 #define log_default_message(fmt, end, ...) log_message(HTML_COLOR_BLACK       fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_message, но BLACK       цветом
+#define log_poison_message( fmt, end, ...) log_message(HTML_COLOR_POISON      fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_message, но OLIVE       цветом
 
 #define log_tab_ok_message(     fmt, end, ...) log_tab_message(HTML_COLOR_LIME_GREEN  fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_tab_message, но LIME_GREEN  цветом
 #define log_tab_error_message(  fmt, end, ...) log_tab_message(HTML_COLOR_DARK_RED    fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_tab_message, но DARK_RED    цветом
 #define log_tab_warning_message(fmt, end, ...) log_tab_message(HTML_COLOR_DARK_ORANGE fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_tab_message, но DARK_ORANGE цветом
 #define log_tab_service_message(fmt, end, ...) log_tab_message(HTML_COLOR_MEDIUM_BLUE fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_tab_message, но MEDIUM_BLUE цветом
 #define log_tab_default_message(fmt, end, ...) log_tab_message(HTML_COLOR_BLACK       fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_tab_message, но BLACK       цветом
+#define log_tab_poison_message( fmt, end, ...) log_tab_message(HTML_COLOR_POISON      fmt HTML_COLOR_CANCEL end, ##__VA_ARGS__) ///< ~ log_tab_message, но OLIVE       цветом
 #else // NLOG
 #define log_ok_message(     fmt, end, ...)
 #define log_error_message(  fmt, end, ...)
 #define log_warning_message(fmt, end, ...)
 #define log_service_message(fmt, end, ...)
 #define log_default_message(fmt, end, ...)
+#define log_poison_message( fmt, end, ...)
 
 #define log_tab_ok_message(     fmt, end, ...)
 #define log_tab_error_message(  fmt, end, ...)
 #define log_tab_warning_message(fmt, end, ...)
 #define log_tab_service_message(fmt, end, ...)
 #define log_tab_default_message(fmt, end, ...)
+#define log_tab_poison_message( fmt, end, ...)
 #endif
 
 #ifndef NLOG

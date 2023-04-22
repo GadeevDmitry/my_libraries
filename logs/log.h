@@ -252,7 +252,7 @@ void _log_free(void *ptr);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 
-#if !defined(LOG_NDEBUG) && !defined(NLOG)
+#if !defined(NDEBUG) && !defined(NLOG) && !defined(LOG_NDEBUG)
 /**
 *   @brief assert с сообщением в лог файл
 */
@@ -275,14 +275,14 @@ void _log_free(void *ptr);
 			    abort();                                            \
             }
 
-#else //defined(LOG_NDEBUG) || defined(NLOG)
+#else // defined(NDEBUG) || defined(NLOG) || defined(LOG_NDEBUG)
 /**
 *   @brief <=> assert
 */
 #define log_assert(condition) assert(condition)
 #endif
 
-#if !defined(LOG_NVERIFY) && !defined(NLOG)
+#if   !defined(NVERIFY) && !defined(NLOG) && !defined(LOG_NVERIFY)
 /**
 *   @brief "мягкий" assert с сообщением в лог
 */
@@ -300,7 +300,13 @@ void _log_free(void *ptr);
         $o  return ret_val;                                         \
         }
 
-#else //defined(LOG_NVERIFY) || defined(NLOG)
+#elif !defined(NVERIFY)
+/**
+*   @brief "мягкий" assert без сообщения в лог
+*/
+#define log_verify(condition, ret_val)                              \
+        if (!(condition)) { $o return ret_val; }
+#else
 #define log_verify(condition, ret_val)
 #endif
 

@@ -126,27 +126,27 @@ static inline void trace_el_dump(const source_pos *const src_pos, const size_t i
 #define $size       (trc->size)
 #define $capacity   (trc->capacity)
 
-#if !defined(NLOG) && !defined(LOG_NVERIFY)
+#if   !defined(NVERIFY) && !defined(NLOG) && !defined(LOG_NVERIFY)
 
 /**
-*   @brief Оболочка для верификатора trace.
+*   @brief Оболочка для верификатора trace с выводом в лог.
 */
-#define log_trace_verify(trc, ret_val)              \
-    if (!trace_verify(trc))                         \
-    {                                               \
-        log_tab_message(HTML_COLOR_DARK_RED "\n"    \
-                        "ERROR: "                   \
-                        "TRACE VERIFY FAILED \n"    \
-                        "====================\n");  \
-        trace_debug_dump(trc);                      \
-        log_tab_message("===================="      \
-                        HTML_COLOR_CANCEL "\n\n");  \
-                                                    \
-        return ret_val;                             \
+#define log_trace_verify(trc, ret_val)                              \
+    if (!trace_verify(trc))                                         \
+    {                                                               \
+        log_tab_message(HTML_COLOR_DARK_RED "\n"                    \
+                        "ERROR: "                                   \
+                        "TRACE VERIFY FAILED \n"                    \
+                        "====================\n");                  \
+        trace_debug_dump(trc);                                      \
+        log_tab_message("===================="                      \
+                        HTML_COLOR_CANCEL "\n\n");                  \
+                                                                    \
+        return ret_val;                                             \
     }
 
 /**
-*   @brief Оболочка для верификатора source_pos.
+*   @brief Оболочка для верификатора source_pos с выводом в лог.
 */
 #define log_src_pos_verify(trc, src_pos, ret_val)                   \
     if (!source_pos_verify(src_pos))                                \
@@ -165,7 +165,21 @@ static inline void trace_el_dump(const source_pos *const src_pos, const size_t i
         return ret_val;                                             \
     }
 
-#else //defined(NLOG) || defined(LOG_NVERIFY)
+#elif !defined(NVERIFY)
+
+/**
+*   @brief Оболочка для верификатора trace без вывода в лог
+*/
+#define log_trace_verify(trc, ret_val)                              \
+    if (!trace_verify(trc)) { return ret_val; }
+
+/**
+*   @brief Оболочка для верификатора source_pos без вывода в лог
+*/
+#define log_src_pos_verify(trc, src_pos, ret_val)                   \
+    if (!source_pos_verify(src_pos)) { return ret_val; }
+
+#else
 #define log_trace_verify(trc, ret_val)
 #define log_src_pos_verify(trc, src_pos, ret_val)
 #endif
