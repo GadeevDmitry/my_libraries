@@ -22,6 +22,21 @@
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
+*   @brief Верификатор source_pos.
+*/
+static bool source_pos_verify(const source_pos *const src_pos);
+
+/**
+*   @brief Dump source_pos, если структура невалидна.
+*   Валидность определяется верификатором source_pos_verify(const source_pos* src_pos).
+*
+*   @see source_pos_verify(const source_pos* src_pos)
+*/
+static void source_pos_debug_dump(const source_pos *const src_pos);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
 *   @brief source_pos ctor.
 *
 *   @param src_pos [out] -  source_pos to ctor
@@ -58,6 +73,30 @@ static inline void source_pos_dump(const source_pos *const src_pos);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
+*   @brief Верификатор trace.
+*/
+static bool trace_verify(const trace *const trc);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Dump trace, если структура невалидна.
+*   Валидность определяется верификаторм trace_verify(const trace* trc).
+*
+*   @see trace_verify(const trace* trc)
+*/
+static void trace_debug_dump(const trace *const trc);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Debug dump trace.stack_trace поля.
+*/
+static void trace_stack_debug_dump(const trace *const trc);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
 *   @brief Реалоцирует память в стеке вызовов.
 *
 *   @return true, если все ОК, false в случае ошибки
@@ -75,7 +114,7 @@ static bool trace_resize(trace *const trc);
 static inline void trace_el_dump(const source_pos *const src_pos, const size_t index);
 
 //================================================================================================================================
-// GLOBAL
+// MACRO
 //================================================================================================================================
 
 #define $file       (src_pos->file)
@@ -86,5 +125,49 @@ static inline void trace_el_dump(const source_pos *const src_pos, const size_t i
 #define $stk        (trc->stack_trace)
 #define $size       (trc->size)
 #define $capacity   (trc->capacity)
+
+#if !defined(NLOG) && !defined(LOG_NVERIFY)
+
+/**
+*   @brief Оболочка для верификатора trace.
+*/
+#define log_trace_verify(trc, ret_val)              \
+    if (!trace_verify(trc))                         \
+    {                                               \
+        log_tab_message(HTML_COLOR_DARK_RED "\n"    \
+                        "ERROR: "                   \
+                        "TRACE VERIFY FAILED \n"    \
+                        "====================\n");  \
+        trace_debug_dump(trc);                      \
+        log_tab_message("===================="      \
+                        HTML_COLOR_CANCEL "\n\n");  \
+                                                    \
+        return ret_val;                             \
+    }
+
+/**
+*   @brief Оболочка для верификатора source_pos.
+*/
+#define log_src_pos_verify(trc, src_pos, ret_val)                   \
+    if (!source_pos_verify(src_pos))                                \
+    {                                                               \
+        log_tab_error_message("\n" "ERROR: "                        \
+                              "SOURCE_POS VERIFY FAILED\n"          \
+                              "====================", "\n");        \
+        source_pos_debug_dump(src_pos);                             \
+                                                                    \
+        log_tab_message(HTML_COLOR_DARK_RED                         \
+                        "====================\n");                  \
+        _trace_dump(trc);                                           \
+        log_tab_message("===================="                      \
+                        HTML_COLOR_CANCEL "\n\n");                  \
+                                                                    \
+        return ret_val;                                             \
+    }
+
+#else //defined(NLOG) || defined(LOG_NVERIFY)
+#define log_trace_verify(trc, ret_val)
+#define log_src_pos_verify(trc, src_pos, ret_val)
+#endif
 
 #endif //TRACE_STATIC_H

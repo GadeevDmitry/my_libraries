@@ -105,14 +105,6 @@ void _log_error(const char *const cur_file,
                 const int         cur_line, const bool is_local_trace, const char *fmt, ...);
 
 /**
-*   @brief Выводит сообщение HTML_COLOR_DARK_RED цветом.
-*   Правила задания аргументов аналогичны функции printf.
-*
-*   @param fmt [in] - формат вывода
-*/
-void _log_error_message(const char *fmt, ...);
-
-/**
 *   @brief Выводит сообщение об ошибке с координатами в точке вызова.
 *   Правила задания аргументов аналогичны функции printf.
 *
@@ -147,14 +139,6 @@ void _log_oneline_error(const char *const cur_file,
 void _log_warning(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line, const bool is_local_trace, const char *fmt, ...);
-
-/**
-*   @brief Выводит сообщение HTML_COLOR_DARK_ORANGE цветом.
-*   Правила задания аргументов аналогичны функции printf.
-*
-*   @param fmt [in] - формат вывода
-*/
-void _log_warning_message(const char *fmt, ...);
 
 /**
 *   @brief Выводит warning с координатами в точке вызова.
@@ -230,8 +214,6 @@ void _log_free(void *ptr);
 // MACRO DEFENITIONS
 //================================================================================================================================
 
-#include "log_def.h"
-
 //--------------------------------------------------------------------------------------------------------------------------------
 // COLORS
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -255,13 +237,20 @@ void _log_free(void *ptr);
 #define BASH_COLOR_WHITE        "\033[0m"                   ///< BASH директива установки цвета шрифта: white
 
 //--------------------------------------------------------------------------------------------------------------------------------
-// EXCEPTIONS
+// COMMON
 //--------------------------------------------------------------------------------------------------------------------------------
+
+#include "log_def.h"
 
 /**
 *   @brief выводит в лог имя файла, имя функции, номер строки в точке вызова.
 */
 #define log_place() log_param_place(__FILE__, __PRETTY_FUNCTION__, __LINE__)
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// EXCEPTIONS
+//--------------------------------------------------------------------------------------------------------------------------------
+
 
 #if !defined(LOG_NDEBUG) && !defined(NLOG)
 /**
@@ -274,8 +263,7 @@ void _log_free(void *ptr);
                                 "ASSERTION FAILED: %s\n",           \
 				                #condition);                        \
                 log_tab_message("====================\n");          \
-                log_place ();                                       \
-                trace_dump();                                       \
+            $   trace_dump();                                       \
                 log_tab_message("===================="              \
                                 HTML_COLOR_CANCEL "\n\n");          \
                                                                     \
@@ -305,12 +293,11 @@ void _log_free(void *ptr);
                             "VERIFY FAILED: %s\n",                  \
                             #condition);                            \
             log_tab_message("====================\n");              \
-            log_place ();                                           \
-            trace_dump();                                           \
+        $   trace_dump();                                           \
             log_tab_message("===================="                  \
                             HTML_COLOR_CANCEL "\n\n");              \
                                                                     \
-            return ret_val;                                         \
+        $o  return ret_val;                                         \
         }
 
 #else //defined(LOG_NVERIFY) || defined(NLOG)

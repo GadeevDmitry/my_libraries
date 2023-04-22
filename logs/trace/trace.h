@@ -79,7 +79,7 @@ bool _trace_pop(trace *const trc);
 *   @param func [in]      - имя функции
 *   @param line [in]      - номер строки
 */
-void _trace_front_upd(trace *const trc, const char *const file,
+bool _trace_front_upd(trace *const trc, const char *const file,
                                         const char *const func,
                                         const int         line);
 

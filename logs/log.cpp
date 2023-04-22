@@ -11,7 +11,9 @@ static int LOG_STREAM_OPEN()
 
     if (LOG_STREAM == nullptr)
     {
-        fprintf(stderr, "ERROR: Can't open log file. All log-messages will disappear\n");
+        fprintf(stderr, BASH_COLOR_RED
+                        "ERROR: Can't open log-file \"%s\". All log-messages will disappear.\n"
+                        BASH_COLOR_WHITE, LOG_FILE);
         return 0;
     }
 
@@ -39,8 +41,8 @@ static void LOG_STREAM_CLOSE()
 
     fprintf(LOG_STREAM, "\n");
 
-    if (DYNAMIC_MEMORY == 0) log_message(HTML_COLOR_LIME_GREEN "DYNAMIC_MEMORY = 0. \n" HTML_COLOR_CANCEL);
-    else                     log_message(HTML_COLOR_DARK_RED   "DYNAMIC_MEMORY = %d.\n" HTML_COLOR_CANCEL, DYNAMIC_MEMORY);
+    if (DYNAMIC_MEMORY == 0) log_ok_message   ("DYNAMIC_MEMORY = 0." , "\n");
+    else                     log_error_message("DYNAMIC_MEMORY = %d.", "\n", DYNAMIC_MEMORY);
 
     fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
@@ -56,11 +58,12 @@ void _trace_push()
     return;
     #else
 
-    log_verify(IS_TRACE_VALID == true, (void) 0);
+    if (IS_TRACE_VALID == false) return;
 
     IS_TRACE_VALID = _trace_push(&TRACE);
+    log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    #endif //!LOG_NTRACE
+    #endif // !LOG_NTRACE
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -74,14 +77,17 @@ void _trace_upd(const char *const file,
 {
     #ifdef LOG_NTRACE
     return;
-    #endif
+    #else
 
     log_assert(file != nullptr);
     log_assert(func != nullptr);
 
+    if (IS_TRACE_VALID == false) return; 
+
+    IS_TRACE_VALID = _trace_front_upd(&TRACE, file, func, line);
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    _trace_front_upd(&TRACE, file, func, line);
+    #endif // !LOG_NTRACE
 }
 
 #pragma GCC diagnostic pop
@@ -94,11 +100,12 @@ void _trace_pop()
     return;
     #else
 
-    log_verify(IS_TRACE_VALID == true, (void) 0);
+    if (IS_TRACE_VALID == false) return;
 
     IS_TRACE_VALID = _trace_pop(&TRACE);
+    log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    #endif //!LOG_NTRACE
+    #endif // !LOG_NTRACE
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -109,11 +116,11 @@ void _trace_dump()
     return;
     #else
 
-    log_verify(IS_TRACE_VALID == true, (void) 0);
+    if (IS_TRACE_VALID == false) return;
 
     _trace_dump(&TRACE);
 
-    #endif //!LOG_NTRACE
+    #endif // !LOG_NTRACE
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -176,7 +183,7 @@ static inline void _log_message(const char *fmt, va_list ap)
 
 void _log_tab_message(const char *fmt, ...)
 {
-    log_assert(fmt != nullptr);
+    log_verify(fmt != nullptr, (void) 0);
 
     if (_OPEN_CLOSE_LOG_STREAM == 0) return;
 
@@ -233,23 +240,6 @@ void _log_error(const char *const cur_file,
 }
 
 #pragma GCC diagnostic pop
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-void _log_error_message(const char *fmt, ...)
-{
-    log_verify(fmt != nullptr, (void) 0);
-
-    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
-
-    log_message(HTML_COLOR_DARK_RED);
-
-    va_list  ap;
-    va_start(ap, fmt);
-    _log_tab_message(fmt, ap);
-
-    log_message(HTML_COLOR_CANCEL);
-}
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -310,23 +300,6 @@ void _log_warning(const char *const cur_file,
 }
 
 #pragma GCC diagnostic pop
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-void _log_warning_message(const char *fmt, ...)
-{
-    log_verify(fmt != nullptr, (void) 0);
-
-    if (_OPEN_CLOSE_LOG_STREAM == 0) return;
-
-    log_message(HTML_COLOR_DARK_ORANGE);
-
-    va_list ap;
-    va_start(ap, fmt);
-    _log_tab_message(fmt, ap);
-
-    log_message(HTML_COLOR_CANCEL);
-}
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
