@@ -82,6 +82,9 @@ $o  return (char *) $data + (index * $el_size);
 // stack verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 static unsigned _stack_verify(const stack *const stk)
 {
 $i
@@ -128,6 +131,8 @@ $   stack_static_dump(stk, true);
 $   log_message("\n");
 $o
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // ctor
@@ -188,11 +193,23 @@ $o  return stk;
 void stack_dtor(void *const _stk)
 {
 $i
+    if (_stk == nullptr) { $o return; }
+
     stack *const stk = (stack *) _stk;
 $   stack_verify(stk, ;);
 
 $   stack_data_dtor(stk);
     *stk = STK_POISON;
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void stack_free(void *const _stk)
+{
+$i
+$   stack_dtor(_stk);
+$   log_free  (_stk);
 $o
 }
 

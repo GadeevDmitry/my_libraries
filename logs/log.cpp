@@ -162,8 +162,7 @@ void _log_message(const char *fmt, ...)
 
     va_list  ap;
     va_start(ap, fmt);
-
-    _log_message(fmt, ap);
+   _log_message(fmt, ap);
 }
 
 static inline void _log_message(const char *fmt, va_list ap)
@@ -172,8 +171,7 @@ static inline void _log_message(const char *fmt, va_list ap)
     log_assert(_OPEN_CLOSE_LOG_STREAM != 0);
 
     char log_buff[LOG_BUFF_SIZE] = {};
-    vsprintf(log_buff, fmt, ap);
-
+    vsprintf (log_buff, fmt, ap);
     log_print(log_buff, false);
 
     va_end(ap);
@@ -189,8 +187,7 @@ void _log_tab_message(const char *fmt, ...)
 
     va_list  ap;
     va_start(ap, fmt);
-
-    _log_tab_message(fmt, ap);
+   _log_tab_message(fmt, ap);
 }
 
 static inline void _log_tab_message(const char *fmt, va_list ap)
@@ -227,10 +224,8 @@ void _log_error(const char *const cur_file,
                                         "ERROR:\n");
     va_list  ap;
     va_start(ap, fmt);
-    _log_tab_message(fmt, ap);
-
+   _log_tab_message(fmt, ap);
     log_tab_message("====================\n");
-    log_param_place(cur_file, cur_func, cur_line);
 
     #ifndef LOG_NTRACE
     if (is_local_trace) _trace_dump();
@@ -258,7 +253,7 @@ void _log_oneline_error(const char *const cur_file,
 
     va_list  ap;
     va_start(ap, fmt);
-    _log_tab_message(fmt, ap);
+   _log_tab_message(fmt, ap);
 
     log_tab_message("====================\n");
     log_param_place(cur_file, cur_func, cur_line);
@@ -287,10 +282,8 @@ void _log_warning(const char *const cur_file,
 
     va_list ap;
     va_start(ap, fmt);
-    _log_tab_message(fmt, ap);
-
+   _log_tab_message(fmt, ap);
     log_tab_message("====================\n");
-    log_param_place(cur_file, cur_func, cur_line);
 
     #ifndef LOG_NTRACE
     if (is_local_trace) _trace_dump();

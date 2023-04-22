@@ -44,49 +44,30 @@ struct buffer
 
 /**
 *   @brief Сравнивает два вещественных числа.
-*   Оболочка для back_trace.
-*
-*   @param cur_file   [in] - файл в точке вызова
-*   @param cur_func   [in] - функция в точке вызова
-*   @param cur_line   [in] - строка в точке вызова
 *
 *   @param a          [in] - первое число
 *   @param b          [in] - второе число
 *   @param error_rate [in] - погрешность сравнения
 *
-*   @return   0, если a = b с учётом погрешности error_rate; < 0, если a < b; > 0, если a > b
+*   @return 0, если a = b с учётом погрешности error_rate; < 0, если a < b; > 0, если a > b
 */
-int _dblcmp(const char *const cur_file,
-            const char *const cur_func,
-            const int         cur_line,
+int dblcmp(const double a, const double b, const double error_rate = DELTA);
 
-            const double a, const double b, const double error_rate = DELTA);
+//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Обменивает значения двух переменных.
-*   Оболочка для back_trace.
-*
-*   @param cur_file  [in]      - файл в точке вызова
-*   @param cur_func  [in]      - функция в точке вызова
-*   @param cur_line  [in]      - строка в точке вызова
 *
 *   @param a         [in, out] - указатель на первую переменную
 *   @param b         [in, out] - указатель на вторую переменную
 *   @param elem_size [in]      - размер (в байтах) переменной
 */
-void _my_swap(const char *const cur_file,
-              const char *const cur_func,
-              const int         cur_line,
+void my_swap(void *a, void *b, size_t elem_size);
 
-              void *a, void *b, size_t elem_size);
+//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Сравнивает (по байтам) две переменные.
-*   Оболочка для back_trace.
-*
-*   @param cur_file  [in] - файл в точке вызова
-*   @param cur_func  [in] - функция в точке вызова
-*   @param cur_line  [in] - строка в точке вызова
 *
 *   @param a         [in] - указатель на первую переменную
 *   @param b         [in] - указатель на вторую переменную
@@ -95,49 +76,42 @@ void _my_swap(const char *const cur_file,
 *   @return true, если переменные равны, false иначе
 *
 */
-bool _is_byte_equal(const char *const cur_file,
-                    const char *const cur_func,
-                    const int         cur_line,
+bool is_byte_equal(const void *a, const void *b, size_t elem_size);
 
-                    const void *a, const void *b, size_t elem_size);
+//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Читает слово из не более max_size - 1 символов в массив str из потока stream.
-*   Игнорирует space-символы в начале.
-*   Слово - последовательность подряд идущих not_space-символов.
-*   Оболочка для back_trace.
+*   @brief Считывает space-символы до первого не space-символа.
 *
-*   @param cur_file [in]  - файл в точке вызова
-*   @param cur_func [in]  - функция в точке вызова
-*   @param cur_line [in]  - строка в точке вызова
-*
-*   @param str      [out] - массив, куда читать 
-*   @param max_size [in]  - максимальное число символов
-*   @param stream   [in]  - поток
-*/
-int _get_word(const char *const cur_file,
-              const char *const cur_func,
-              const int         cur_line,
-
-              char *const str, const size_t max_size, FILE *const stream);
-
-/**
-*   @brief Считывает space-символы до первого not_space-символа.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
-*
-*   @param stream   [in] - поток
+*   @param stream [in] - поток
 *
 *   @return EOF, если после space-символов встретился конец файла, и 0 иначе
 */
-int _skip_spaces(const char *const cur_file,
-                 const char *const cur_func,
-                 const int         cur_line,
+int skip_spaces(FILE *const stream);
 
-                 FILE *const stream);
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define num_cmp(type, name, operator)                                                       \
+__always_inline type name(const type a, const type b);                                      \
+                type name(const type a, const type b) { return (a operator b) ? a : b; }
+
+num_cmp(int      , int_min, <)
+num_cmp(int      , int_max, >)
+num_cmp(long     ,   l_min, <)
+num_cmp(long     ,   l_max, >)
+num_cmp(long long,  ll_min, <)
+num_cmp(long long,  ll_max, >)
+
+num_cmp(size_t            , size_t_min, <)
+num_cmp(size_t            , size_t_max, >)
+num_cmp(unsigned          ,   uint_min, <)
+num_cmp(unsigned          ,   uint_max, >)
+num_cmp(unsigned long     ,     ul_min, <)
+num_cmp(unsigned long     ,     ul_max, >)
+num_cmp(unsigned long long,    ull_min, <)
+num_cmp(unsigned long long,    ull_max, >)
+
+#undef num_cmp
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // BUFFER
@@ -145,74 +119,36 @@ int _skip_spaces(const char *const cur_file,
 
 /**
 *   @brief Выделяет динамическую память для буфера buff размера buff_size.
-*   Оболочка для back_trace.
-*
-*   @param cur_file  [in]  - файл в точке вызова
-*   @param cur_func  [in]  - функция в точке вызова
-*   @param cur_line  [in]  - строка в точке вызова
 *
 *   @param buff      [out] - буфер
 *   @param buff_size [in]  - размер буфера (в байтах)
 *
 *   @return true, если всё ОК, false в случае ошибки
 */
-bool _buffer_ctor(const char *const cur_file,
-                  const char *const cur_func,
-                  const int         cur_line,
-
-                  buffer *const buff, const size_t buff_size);
+bool buffer_ctor(buffer *const buff, const size_t buff_size);
 
 /**
 *   @brief Выделяет динамическую память для содержимого файла <file_name>, заполняет поля буфера buff.
-*   Оболочка для back_trace.
-*
-*   @param cur_file  [in]  - файл в точке вызова
-*   @param cur_func  [in]  - функция в точке вызова
-*   @param cur_line  [in]  - строка в точке вызова
 *
 *   @param buff      [out] - буфер
 *   @param file_name [in]  - имя файла
 *
 *   @return true если всё ОК, false в случае ошибки
 */
-bool _buffer_ctor_file(const char *const cur_file,
-                       const char *const cur_func,
-                       const int         cur_line,
-
-                       buffer *const buff, const char *const file_name);
+bool buffer_ctor(buffer *const buff, const char *const file_name);
 
 /**
 *   @brief Buffer_dtor.
-*   Оболочка для back_trace.
 *
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
-*
-*   @param _buff    [in] - буффер
+*   @param _buff [in] - буффер
 */
-void _buffer_dtor(const char *const cur_file,
-                  const char *const cur_func,
-                  const int         cur_line,
-
-                  void *const _buff);
+void buffer_dtor(void *const _buff);
 
 /**
 *   @brief Buffer_dump.
-*   Оболочка для back_trace.
 *
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - строка в точке вызова
-*
-*   @param _buff    [in] - буффер
+*   @param _buff [in] - буффер
 */
-void _buffer_dump(const char *const cur_file,
-                  const char *const cur_func,
-                  const int         cur_line,
-
-                  const void *const _buff);
-
-#include "algorithm_def.h"
+void buffer_dump(const void *const _buff);
 
 #endif //ALGORITHM_H

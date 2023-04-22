@@ -14,8 +14,8 @@ LST_STAT_H   = $(LST)_static.h
 
 TRC_H   = $(TRC).h                             $(TRC)_settings.h
 LOG_H   = $(LOG).h $(LOG)_def.h $(LOG)_undef.h $(LOG)_settings.h
-ALG_H   = $(ALG).h $(ALG)_def.h $(ALG)_undef.h
-STK_H   = $(STK).h $(STK)_def.h $(STK)_undef.h $(STK)_settings.h
+ALG_H   = $(ALG).h                             $(ALG)_settings.h
+STK_H   = $(STK).h                             $(STK)_settings.h
 LST_H   = $(LST).h $(LST)_def.h $(LST)_undef.h $(LST)_settings.h
 
 TRC_O   = $(TRC).o
