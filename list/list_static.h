@@ -2,6 +2,11 @@
 #ifndef LIST_STATIC_H
 #define LIST_STATIC_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+
 #include "list_settings.h"
 #include "list.h"
 
@@ -106,87 +111,52 @@ static const list LST_POISON =
 // list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static unsigned _list_verify(const list *const lst);
-
 /**
 *   @brief Верификатор листа.
-*   Оболочка для back_trace.
 *
 *   @return битовая маска кодов ошибок из enum LST_STATUS
 *
 *   @see enum LST_STATUS
 */
-static unsigned _list_verify(const char *const cur_file,
-                             const char *const cur_func,
-                             const int         cur_line,
-
-                             const list *const lst);
+static unsigned _list_verify(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static unsigned _list_fictional_verify(const list *const lst);
 
 /**
 *   @brief Верификатор поля .fictional листа.
-*   Оболочка для back_trace.
 *
 *   @return битовая маска кодов ошибок из enum LST_STATUS
 *
 *   @see enum LST_STATUS
 */
-static unsigned _list_fictional_verify(const char *const cur_file,
-                                       const char *const cur_func,
-                                       const int         cur_line,
-
-                                       const list *const lst);
+static unsigned list_fictional_verify(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static unsigned _list_data_verify(const list *const lst);
 
 /**
 *   @brief Верификатор содержимого листа. Проверка листа на связность.
-*   Оболочка для back_trace.
 *
 *   @return битовая маска кодов ошибок из enum LST_STATUS
 *
 *   @see enum LST_STATUS
 */
-static unsigned _list_data_verify(const char *const cur_file,
-                                  const char *const cur_func,
-                                  const int         cur_line,
-
-                                  const list *const lst);
+static unsigned list_data_verify(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void _list_log_error(const list *const lst, const unsigned err);
-
 /**
 *   @brief Выводит сообщения об ошибках в листе по битовой маске ошибок. Полный дамп листа.
-*   Оболочка для back_trace.
 */
-static void _list_log_error(const char *const cur_file,
-                            const char *const cur_func,
-                            const int         cur_line,
-
-                            const list *const lst, const unsigned err);
+static void list_log_error(const list *const lst, const unsigned err);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list_node verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static unsigned _list_node_verify(const list_node *const lst_node, const bool is_independent);
-
 /**
 *   @brief Верификатор вершины листа.
-*   Оболочка для back_trace.
 *   В "независимом" режиме в случае ошибки вызовет _list_node_log_error() для вывода сообщения об ошибке и дампа вершины листа.
 *   Иначе просто вернет код ошибки.
-*
-*   @param cur_file       [in] - файл в точке вызова
-*   @param cur_func       [in] - функция в точке вызова
-*   @param cur_line       [in] - номер строки в точке вызова
 *
 *   @param lst_node       [in] - вершина листа
 *   @param is_independent [in] - true, если "независимый" режим, false иначе
@@ -195,90 +165,39 @@ static unsigned _list_node_verify(const list_node *const lst_node, const bool is
 *
 *   @see enum LST_STATUS
 */
-static unsigned _list_node_verify(const char *const cur_file,
-                                  const char *const cur_func,
-                                  const int         cur_line,
-
-                                  const list_node *const lst_node, const bool is_independent);
+static unsigned list_node_verify(const list_node *const lst_node, const bool is_independent);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static unsigned _list_data_node_verify(const list_node *const fictional_node,
-                                       const list_node *const       cur_node,
-                                       const list_node *const      prev_node);
-
 /**
 *   @brief Верификатор указателей вершины листа.
-*   Оболочка для back_trace.
-*
-*   @param cur_file       [in] - файл в точке вызова
-*   @param cur_func       [in] - функция в точке вызова
-*   @param cur_line       [in] - номер строки в точке вызова
 *
 *   @param fictional_node [in] - фиктивная вершина (поле .fictional) листа, к которому относится данная вершина
 *   @param       cur_node [in] - текущая вершина
 *   @param      prev_node [in] - предыдущая вершина
 */
-static unsigned _list_data_node_verify(const char *const cur_file,
-                                       const char *const cur_func,
-                                       const int         cur_line,
-
-                                       const list_node *const fictional_node,
-                                       const list_node *const       cur_node,
-                                       const list_node *const      prev_node);
+static unsigned list_data_node_verify(const list_node *const fictional_node,
+                                      const list_node *const       cur_node,
+                                      const list_node *const      prev_node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static void _list_node_log_error(const list_node *const lst_node, const unsigned err);
 
 /**
 *   @brief Выводит сообщения об ошибках в вершине листа по битовой маске ошибок. Дамп вершины листа.
-*   Оболочка для back_trace.
 */
-static void _list_node_log_error(const char *const cur_file,
-                                 const char *const cur_func,
-                                 const int         cur_line,
-
-                                 const list_node *const lst_node, const unsigned err);
+static void list_node_log_error(const list_node *const lst_node, const unsigned err);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_ctor(list *const lst, const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
-                                                              void (*el_dump) (const void *const) = nullptr);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static list *_list_new(const size_t el_size,    void (*el_dtor) (      void *const) = nullptr,
-                                                void (*el_dump) (const void *const) = nullptr);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_fictional_ctor(list *const lst);
 
 /**
 *   @brief Конструктор поля .fictional листа.
-*   Оболочка для back_trace.
 */
-static bool _list_fictional_ctor(const char *const cur_file,
-                                 const char *const cur_func,
-                                 const int         cur_line,
-
-                                 list *const lst);
+static bool list_fictional_ctor(list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool _list_node_ctor(list      *const lst,
-                            list_node *const lst_node,   const void      *const data,
-                                                         const list_node *const prev,
-                                                         const list_node *const next);
-
 /**
 *   @brief Конструктор вершины листа.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in]  - файл в точке вызова
-*   @param cur_func [in]  - функция в точке вызова
-*   @param cur_line [in]  - номер строки в точке вызова
 *
 *   @param lst      [in]  - лист, к которому относится данная вершина
 *   @param lst_node [out] - вершина листа
@@ -288,28 +207,15 @@ static bool _list_node_ctor(list      *const lst,
 *
 *   @return true, если все ОК, false в случае ошибки
 */
-static bool _list_node_ctor(const char *const cur_file,
-                            const char *const cur_func,
-                            const int         cur_line,
-
-                            list      *const lst,
-                            list_node *const lst_node, const void      *const data,
-                                                       const list_node *const prev,
-                                                       const list_node *const next);
+static bool list_node_ctor(list      *const lst,
+                           list_node *const lst_node,   const void      *const data,
+                                                        const list_node *const prev,
+                                                        const list_node *const next);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static list_node *_list_node_new(list *const lst,   const void      *const data,
-                                                    const list_node *const prev,
-                                                    const list_node *const next);
-
 /**
 *   @brief Создает вершину листа в динамической памяти.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - номер строки в точке вызова
 *
 *   @param lst      [in] - лист, к которому относится создаваемая вершина
 *   @param data     [in] - поле .data вершины листа
@@ -318,358 +224,134 @@ static list_node *_list_node_new(list *const lst,   const void      *const data,
 *
 *   @return указатель на вершину листа, nullptr в случае ошибки
 */
-static list_node *_list_node_new(const char *const cur_file,
-                                 const char *const cur_func,
-                                 const int         cur_line,
-
-                                 list *const lst, const void      *const data,
-                                                  const list_node *const prev,
-                                                  const list_node *const next);
+static list_node *list_node_new(list *const lst, const void      *const data,
+                                                 const list_node *const prev,
+                                                 const list_node *const next);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void _list_dtor(void *const _lst);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static void _list_fictional_dtor(list *const lst);
-
 /**
 *   @brief Деструктор пользовательских данных листа.
-*   Оболочка для back_trace.
 */
-static void _list_fictional_dtor(const char *const cur_file,
-                                 const char *const cur_func,
-                                 const int         cur_line,
-
-                                 list *const lst);
+static void list_fictional_dtor(list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static void _list_node_dtor(list *const lst, list_node *const lst_node);
 
 /**
 *   @brief Деструктор вершины листа.
-*   Оболочка для back_trace.
 */
-static void _list_node_dtor(const char *const cur_file,
-                            const char *const cur_func,
-                            const int         cur_line,
-
-                            list *const lst, list_node *const lst_node);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Оболочка для функции удаления элемента листа для back_trace.
-*/
-static void _list_private_el_dtor(const char *const cur_file,
-                                  const char *const cur_func,
-                                  const int         cur_line,
-
-                                  void (*el_dtor) (void *const),
-                                                   void *const el);
+static void list_node_dtor(list *const lst, list_node *const lst_node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // insert erase
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static list_node *_list_get_node(const list *const lst, const size_t index);
-
 /**
 *   @brief Возвращает указатель на вершину листа.
-*   Оболочка для back_trace.
-*
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - номер строки в точке вызова,
 *
 *   @param lst      [in] - лист
 *   @param index    [in] - порядковый номер вершины листа
 *
 *   @return указатель на вершину листа с порядковым номером index
 */
-static list_node *_list_get_node(const char *const cur_file,
-                                 const char *const cur_func,
-                                 const int         cur_line,
-
-                                 const list *const lst, const size_t index);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_insert(list *const lst, const void *const data, const size_t index);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_push_front(list *const lst, const void *const data);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_push_back(list *const lst, const void *const data);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_erase(list *const lst, const size_t index, void *const data = nullptr);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_pop_front(list *const lst, void *const data = nullptr);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_pop_back(list *const lst, void *const data = nullptr);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// list get
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_get(const list *const lst, const size_t index, void *const data);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_front(const list *const lst, void *const data);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_back(const list *const lst, void *const data);
+static list_node *list_get_node(const list *const lst, const size_t index);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void _list_dump(const void *const _lst);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static void _list_static_dump(const list *const lst, const bool is_full);
-
 /**
 *   @brief Дамп листа.
-*   Оболочка для back_trace.
 *   В "полном" режиме, помимо пользовательских данных, дампит и служебные. Используется для дампа невалидного листа.
-*
-*   @param cur_file [in] - файл в точке вызова
-*   @param cur_func [in] - функция в точке вызова
-*   @param cur_line [in] - номер строки в точке вызова
 *
 *   @param lst      [in] - лист
 *   @param is_full  [in] - true, если "полный" режим, false иначе
 */
-static void _list_static_dump(const char *const cur_file,
-                              const char *const cur_func,
-                              const int         cur_line,
-
-                              const list *const lst, const bool is_full);
+static void list_static_dump(const list *const lst, const bool is_full);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_public_fields_dump(const list *const lst);
 
 /**
 *   @brief Дамп полей листа.
-*   Оболочка для back_trace.
 */
-static bool _list_public_fields_dump(const char *const cur_file,
-                                     const char *const cur_func,
-                                     const int         cur_line,
-
-                                     const list *const lst);
+static bool list_public_fields_dump(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void _list_data_dump(const list *const lst, const bool are_poison_fields, const bool is_full);
-
 /**
 *   @brief Дамп содержимого листа.
-*   Оболочка для back_trace.
 *   В случае, если хотя бы одно из полей листа является POISON-значением, содержимое выведено не будет.
-*
-*   @param cur_file          [in] - файл в точке вызова
-*   @param cur_func          [in] - функция в точке вызова
-*   @param cur_line          [in] - номер строки в точке вызова
 *
 *   @param lst               [in] - лист
 *   @param are_poison_fields [in] - true, елси хотя бы одно из полей является POISON-значением, false иначе
 *   @param is_full           [in] - true, если "полный" режим
 */
-static void _list_data_dump(const char *const cur_file,
-                            const char *const cur_func,
-                            const int         cur_line,
-
-                            const list *const lst, const bool are_poison_fields, const bool is_full);
+static void list_data_dump(const list *const lst, const bool are_poison_fields, const bool is_full);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static bool _list_fictional_dump(const list *const lst, bool are_poison_fields, const bool is_full);
 
 /**
 *   @brief Дамп поля .fictional листа
-*   Оболочка для back_trace.
 */
-static bool _list_fictional_dump(const char *const cur_file,
-                                 const char *const cur_func,
-                                 const int         cur_line,
-
-                                 const list *const lst, bool are_poison_fields, const bool is_full);
+static bool list_fictional_dump(const list *const lst, bool are_poison_fields, const bool is_full);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static void _list_full_fictional_dump(const list *const lst);
 
 /**
 *   @brief Дамп служебных данных поля .fictional листа (указатели на первую и последнюю вершину).
-*   Оболочка для back_trace.
 */
-static void _list_full_fictional_dump(const char *const cur_file,
-                                      const char *const cur_func,
-                                      const int         cur_line,
-
-                                      const list *const lst);
+static void list_full_fictional_dump(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-static void _list_node_dump(const list *const lst, const list_node *const lst_node, const bool is_full);
 
 /**
 *   @brief Дамп вершины листа.
-*   Оболочка для back_trace.
 */
-static void _list_node_dump(const char *const cur_file,
-                            const char *const cur_func,
-                            const int         cur_line,
-
-                            const list *const lst, const list_node *const lst_node, const bool is_full);
+static void list_node_dump(const list *const lst, const list_node *const lst_node, const bool is_full);
 
 //--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Оболочка для функции дампа элемента листа для back_trace.
-*/
-static void _list_private_el_dump(const char *const cur_file,
-                                  const char *const cur_func,
-                                  const int         cur_line,
-
-                                  void (*el_dump) (const void *const),
-                                                   const void *const el);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static void _list_node_service_fields_dump(const list_node *const lst_node);
 
 /**
 *   @brief Дамп служебных полей вершины листа (указатели на предыдущую и следующую вершины).
 */
-static void _list_node_service_fields_dump(const char *const cur_file,
-                                           const char *const cur_func,
-                                           const int         cur_line,
-
-                                           const list_node *const lst_node);
+static void list_node_service_fields_dump(const list_node *const lst_node);
 
 //================================================================================================================================
-// MACRO DEFINITIONS
+// MACRO
 //================================================================================================================================
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#ifndef LIST_NVERIFY
+#if !defined(NVERIFY) && !defined(LIST_NVERIFY)
 #define list_verify(lst, ret_val)                                                                                   \
-    if (_list_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst) != LST_OK)                                       \
+    if (_list_verify(lst) != LST_OK)                                                                                \
     {                                                                                                               \
         return ret_val;                                                                                             \
     }
 #else
-#define list_verify(lst, ret_val) ;
+#define list_verify(lst, ret_val)
 #endif
 
-#if defined(LIST_DEBUG) && !defined(LIST_NVERIFY)
+#if !defined(NDEBUG) && !defined(LIST_NDEBUG)
 #define list_debug_verify(lst)                                                                                      \
-        log_assert(_list_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst) == LST_OK);
+        log_assert(_list_verify(lst) == LST_OK)
 #else
-#define list_debug_verify(lst) ;
+#define list_debug_verify(lst)
 #endif
-
-#define list_fictional_verify(lst) _list_fictional_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst)
-#define list_data_verify(     lst) _list_data_verify     (__FILE__, __PRETTY_FUNCTION__, __LINE__, lst)
-
-#define list_log_error(lst, err)   _list_log_error       (__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, err)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list_node verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define list_node_verify(lst_node)                                                                                  \
-       _list_node_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst_node, false)
-
-#define list_data_node_verify(fictional_node, cur_node, prev_node)                                                  \
-       _list_data_node_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, fictional_node, cur_node, prev_node)
-
-#if defined(LIST_DEBUG) && !defined(LIST_NVERIFY)
+#if !defined(NDEBUG) && !defined(LIST_NDEBUG)
 #define list_node_debug_verify(lst_node)                                                                            \
-    log_assert(_list_node_verify(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst_node, true) == LST_OK);
+    log_assert(list_node_verify(lst_node, true) == LST_OK);
 #else
-#define list_node_debug_verify(lst_node) ;
+#define list_node_debug_verify(lst_node)
 #endif
-
-#define list_node_log_error(lst_node, err)                                                                          \
-       _list_node_log_error(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst_node, err)
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// ctor
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#define list_fictional_ctor(lst)                                                                                    \
-       _list_fictional_ctor(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst)
-
-#define list_node_ctor(lst, lst_node, data, prev, next)                                                             \
-       _list_node_ctor(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, lst_node, data, prev, next)
-
-#define list_node_new(lst, data, prev, next)                                                                        \
-       _list_node_new(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, data, prev, next)
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// dtor
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#define list_fictional_dtor(lst)          _list_fictional_dtor (__FILE__, __PRETTY_FUNCTION__, __LINE__, lst)
-#define list_node_dtor(lst, lst_node)     _list_node_dtor      (__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, lst_node)
-#define list_private_el_dtor(el_dtor, el) _list_private_el_dtor(__FILE__, __PRETTY_FUNCTION__, __LINE__, el_dtor, el)
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// insert erase
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#define list_get_node(lst, index) _list_get_node(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, index)
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// dump
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#define list_static_dump(       lst, is_full)                                                                       \
-       _list_static_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, is_full)
-
-#define list_public_fields_dump(lst)                                                                                \
-       _list_public_fields_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst)
-
-#define list_data_dump(lst, are_poison_fields, is_full)                                                             \
-       _list_data_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, are_poison_fields, is_full)
-
-#define list_fictional_dump(lst, are_poison_fields, is_full)                                                        \
-       _list_fictional_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, are_poison_fields, is_full)
-
-#define list_full_fictional_dump(lst)                                                                               \
-       _list_full_fictional_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst)
-
-#define list_node_dump(lst, lst_node, is_full)                                                                      \
-       _list_node_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst, lst_node, is_full)
-
-#define list_private_el_dump(el_dump, el)                                                                           \
-       _list_private_el_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, el_dump, el)
-
-#define list_node_service_fields_dump(lst_node)                                                                     \
-       _list_node_service_fields_dump(__FILE__, __PRETTY_FUNCTION__, __LINE__, lst_node)
 
 #endif //LIST_STATIC_H

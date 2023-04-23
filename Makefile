@@ -12,11 +12,11 @@ ALG_STAT_H   = $(ALG)_static.h
 STK_STAT_H   = $(STK)_static.h
 LST_STAT_H   = $(LST)_static.h
 
-TRC_H   = $(TRC).h                             $(TRC)_settings.h
-LOG_H   = $(LOG).h $(LOG)_def.h $(LOG)_undef.h $(LOG)_settings.h
-ALG_H   = $(ALG).h                             $(ALG)_settings.h
-STK_H   = $(STK).h                             $(STK)_settings.h
-LST_H   = $(LST).h $(LST)_def.h $(LST)_undef.h $(LST)_settings.h
+TRC_H   = $(TRC).h $(TRC)_settings.h
+LOG_H   = $(LOG).h $(LOG)_settings.h $(LOG)_def.h $(LOG)_undef.h
+ALG_H   = $(ALG).h $(ALG)_settings.h
+STK_H   = $(STK).h $(STK)_settings.h
+LST_H   = $(LST).h $(LST)_settings.h
 
 TRC_O   = $(TRC).o
 LOG_O   = $(LOG).o
@@ -30,7 +30,7 @@ $(ALG_O): $(ALG_H) $(ALG_STAT_H) $(LOG_H)
 $(STK_O): $(STK_H) $(STK_STAT_H) $(LOG_H) $(ALG_H)
 $(LST_O): $(LST_H) $(LST_STAT_H) $(LOG_H) $(ALG_H)
 
-all: $(LOG_O) $(ALG_O) $(STK_O) $(LST_O)
+all: $(LOG_O) $(TRC_O) $(ALG_O) $(STK_O) $(LST_O)
 
 %.o: %.cpp
 	g++ -c $(CFLAGS) $< -o $@
