@@ -23,8 +23,8 @@ static bool source_pos_verify(const source_pos *const src_pos)
 static void source_pos_debug_dump(const source_pos *const src_pos)
 {
     log_tab_service_message("source_pos (addr: ", "");
-    if (src_pos == nullptr) log_error_message  ("nullptr", "");
-    else                    log_default_message("%p", "" , src_pos);
+    if (src_pos == nullptr) { log_error_message  ("nullptr", "");      }
+    else                    { log_default_message("%p", "" , src_pos); }
 
     log_service_message(")\n{", "\n");
     if (src_pos == nullptr) { log_service_message("}", "\n"); return; }
@@ -32,16 +32,16 @@ static void source_pos_debug_dump(const source_pos *const src_pos)
     LOG_TAB++;
 
     log_tab_service_message("file = ", "");
-    if ($file == nullptr) log_error_message  ("nullptr" , "\n");
-    else                  log_default_message("%s", "\n", $file);
+    if ($file == nullptr) { log_error_message  ("nullptr" , "\n");  }
+    else                  { log_default_message("%s", "\n", $file); }
 
     log_tab_service_message("func = ", "");
-    if ($func == nullptr) log_error_message  ("nullptr" , "\n");
-    else                  log_default_message("%s", "\n", $func);
+    if ($func == nullptr) { log_error_message  ("nullptr" , "\n");  }
+    else                  { log_default_message("%s", "\n", $func); }
 
     log_tab_service_message("line = ", "");
-    if ($line <= 0)       log_error_message  ("%d", "\n", $line);
-    else                  log_default_message("%d", "\n", $line);
+    if ($line <= 0)       { log_error_message  ("%d", "\n", $line); }
+    else                  { log_default_message("%d", "\n", $line); }
 
     LOG_TAB--;
     log_tab_service_message("}", "\n");
@@ -76,12 +76,17 @@ static inline void source_pos_ctor(source_pos *const src_pos, const source_pos *
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 static inline void source_pos_dump(const source_pos *const src_pos)
 {
     log_assert(src_pos != nullptr);
 
     log_param_place($file, $func, $line);
 }
+
+#pragma GCC diagnostic pop
 
 //================================================================================================================================
 // TRACE
@@ -115,8 +120,8 @@ static bool trace_verify(const trace *const trc)
 static void trace_debug_dump(const trace *const trc)
 {
     log_tab_service_message("trace (addr: ", "");
-    if (trc == nullptr) log_error_message  ("nullptr", "");
-    else                log_default_message("%p",  "", trc);
+    if (trc == nullptr) { log_error_message  ("nullptr", "");  }
+    else                { log_default_message("%p",  "", trc); }
 
     log_service_message(")\n{", "\n");
     if (trc == nullptr) { log_service_message("}", "\n"); return; }
@@ -124,12 +129,12 @@ static void trace_debug_dump(const trace *const trc)
     LOG_TAB++;
 
     log_tab_service_message("size     = ", "");
-    if ($size > $capacity) log_error_message  ("%d", "\n", $size);
-    else                   log_default_message("%d", "\n", $size);
+    if ($size > $capacity) { log_error_message  ("%d", "\n", $size); }
+    else                   { log_default_message("%d", "\n", $size); }
 
     log_tab_service_message("capacity = ", "");
-    if ($size > $capacity) log_error_message  ("%d", "\n", $capacity);
-    else                   log_default_message("%d", "\n", $capacity);
+    if ($size > $capacity) { log_error_message  ("%d", "\n", $capacity); }
+    else                   { log_default_message("%d", "\n", $capacity); }
 
     log_tab_service_message("front_trace", "\n");
     source_pos_debug_dump(&$front);
@@ -144,8 +149,8 @@ static void trace_stack_debug_dump(const trace *const trc)
     log_assert(trc != nullptr);
 
     log_tab_service_message("stack_trace = ", "");
-    if ($stk == nullptr) log_error_message  ("nullptr" , "\n");
-    else                 log_default_message("%p", "\n", $stk);
+    if ($stk == nullptr) { log_error_message  ("nullptr" , "\n"); }
+    else                 { log_default_message("%p", "\n", $stk); }
 
     if ($stk ==   nullptr) return;
     if ($size > $capacity) return;
@@ -194,7 +199,7 @@ void _trace_dtor(trace *const trc)
 {
     log_trace_verify(trc, (void) 0);
 
-    #if !defined(NLOG) && !defined(LOG_NVERIFY)
+    #if !defined(NVERIFY) && !defined(NLOG) && !defined(LOG_NVERIFY)
     if ($size != 0)
     {
         log_tab_message("\n" HTML_COLOR_DARK_ORANGE
@@ -272,7 +277,7 @@ bool _trace_pop(trace *const trc)
 {
     log_trace_verify(trc, false);
 
-    #if !defined(NLOG) && !defined(LOG_NVERIFY)
+    #if   !defined(NVERIFY) && !defined(NLOG) && !defined(LOG_NVERIFY)
     if ($size == 0)
     {
         log_tab_error_message("\n"
@@ -284,6 +289,8 @@ bool _trace_pop(trace *const trc)
 
         return false;
     }
+    #elif !defined(NVERIFY)
+    if ($size == 0) return false;
     #endif
 
     $size--;
@@ -310,6 +317,9 @@ void _trace_dump(const trace *const trc)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 static inline void trace_el_dump(const source_pos *const src_pos, const size_t index)
 {
     log_assert(src_pos != nullptr);
@@ -317,3 +327,5 @@ static inline void trace_el_dump(const source_pos *const src_pos, const size_t i
     log_tab_message(HTML_COLOR_MEDIUM_BLUE "#%d:" HTML_COLOR_CANCEL "\n", index);
     source_pos_dump(src_pos);
 }
+
+#pragma GCC diagnostic pop

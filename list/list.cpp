@@ -4,6 +4,9 @@
 // list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 static unsigned _list_verify(const list *const lst)
 {
 $i
@@ -70,9 +73,9 @@ $i
     const list_node *cur_node  = $fictional->next;
     const list_node *prev_node = $fictional;
 
-    for (size_t i = 0; i < $size; ++i)
+$   for (size_t i = 0; i < $size; ++i)
     {
-$       err = err | list_data_node_verify($fictional, cur_node, prev_node);
+        err = err | list_data_node_verify($fictional, cur_node, prev_node);
 
         if (err != LST_OK && err != LST_NODE_NULLPTR_DATA) break;
 
@@ -85,6 +88,8 @@ $       err = err | list_data_node_verify($fictional, cur_node, prev_node);
 $o  return err;
 }
 
+#pragma GCC diagnostic pop
+
 //--------------------------------------------------------------------------------------------------------------------------------
 
 static void list_log_error(const list *const lst, const unsigned err)
@@ -96,7 +101,7 @@ $   log_error("list verify failed\n");
 
 $   for (size_t i = 1; i * sizeof(char *) < sizeof(LST_STATUS_MESSAGES); ++i)
     {
-        if (err & (1 << i)) log_tab_error_message("%s", "\n", LST_STATUS_MESSAGES[i]);
+        if (err & (1 << i)) { log_tab_error_message("%s", "\n", LST_STATUS_MESSAGES[i]); }
     }
 
 $   list_static_dump(lst, true);
@@ -162,7 +167,7 @@ $   log_error("list_node verify failed\n");
 
 $   for (size_t i = 0; i * sizeof(char *) < sizeof(LST_STATUS_MESSAGES); ++i)
     {
-        if (err & (1 << i)) log_tab_error_message("%s", "\n", LST_STATUS_MESSAGES[i]);
+        if (err & (1 << i)) { log_tab_error_message("%s", "\n", LST_STATUS_MESSAGES[i]); }
     }
 
 $   list_node_service_fields_dump(lst_node);
@@ -262,6 +267,7 @@ static list_node *list_node_new(list *const lst,   const void      *const data,
                                                    const list_node *const prev,
                                                    const list_node *const next)
 {
+$i
 $   list_node *lst_node = (list_node *) log_calloc(1, sizeof(list_node));
     if (lst_node == nullptr)
     {
@@ -287,6 +293,16 @@ $   list_verify(lst, ;);
 
 $   list_fictional_dtor(lst);
     *lst = LST_POISON;
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void list_free(void *const _lst)
+{
+$i
+$   list_dtor(_lst);
+$   log_free (_lst);
 $o
 }
 

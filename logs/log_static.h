@@ -17,7 +17,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------
 #include "log.h"
 
-#ifndef LOG_NTRACE
+#if !defined(NLOG) && !defined(LOG_NTRACE)
 #include "trace/trace.h"
 #endif
 
@@ -99,7 +99,7 @@ static int   _OPEN_CLOSE_LOG_STREAM = LOG_STREAM_OPEN(); ///< равна 0, ес
 static int    DYNAMIC_MEMORY        = 0;                 ///< счётчик указателей на динамическую память
 static size_t LOG_BUFF_SIZE         = 100000;            ///< максимальное количество символов, которое можно вывести за один запрос log_message()
 
-#ifndef LOG_NTRACE
+#if !defined(NLOG) && !defined(LOG_NTRACE)
 static trace        TRACE           = {};                ///< для back trace
 static bool      IS_TRACE_VALID     = true;              ///< равна true, если стек валидный, false иначе
 #endif

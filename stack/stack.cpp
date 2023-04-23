@@ -124,7 +124,7 @@ $   log_error("stack verify failed\n");
 
 $   for (size_t i = 0; i * sizeof(char *) < sizeof(STK_STATUS_MESSAGES); ++i)
     {
-        if (err & (1 << i)) log_tab_error_message("%s", "\n", STK_STATUS_MESSAGES[i]);
+        if (err & (1 << i)) { log_tab_error_message("%s", "\n", STK_STATUS_MESSAGES[i]); }
     }
 
 $   stack_static_dump(stk, true);

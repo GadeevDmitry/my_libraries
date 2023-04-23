@@ -2,6 +2,7 @@
 #ifndef LOG_SETTINGS_H
 #define LOG_SETTINGS_H
 
+//#define NLOG          ///< отключить логи везде
 //#define LOG_NTRACE    ///< отключить поддержку trace и все макросы для управления стеком trace
 //#define LOG_NLEAK     ///< отключить макросы для отслеживания утечек памяти
 

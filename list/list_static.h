@@ -330,7 +330,7 @@ static void list_node_service_fields_dump(const list_node *const lst_node);
 #define list_verify(lst, ret_val)                                                                                   \
     if (_list_verify(lst) != LST_OK)                                                                                \
     {                                                                                                               \
-        return ret_val;                                                                                             \
+    $o  return ret_val;                                                                                             \
     }
 #else
 #define list_verify(lst, ret_val)

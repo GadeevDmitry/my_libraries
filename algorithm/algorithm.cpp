@@ -120,8 +120,8 @@ $i
     log_verify(file_name != nullptr, false);
     log_verify(buff      != nullptr, false);
 
-$   if (!get_file_size(file_name, &$buff_size)) return false;
-    $buff_size += 1;                                            //for null character at the end
+$   if (!get_file_size(file_name, &$buff_size)) { $o return false; }
+    $buff_size += 1;    //for null character at the end
 
 $   $buff_beg = (char *) log_calloc($buff_size, sizeof(char));
     if ($buff_beg == nullptr)

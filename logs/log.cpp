@@ -21,7 +21,7 @@ static int LOG_STREAM_OPEN()
     fprintf(LOG_STREAM, "<pre>\n"
                         "\"%s\" OPENING IS OK\n\n", LOG_FILE);
 
-    #ifndef LOG_NTRACE
+    #if !defined(NLOG) && !defined(LOG_NTRACE)
     IS_TRACE_VALID = _trace_ctor(&TRACE);
     #endif
 
@@ -35,14 +35,16 @@ static void LOG_STREAM_CLOSE()
 {
     assert(LOG_STREAM != nullptr);
 
-    #ifndef LOG_NTRACE
+    #if !defined(NLOG) && !defined(LOG_NTRACE)
     if (IS_TRACE_VALID) _trace_dtor(&TRACE);
     #endif
 
     fprintf(LOG_STREAM, "\n");
 
+    #if !defined(NLOG) && !defined(LOG_NLEAK)
     if (DYNAMIC_MEMORY == 0) log_ok_message   ("DYNAMIC_MEMORY = 0." , "\n");
     else                     log_error_message("DYNAMIC_MEMORY = %d.", "\n", DYNAMIC_MEMORY);
+    #endif
 
     fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
@@ -54,7 +56,7 @@ static void LOG_STREAM_CLOSE()
 
 void _trace_push()
 {
-    #ifdef LOG_NTRACE
+    #if defined(NLOG) || defined(LOG_NTRACE)
     return;
     #else
 
@@ -63,7 +65,7 @@ void _trace_push()
     IS_TRACE_VALID = _trace_push(&TRACE);
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    #endif // !LOG_NTRACE
+    #endif
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -75,7 +77,7 @@ void _trace_upd(const char *const file,
                 const char *const func,
                 const int         line)
 {
-    #ifdef LOG_NTRACE
+    #if defined(NLOG) || defined(LOG_NTRACE)
     return;
     #else
 
@@ -87,7 +89,7 @@ void _trace_upd(const char *const file,
     IS_TRACE_VALID = _trace_front_upd(&TRACE, file, func, line);
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    #endif // !LOG_NTRACE
+    #endif
 }
 
 #pragma GCC diagnostic pop
@@ -96,7 +98,7 @@ void _trace_upd(const char *const file,
 
 void _trace_pop()
 {
-    #ifdef LOG_NTRACE
+    #if defined(NLOG) || defined(LOG_NTRACE)
     return;
     #else
 
@@ -105,14 +107,14 @@ void _trace_pop()
     IS_TRACE_VALID = _trace_pop(&TRACE);
     log_verify(IS_TRACE_VALID == true, (void) 0);
 
-    #endif // !LOG_NTRACE
+    #endif
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 void _trace_dump()
 {
-    #ifdef LOG_NTRACE
+    #if defined(NLOG) || defined(LOG_NTRACE)
     return;
     #else
 
@@ -120,7 +122,7 @@ void _trace_dump()
 
     _trace_dump(&TRACE);
 
-    #endif // !LOG_NTRACE
+    #endif
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -227,14 +229,12 @@ void _log_error(const char *const cur_file,
    _log_tab_message(fmt, ap);
     log_tab_message("====================\n");
 
-    #ifndef LOG_NTRACE
+    #if !defined(NLOG) && !defined(LOG_NTRACE)
     if (is_local_trace) _trace_dump();
     #endif
 
     log_tab_message("====================" HTML_COLOR_CANCEL "\n");
 }
-
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -264,9 +264,6 @@ void _log_oneline_error(const char *const cur_file,
 // LOG_WARNING
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 void _log_warning(const char *const cur_file,
                   const char *const cur_func,
                   const int         cur_line, const bool is_local_trace, const char *fmt, ...)
@@ -285,14 +282,12 @@ void _log_warning(const char *const cur_file,
    _log_tab_message(fmt, ap);
     log_tab_message("====================\n");
 
-    #ifndef LOG_NTRACE
+    #if !defined(NLOG) && !defined(LOG_NTRACE)
     if (is_local_trace) _trace_dump();
     #endif
 
     log_tab_message("====================" HTML_COLOR_CANCEL "\n");
 }
-
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -350,6 +345,8 @@ void _log_param_place(const char *const file,
                     "FUNCTION: %s\n"
                     "    LINE: %d\n", file, func, line);
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY

@@ -7,7 +7,7 @@
 #define LOG_NTRACE
 #define LOG_NLEAK
 //#define NLOG
-//#define LOG_NVERIFY
 //#define LOG_NDEBUG
+//#define LOG_NVERIFY
 
 #endif //ALGORITHM_SETTINGS_H
