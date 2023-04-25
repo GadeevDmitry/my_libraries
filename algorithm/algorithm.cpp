@@ -149,6 +149,38 @@ $o  return true;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+buffer *buffer_new(const size_t buff_size)
+{
+$i
+$   buffer *buff_new = (buffer *) log_calloc(1, sizeof(buffer));
+    if (buff_new == nullptr)
+    {
+$       log_error("log_calloc(1, sizeof(buffer) = %lu) returns nullptr\n", sizeof(buffer));
+$o      return nullptr;
+    }
+
+$   if (!buffer_ctor(buff_new, buff_size)) { log_free(buff_new); $o return nullptr; }
+$o  return buff_new;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+buffer *buffer_new(const char *const file_name)
+{
+$i
+$   buffer *buff_new = (buffer *) log_calloc(1, sizeof(buffer));
+    if (buff_new == nullptr)
+    {
+$       log_error("log_calloc(1, sizeof(buffer) = %lu) returns nullptr\n", sizeof(buffer));
+$o      return nullptr;
+    }
+
+$   if (!buffer_ctor(buff_new, file_name)) { log_free(buff_new); return nullptr; }
+$o  return buff_new;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 static bool get_file_size(const char *file_name, size_t *const file_size)
 {
 $i
@@ -179,6 +211,16 @@ $   log_free($buff_beg);
     $buff_beg  = nullptr;
     $buff_pos  = nullptr;
     $buff_size =       0;
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void buffer_free(void *const _buff)
+{
+$i
+$   buffer_dtor(_buff);
+$   log_free   (_buff);
 $o
 }
 
