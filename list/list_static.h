@@ -18,20 +18,21 @@
 // list_node
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define $data       lst_node->data
-#define $prev       lst_node->prev
-#define $next       lst_node->next
+#define $data       (lst_node->data)
+#define $prev       (lst_node->prev)
+#define $next       (lst_node->next)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define $fictional  lst->fictional
+#define $fictional  (lst->fictional)
 
-#define $el_size    lst->el_size
-#define $size       lst->size
-#define $el_dtor    lst->el_dtor
-#define $el_dump    lst->el_dump
+#define $el_size    (lst->el_size)
+#define $size       (lst->size)
+
+#define $el_dtor    (lst->el_dtor)
+#define $el_dump    (lst->el_dump)
 
 //================================================================================================================================
 // GLOBAL
