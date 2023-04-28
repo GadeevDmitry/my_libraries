@@ -2,6 +2,8 @@
 #ifndef LIST_H
 #define LIST_H
 
+#include <stdlib.h>
+
 #include "../logs/log.h"
 #include "../algorithm/algorithm.h"
 
