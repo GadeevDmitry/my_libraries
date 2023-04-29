@@ -110,15 +110,15 @@ $   list_node *node_next = $fictional + node_cur->next; list_free_node_verify(no
 
     for (size_t i = 1; i < free_cycle_len; ++i)
     {
-        if (node_next->prev != node_cur - $fictional) { $o return LST_INVALID_CYCLE; }
-        if (node_next == node_free_first)             { $o return LST_INVALID_CYCLE; }
+        if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
+        if (node_next == node_free_first)                        { $o return LST_INVALID_CYCLE; }
 
         node_cur  = node_next;
 $       node_next = $fictional + node_cur->next; list_free_node_verify(node_next);
     }
 
-    if (node_next->prev != node_cur - $fictional) { $o return LST_INVALID_CYCLE; }
-    if (node_next != node_free_first)             { $o return LST_INVALID_CYCLE; }
+    if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
+    if (node_next != node_free_first)                        { $o return LST_INVALID_CYCLE; }
 
 $o  return LST_OK;
 }
@@ -142,15 +142,15 @@ $   list_node *node_next = $fictional + node_cur->next; list_busy_node_verify(no
 
     for (size_t i = 1; i < busy_cycle_len; ++i)
     {
-        if (node_next->prev != node_cur - $fictional) { $o return LST_INVALID_CYCLE; }
-        if (node_next == $fictional)                  { $o return LST_INVALID_CYCLE; }
+        if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
+        if (node_next == $fictional)                             { $o return LST_INVALID_CYCLE; }
 
         node_cur  = node_next;
 $       node_next = $fictional + node_cur->next; list_busy_node_verify(node_next);
     }
 
-    if (node_next->prev != node_cur - $fictional) { $o return LST_INVALID_CYCLE; }
-    if (node_next != $fictional)                  { $o return LST_INVALID_CYCLE; }
+    if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
+    if (node_next != $fictional)                             { $o return LST_INVALID_CYCLE; }
 
 $o  return LST_OK;
 }
