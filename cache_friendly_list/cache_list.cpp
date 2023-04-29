@@ -1,0 +1,706 @@
+#include "cache_list_static.h"
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// list verify
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned _list_verify(const list *const lst)
+{
+    unsigned err = LST_OK;
+
+    if (lst == nullptr)
+    {
+        err = err | (1 << LST_NULLPTR);
+        list_log_error(lst, err);
+
+        return err;
+    }
+
+    err = err | list_poison_verify(lst);
+    err = err | list_fields_verify(lst);
+
+    if (err != LST_OK) { list_log_error(lst, err); return err; }
+
+    err =       list_free_cycle_verify(lst);
+    err = err | list_busy_cycle_verify(lst);
+
+    list_log_error(lst, err);
+    return err;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_log_error(const list *const lst, const unsigned err)
+{
+    if (err == LST_OK) return;
+
+    log_error("cache list verify failed\n");
+
+    for (size_t i = 1; i * sizeof(char *) < sizeof(LST_STATUS_MESSAGES); ++i)
+    {
+        if (err & (1 << i)) log_tab_error_message("%s", "\n", LST_STATUS_MESSAGES[i]);
+    }
+
+    list_static_dump(lst, true);
+    log_message("\n");
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned list_poison_verify(const list *const lst)
+{
+    log_assert(lst != nullptr);
+
+    unsigned err = LST_OK;
+
+    if ($fictional == LST_POISON.fictional) err = err | (1 << LST_POISON_FICTIONAL);
+    if ($el_size   == LST_POISON.el_size  ) err = err | (1 << LST_POISON_EL_SIZE  );
+    if ($el_free   == LST_POISON.el_free  ) err = err | (1 << LST_POISON_EL_FREE  );
+    if ($size      == LST_POISON.size     ) err = err | (1 << LST_POISON_SIZE     );
+    if ($capacity  == LST_POISON.capacity ) err = err | (1 << LST_POISON_CAPACITY );
+    if ($el_dtor   == LST_POISON.el_dtor  ) err = err | (1 << LST_POISON_EL_DTOR  );
+    if ($el_dump   == LST_POISON.el_dump  ) err = err | (1 << LST_POISON_EL_DUMP  );
+
+    return err;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned list_fields_verify(const list *const lst)
+{
+    log_assert(lst != nullptr);
+
+    unsigned err = LST_OK;
+
+    if ($fictional == nullptr) err = err | (1 << LST_NULLPTR_FICTIONAL    );
+    if ($size    > $capacity ) err = err | (1 << LST_INVALID_SIZE_CAPACITY);
+    if ($el_free > $capacity ) err = err | (1 << LST_INVALID_EL_FREE      );
+
+    return err;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define list_free_node_verify(node) if ((err = _list_free_node_verify(lst, node)) != LST_OK) return err;
+
+static unsigned list_free_cycle_verify(const list *const lst)
+{
+    log_assert(lst        != nullptr);
+    log_assert($fictional != nullptr);
+
+    unsigned err = LST_OK;
+
+    const size_t free_cycle_len = $capacity - $size;
+    if (free_cycle_len == 0) return $el_free == $capacity ? LST_OK : LST_INVALID_EL_FREE;
+
+    list_node *node_free_first = $fictional + $el_free;
+    list_node *node_cur  = node_free_first;             list_free_node_verify(node_cur );
+    list_node *node_next = $fictional + node_cur->next; list_free_node_verify(node_next);
+
+    for (size_t i = 1; i < free_cycle_len; ++i)
+    {
+        if (node_next->prev != node_cur - $fictional) return LST_INVALID_CYCLE;
+        if (node_next == node_free_first)             return LST_INVALID_CYCLE;
+
+        node_cur  = node_next;
+        node_next = $fictional + node_cur->next; list_free_node_verify(node_next);
+    }
+
+    if (node_next->prev != node_cur - $fictional) return LST_INVALID_CYCLE;
+    if (node_next != node_free_first)             return LST_INVALID_CYCLE;
+
+    return LST_OK;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define list_busy_node_verify(node) if ((err = _list_busy_node_verify(lst, node)) != LST_OK) return err;
+
+static unsigned list_busy_cycle_verify(const list *const lst)
+{
+    log_assert(lst        != nullptr);
+    log_assert($fictional != nullptr);
+
+    unsigned err = LST_OK;
+
+    const size_t list_busy_cycle_len = $size;
+
+    list_node *node_cur  = $fictional;                  list_free_node_verify(node_cur );
+    list_node *node_next = $fictional + node_cur->next; list_busy_node_verify(node_next);
+
+    for (size_t i = 1; i < list_busy_cycle_len; ++i)
+    {
+        if (node_next->prev != node_cur - $fictional) return LST_INVALID_CYCLE;
+        if (node_next == $fictional)                  return LST_INVALID_CYCLE;
+
+        node_cur  = node_next;
+        node_next = $fictional + node_cur->next; list_busy_node_verify(node_next);
+    }
+
+    if (node_next->prev != node_cur - $fictional) return LST_INVALID_CYCLE;
+    if (node_next != $fictional)                  return LST_INVALID_CYCLE;
+
+    return LST_OK;
+}
+
+#undef list_free_node_verify
+#undef list_bust_node_verify
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned _list_free_node_verify(const list *const lst, const list_node *const lst_node)
+{
+    log_assert(lst      != nullptr);
+    log_assert(lst_node != nullptr);
+
+    unsigned err = LST_OK;
+
+    if ($data !=  nullptr) err = err | (1 << LST_FREE_NODE_NOT_NULLPTR_DATA);
+    if ($next > $capacity) err = err | (1 << LST_NODE_INVALID_NEXT);
+    if ($prev > $capacity) err = err | (1 << LST_NODE_INVALID_PREV);
+
+    return err;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static unsigned _list_busy_node_verify(const list *const lst, const list_node *const lst_node)
+{
+    log_assert(lst      != nullptr);
+    log_assert(lst_node != nullptr);
+
+    unsigned err = LST_OK;
+
+    if ($data ==  nullptr) err = err | (1 << LST_BUSY_NODE_NULLPTR_DATA);
+    if ($next > $capacity) err = err | (1 << LST_NODE_INVALID_NEXT);
+    if ($prev > $capacity) err = err | (1 << LST_NODE_INVALID_PREV);
+
+    return err;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// ctor
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_ctor(list *const lst, const size_t el_size, void (*el_dtor) (      void *const) /* = nullptr */,
+                                                      void (*el_dump) (const void *const) /* = nullptr */)
+{
+$i
+    log_verify(lst != nullptr, false);
+
+    $el_size  = el_size;
+    $el_dtor  = el_dtor;
+    $el_dump  = el_dump;
+
+    $capacity = DEFAULT_LIST_CAPACITY;
+    $size     = 1; // fictional
+    $el_free  = 1;
+
+$   if (!list_fictional_ctor(lst)) { $o return false; }
+
+$   list_debug_verify(lst);
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+list *list_new(const size_t el_size, void (*el_dtor) (      void *const) /* = nullptr */,
+                                     void (*el_dump) (const void *const) /* = nullptr */)
+{
+$i
+$   list *lst = (list *) log_calloc(1, sizeof(list));
+    if (lst == nullptr)
+    {
+$       log_error("log_calloc(1, sizeof(list) = %lu) returns nullptr\n", sizeof(list));
+$o      return nullptr;
+    }
+$   if (!list_ctor(lst, el_size, el_dtor, el_dump)) { log_free(lst); $o return nullptr; }
+
+$   list_debug_verify(lst);
+$o  return lst;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool list_fictional_ctor(list *const lst)
+{
+$i
+    log_assert(lst != nullptr);
+
+    $fictional = (list_node *) log_calloc(DEFAULT_LIST_CAPACITY, sizeof(list_node));
+    if ($fictional == nullptr)
+    {
+        log_error("log_calloc(DEFAULT_LIST_CAPACITY = %lu, sizeof(list_node) = %lu) returns nullptr\n",
+                              DEFAULT_LIST_CAPACITY      , sizeof(list_node));
+        return false;
+    }
+
+    $fictional->data = nullptr;
+    $fictional->prev = 0;
+    $fictional->next = 0;
+
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool list_node_ctor(list      *const lst,
+                           list_node *const lst_node,   const void      *const data,
+                                                        const list_node *const prev,
+                                                        const list_node *const next)
+{
+$i
+$   list_debug_verify(lst);
+    log_assert(lst_node != nullptr);
+
+$   $data = log_calloc(1, $el_size);
+    if ($data == nullptr)
+    {
+$       log_error("log_calloc(1, el_size = %lu) returns nullptr\n", $el_size);
+$o      return false;
+    }
+
+$   memcpy($data, data, $el_size);
+    $prev = (list_node *) prev;
+    $next = (list_node *) next;
+
+$   list_node_debug_verify(lst_node);
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static list_node *list_node_new(list *const lst,   const void      *const data,
+                                                   const list_node *const prev,
+                                                   const list_node *const next)
+{
+$i
+$   list_node *lst_node = (list_node *) log_calloc(1, sizeof(list_node));
+    if (lst_node == nullptr)
+    {
+$       log_error("log_calloc(1, sizeof(list_node)) returns nullptr\n");
+$o      return nullptr;
+    }
+
+$   if (!list_node_ctor(lst, lst_node, data, prev, next)) { log_free(lst_node); $o return nullptr; }
+
+$   list_node_debug_verify(lst_node);
+$o  return lst_node;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dtor
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void list_dtor(void *const _lst)
+{
+$i
+    list *const lst = (list *) _lst;
+$   list_verify(lst, ;);
+
+$   list_fictional_dtor(lst);
+    *lst = LST_POISON;
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void list_free(void *const _lst)
+{
+$i
+$   list_dtor(_lst);
+$   log_free (_lst);
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_fictional_dtor(list *const lst)
+{
+$i
+$   list_debug_verify(lst);
+    log_assert($fictional != nullptr);
+
+    list_node *cur_node = $fictional->next;
+$   if (cur_node != $fictional && $el_dtor == nullptr) { log_warning("Can't dtor list elements\n"); }
+
+$   for (; cur_node != $fictional;)
+    {
+        list_node *next_node = cur_node->next;
+        list_node_dtor(lst, cur_node);
+
+        cur_node = next_node;
+    }
+$   log_free($fictional);
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_node_dtor(list *const lst, list_node *const lst_node)
+{
+$i
+    log_assert(lst      != nullptr);
+    log_assert(lst_node != nullptr);
+
+$   if ($el_dtor != nullptr) (*$el_dtor)($data);
+
+$   log_free($data);
+$   log_free(lst_node);
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// insert erase
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static list_node *list_get_node(const list *const lst, const size_t index)
+{
+$i
+$   list_debug_verify(lst);
+    log_verify(index < $size, nullptr);
+
+    list_node *cur_node = $fictional;
+
+    if (index <= $size / 2)
+    {
+        for (size_t i = 0; i <= index; ++i) cur_node = cur_node->next;
+    }
+    else
+    {
+        for (size_t i = $size; i > index; --i) cur_node = cur_node->prev;
+    }
+
+$   list_debug_verify(lst);
+
+$o  return cur_node;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_insert(list *const lst, const void *const data, const size_t index)
+{
+$i
+$   list_verify(lst,              false);
+    log_verify (data  != nullptr, false);
+    log_verify (index <=   $size, false);
+
+    list_node *prev_node = nullptr;
+    list_node *next_node = nullptr;
+
+    if (index == 0)
+    {
+        prev_node = $fictional;
+        next_node = $fictional->next;
+    }
+    else
+    {
+$       prev_node = list_get_node(lst, index - 1);
+        next_node = prev_node->next;
+    }
+
+$   list_node *cur_node = list_node_new(lst, data, prev_node, next_node);
+    if (cur_node == nullptr) { $o return false; }
+
+    prev_node->next = cur_node;
+    next_node->prev = cur_node;
+    $size += 1;
+
+$   list_debug_verify(lst);
+
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_push_front(list *const lst, const void *const data)
+{
+$i
+$   list_verify(lst, false);
+
+$   bool   ret = list_insert(lst, data, 0);
+$o  return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_push_back(list *const lst, const void *const data)
+{
+$i
+$   list_verify(lst, false);
+
+$   bool   ret = list_insert(lst, data, $size);
+$o  return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_erase(list *const lst, const size_t index, void *const data /* = nullptr */)
+{
+$i
+$   list_verify(lst,           false);
+    log_verify (index < $size, false);
+
+$   list_node *cur_node = list_get_node(lst, index);
+$   if (data != nullptr) memcpy(data, cur_node->data, $el_size);
+
+    cur_node->prev->next = cur_node->next;
+    cur_node->next->prev = cur_node->prev;
+    $size -= 1;
+
+$   list_node_dtor(lst, cur_node);
+$   list_debug_verify(lst);
+
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_pop_front(list *const lst, void *const data /* = nullptr */)
+{
+$i
+$   list_verify(lst, false);
+
+$   bool   ret = list_erase(lst, 0, data);
+$o  return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_pop_back(list *const lst, void *const data /* = nullptr */)
+{
+$i
+$   list_verify(lst, false);
+
+$   bool   ret = list_erase(lst, $size - 1, data);
+$o  return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// list get
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_get(const list *const lst, const size_t index, void *const data)
+{
+$i
+$   list_verify(lst,             false);
+    log_verify (index <   $size, false);
+    log_verify (data != nullptr, false);
+
+$   const list_node *const lst_node = list_get_node(lst, index);
+$   memcpy(data, $data, $el_size);
+
+$   list_debug_verify(lst);
+
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_front(const list *const lst, void *const data)
+{
+$i
+$   list_verify(lst, false);
+
+$   bool   ret = list_get(lst, 0, data);
+$o  return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_back(const list *const lst, void *const data)
+{
+$i
+$   list_verify(lst, false);
+
+$   bool   ret = list_get(lst, $size - 1, data);
+$o  return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void list_dump(const void *const _lst)
+{
+$i
+    const list *const lst = (const list *) _lst;
+$   list_verify(lst, ;);
+
+$   list_static_dump(lst, false);
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_static_dump(const list *const lst, const bool is_full)
+{
+$i
+$   bool are_poison_fields = list_public_fields_dump(lst);
+    if (lst == nullptr) { $o return; }
+
+$   list_data_dump(lst, are_poison_fields, is_full);
+
+    LOG_TAB--;
+$   log_tab_message("}\n");
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool list_public_fields_dump(const list *const lst)
+{
+$i
+    bool is_any_poison = false;
+
+$   log_tab_message("list (address: %p)\n"
+                    "{\n",          lst);
+    LOG_TAB++;
+
+$   if (lst == nullptr) { LOG_TAB--; log_tab_message("}\n"); $o return is_any_poison; }
+
+    if      ($el_size == LST_POISON.el_size) { $ poison_field_dump ("el_size  "); is_any_poison = true; }
+    else                                     { $ usual_field_dump  ("el_size  ", "%lu", $el_size);      }
+
+    if      ($el_dtor == LST_POISON.el_dtor) { $ poison_field_dump ("el_dtor  "); is_any_poison = true; }
+    else if ($el_dtor == nullptr)            { $ warning_field_dump("el_dtor  ", "%p",   nullptr);      }
+    else                                     { $ usual_field_dump  ("el_dtor  ", "%p",  $el_dtor);      }
+
+    if      ($el_dump == LST_POISON.el_dump) { $ poison_field_dump ("el_dump  "); is_any_poison = true; }
+    else if ($el_dump == nullptr)            { $ warning_field_dump("el_dump  ", "%p",   nullptr);      }
+    else                                     { $ usual_field_dump  ("el_dump  ", "%p",  $el_dump);      }
+
+    if      ($size    == LST_POISON.size)    { $ poison_field_dump ("size     "); is_any_poison = true; }
+    else                                     { $ usual_field_dump  ("size     ", "%lu",    $size);      }
+
+$o  return is_any_poison;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_data_dump(const list *const lst, const bool are_poison_fields, const bool is_full)
+{
+$i
+    log_assert(lst != nullptr);
+
+$   if (!list_fictional_dump(lst, are_poison_fields, is_full)) { $o return; }
+
+$   log_tab_message("{\n"); LOG_TAB++;
+
+    const list_node *cur_node = $fictional->next;
+
+    for (size_t i = 0; i < $size; ++i)
+    {
+        if (cur_node == nullptr)    break;
+        if (cur_node == $fictional) break;
+
+$       log_tab_message("#%lu:\n", i);
+$       list_node_dump(lst, cur_node, is_full);
+        cur_node = cur_node->next;
+    }
+
+    LOG_TAB--;
+$   log_tab_message("}\n");
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool list_fictional_dump(const list *const lst, bool are_poison_fields, const bool is_full)
+{
+$i
+    log_assert(lst != nullptr);
+
+    if      ($fictional == LST_POISON.fictional) { $ poison_field_dump("fictional"); are_poison_fields = true; }
+    else if ($fictional == nullptr)              { $ error_field_dump ("fictional", "%p", $fictional); }
+    else                                         { $ usual_field_dump ("fictional", "%p", $fictional); }
+
+    if ($fictional == nullptr) { $o return false; }
+
+    if (are_poison_fields)
+    {
+$       log_tab_message("{\n"); LOG_TAB++;
+$       log_tab_error_message("Some of list's fields are POISON. Can't dump list content", "\n");
+$       LOG_TAB--; log_tab_message("}\n");
+
+$o      return false;
+    }
+
+$   if (is_full) list_full_fictional_dump(lst);
+
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_full_fictional_dump(const list *const lst)
+{
+$i
+    log_assert(lst != nullptr);
+    log_assert($fictional != nullptr);
+    log_assert($fictional != LST_POISON.fictional);
+
+$   log_tab_message("{" HTML_COLOR_MEDIUM_BLUE "\n"); LOG_TAB++;
+
+    if ($fictional->prev == nullptr) { $ error_field_dump("prev", "%p", $fictional->prev); }
+    else                             { $ usual_field_dump("prev", "%p", $fictional->prev); }
+
+    if ($fictional->next == nullptr) { $ error_field_dump("next", "%p", $fictional->next); }
+    else                             { $ usual_field_dump("next", "%p", $fictional->next); }
+
+    if ($fictional->data != nullptr) { $ error_field_dump("data", "%p", $fictional->data); }
+    else                             { $ good_field_dump ("data", "%p", $fictional->data); }
+
+    LOG_TAB--;
+$   log_tab_message(HTML_COLOR_CANCEL "}\n");
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_node_dump(const list *const lst, const list_node *const lst_node, const bool is_full)
+{
+$i
+$   if (is_full) list_node_service_fields_dump(lst_node);
+
+$   log_tab_message("{\n");
+    LOG_TAB++;
+
+    if ($data != nullptr)
+    {
+        if ($el_dump == nullptr) { $ log_tab_warning_message("Can't dump list elements", "\n"); }
+        else                     { $ (*$el_dump)($data); }
+    }
+
+    LOG_TAB--;
+$   log_tab_message("}\n");
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_node_service_fields_dump(const list_node *const lst_node)
+{
+$i
+    log_assert(lst_node != nullptr);
+
+$   log_tab_message(HTML_COLOR_MEDIUM_BLUE
+                    "list_node (address: %p)\n"
+                    "{\n", lst_node);
+    LOG_TAB++;
+
+    if      ($prev == nullptr)        { $ error_field_dump("prev", "%p", $prev); }
+    else if ($prev->next != lst_node) { $ error_field_dump("prev", "%p", $prev); }
+    else                              { $ usual_field_dump("prev", "%p", $prev); }
+
+    if      ($next == nullptr)        { $ error_field_dump("next", "%p", $next); }
+    else if ($next->prev != lst_node) { $ error_field_dump("next", "%p", $next); }
+    else                              { $ usual_field_dump("next", "%p", $next); }
+
+    if      ($data == nullptr)        { $ error_field_dump("data", "%p", $data); }
+    else                              { $ usual_field_dump("data", "%p", $data); }
+
+    LOG_TAB--;
+$   log_tab_message("}" HTML_COLOR_CANCEL "\n");
+$o
+}
