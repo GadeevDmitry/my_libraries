@@ -189,6 +189,8 @@ static unsigned list_data_node_verify(const list_node *const fictional_node,
 static void list_node_log_error(const list_node *const lst_node, const unsigned err);
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// ctor
+//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Конструктор поля .fictional листа.

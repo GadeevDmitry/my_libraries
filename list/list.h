@@ -95,7 +95,7 @@ void list_free(void *const _lst);
 /**
 *   @brief Добавляет элемент в лист.
 *
-*   @param lst   [in, out] - лист
+*   @param lst   [in, out] - указатель на лист
 *   @param data  [in]      - указатель на элемент
 *   @param index [in]      - порядковый номер, на который поставить элемент
 *
@@ -108,7 +108,7 @@ bool list_insert(list *const lst, const void *const data, const size_t index);
 /**
 *   @brief Добавляет элемент в начало листа.
 *
-*   @param lst  [in, out] - лист
+*   @param lst  [in, out] - указатель на лист
 *   @param data [in]      - указатель на элемент
 *
 *   @return true, если все ОК, false в случае ошибки
@@ -120,7 +120,7 @@ bool list_push_front(list *const lst, const void *const data);
 /**
 *   @brief Добавляет элемент в конец листа.
 *
-*   @param lst  [in, out] - лист
+*   @param lst  [in, out] - указатель на лист
 *   @param data [in]      - указатель на элемент
 *
 *   @return true, если все ОК, false в случае ошибки
@@ -132,7 +132,7 @@ bool list_push_back(list *const lst, const void *const data);
 /**
 *   @brief Удаляет элемент из листа.
 *
-*   @param lst   [in, out] - лист
+*   @param lst   [in, out] - указатель на лист
 *   @param index [in]      - порядковый номер удаляемого элемента
 *   @param data  [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
 *
@@ -145,7 +145,7 @@ bool list_erase(list *const lst, const size_t index, void *const data = nullptr)
 /**
 *   @brief Удаляет элемент из начала листа.
 *
-*   @param lst  [in, out] - лист
+*   @param lst  [in, out] - указатель на лист
 *   @param data [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
 *
 *   @return true, если все ОК, false в случае ошибки
@@ -157,7 +157,7 @@ bool list_pop_front(list *const lst, void *const data = nullptr);
 /**
 *   @brief Удаляет элемент из конца листа.
 *
-*   @param lst  [in, out] - лист
+*   @param lst  [in, out] - указатель на лист
 *   @param data [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
 *
 *   @return true, если все ОК, false в случае ошибки
@@ -171,7 +171,7 @@ bool list_pop_back(list *const lst, void *const data = nullptr);
 /**
 *   @brief Показывает содержимое элемента листа.
 *
-*   @param lst   [in]  - лист
+*   @param lst   [in]  - указатель на лист
 *   @param index [in]  - порядковый номер элемента
 *   @param data  [out] - указатель, куда скопировать содержимое элемента
 *
@@ -184,7 +184,7 @@ bool list_get(const list *const lst, const size_t index, void *const data);
 /**
 *   @brief Показывает содержимое первого элемента листа.
 *
-*   @param lst  [in]  - лист
+*   @param lst  [in]  - указатель на лист
 *   @param data [out] - указатель, куда скопировать содержимое элемента
 *
 *   @return true, если все ОК, false в случае ошибки
@@ -196,7 +196,7 @@ bool list_front(const list *const lst, void *const data);
 /**
 *   @brief Показывает содержимое последнего элемента листа.
 *
-*   @param lst  [in]  - лист
+*   @param lst  [in]  - указатель на лист
 *   @param data [out] - указатель, куда скопировать содержимое элемента
 *
 *   @return true, если все ОК, false в случае ошибки
