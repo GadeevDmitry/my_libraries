@@ -146,7 +146,7 @@ bool cache_list_erase(cache_list *const lst, const size_t pos, void *const data 
 *
 *   @return true, если все ОК, false в случае ошибки
 */
-bool list_pop_front(cache_list *const lst, void *const data = nullptr);
+bool cache_list_pop_front(cache_list *const lst, void *const data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -158,7 +158,7 @@ bool list_pop_front(cache_list *const lst, void *const data = nullptr);
 *
 *   @return true, если все ОК, false в случае ошибки
 */
-bool list_pop_back(cache_list *const lst, void *const data = nullptr);
+bool cache_list_pop_back(cache_list *const lst, void *const data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
@@ -208,6 +208,6 @@ bool cache_list_back(const cache_list *const lst, void *const data);
 *
 *   @param lst [in] - указатель на кэш-лист
 */
-void list_dump(const void *const _lst);
+void cache_list_dump(const void *const _lst);
 
 #endif // CACHE_LIST_H

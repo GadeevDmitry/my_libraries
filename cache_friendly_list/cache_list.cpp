@@ -583,7 +583,7 @@ $o  return true;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool list_pop_front(cache_list *const lst, void *const data /* = nullptr */)
+bool cache_list_pop_front(cache_list *const lst, void *const data /* = nullptr */)
 {
 $i
 $   bool   ret = cache_list_erase(lst, 0, data);
@@ -592,7 +592,7 @@ $o  return ret;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool list_pop_back(cache_list *const lst, void *const data /* = nullptr */)
+bool cache_list_pop_back(cache_list *const lst, void *const data /* = nullptr */)
 {
 $i
 $   bool   ret = cache_list_erase(lst, $size - 1, data);
@@ -640,7 +640,7 @@ $o  return ret;
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void list_dump(const void *const _lst)
+void cache_list_dump(const void *const _lst)
 {
 $i
     const list *const lst = (const list *) _lst;
