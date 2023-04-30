@@ -89,14 +89,14 @@ const char *LST_STATUS_MESSAGES[] =
     "cache_list.capacity is invalid"                    ,
     "cache_list.el_dtor is invalid"                     ,
     "cache_list.el_dump is invalid"                     ,
-    "cache_list.fictional is nullptr"                   ,
 
+    "cache_list.fictional is nullptr"                   ,
     "cache_list.fictional->data is not nullptr"         ,
-    "cache_list.size > cache_list.capacity"             ,
-    "cache_list.el_free > cache_list.size"              ,
+    "cache_list.size >= cache_list.capacity"            ,
+    "cache_list.el_free > cache_list.capacity"          ,
 
     "cache_list_node.data of free node is not nullptr"  ,
-    "cache_list_node.data if busy node is nullptr"      ,
+    "cache_list_node.data of busy node is nullptr"      ,
 
     "cache_list_node.next is invalid"                   ,
     "cache_list_node.prev is invalid"                   ,

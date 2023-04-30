@@ -101,7 +101,7 @@ $i
     unsigned err = LST_OK;
 
     const size_t free_cycle_len = $capacity - ($size + 1);
-    if (free_cycle_len == 0) { $o return $el_free == $capacity ? LST_OK : LST_INVALID_EL_FREE; }
+    if (free_cycle_len == 0) { $o return $el_free == $capacity ? LST_OK : (1 << LST_INVALID_EL_FREE); }
 
     list_node *const node_free_first = $fictional + $el_free;
 
@@ -110,15 +110,15 @@ $   list_node *node_next = $fictional + node_cur->next; list_free_node_verify(no
 
     for (size_t i = 1; i < free_cycle_len; ++i)
     {
-        if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
-        if (node_next == node_free_first)                        { $o return LST_INVALID_CYCLE; }
+        if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return (1 << LST_INVALID_CYCLE); }
+        if (node_next == node_free_first)                        { $o return (1 << LST_INVALID_CYCLE); }
 
         node_cur  = node_next;
 $       node_next = $fictional + node_cur->next; list_free_node_verify(node_next);
     }
 
-    if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
-    if (node_next != node_free_first)                        { $o return LST_INVALID_CYCLE; }
+    if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return (1 << LST_INVALID_CYCLE); }
+    if (node_next != node_free_first)                        { $o return (1 << LST_INVALID_CYCLE); }
 
 $o  return LST_OK;
 }
@@ -137,20 +137,26 @@ $i
 
     const size_t busy_cycle_len = $size + 1;
 
-$   list_node *node_cur  = $fictional;                  list_free_node_verify(node_cur );
-$   list_node *node_next = $fictional + node_cur->next; list_busy_node_verify(node_next);
+    list_node *node_cur  = $fictional;
+    list_node *node_next = $fictional + node_cur->next;
+
+    /* fictional */   $ list_free_node_verify(node_cur );
+    if ($size == 0) { $ list_free_node_verify(node_next); }
+    else            { $ list_busy_node_verify(node_next); }
 
     for (size_t i = 1; i < busy_cycle_len; ++i)
     {
-        if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
-        if (node_next == $fictional)                             { $o return LST_INVALID_CYCLE; }
+        if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return (1 << LST_INVALID_CYCLE); }
+        if (node_next == $fictional)                             { $o return (1 << LST_INVALID_CYCLE); }
 
         node_cur  = node_next;
-$       node_next = $fictional + node_cur->next; list_busy_node_verify(node_next);
+        node_next = $fictional + node_cur->next;
+
+$       if (i != busy_cycle_len - 1) list_busy_node_verify(node_next);
     }
 
-    if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return LST_INVALID_CYCLE; }
-    if (node_next != $fictional)                             { $o return LST_INVALID_CYCLE; }
+    if (node_next->prev != (size_t) (node_cur - $fictional)) { $o return (1 << LST_INVALID_CYCLE); }
+    if (node_next != $fictional)                             { $o return (1 << LST_INVALID_CYCLE); }
 
 $o  return LST_OK;
 }
@@ -365,7 +371,7 @@ $   list_debug_verify(lst);
     log_assert(ind_prev < $capacity);
     log_assert(ind_next < $capacity);
 
-$   if ($size + 1 == $capacity) { if (!list_resize(lst)) $o return false; }
+$   if ($size + 1 == $capacity) if (!list_resize(lst)) { $o return false; }
 
     const size_t ind_cur = $el_free;
 
@@ -426,10 +432,13 @@ static bool list_resize(list *const lst)
 $i
 $   list_debug_verify(lst);
 
-$   list_node *fictional_new = (list_node *) log_realloc($fictional, 2 * $capacity);
+    size_t      capacity_new = 2 * $capacity;
+$   list_node *fictional_new = (list_node *) log_realloc($fictional, capacity_new * sizeof(list_node));
+
     if (fictional_new == nullptr)
     {
-$       log_error("log_realloc($fictional, (2 * $capacity) = %lu) returns nullptr\n", 2 * $capacity);
+$       log_error("log_realloc($fictional, (capacity_new * sizeof(list_node)) = %lu) returns nullptr\n",
+                                            capacity_new * sizeof(list_node));
 $o      return false;
     }
 
@@ -477,14 +486,12 @@ static void list_fictional_dtor(list *const lst)
 $i
 $   list_debug_verify(lst);
 
-$   if ($el_dtor == nullptr) { log_free($fictional); $o return; }
-
     list_node *node_cur  = $fictional + $fictional->next;
     list_node *node_next = $fictional + node_cur  ->next;
 
 $   for (; node_cur != $fictional;)
     {
-        $el_dtor(node_cur->data);
+        list_node_dtor(lst, node_cur);
 
         node_cur  = node_next;
         node_next = $fictional + node_cur->next;
@@ -561,6 +568,8 @@ $o  return ret;
 bool cache_list_push_back(cache_list *const lst, const void *const data)
 {
 $i
+$   list_verify(lst, false);
+
 $   bool   ret = cache_list_insert(lst, data, $size);
 $o  return ret;
 }
@@ -595,6 +604,8 @@ $o  return ret;
 bool cache_list_pop_back(cache_list *const lst, void *const data /* = nullptr */)
 {
 $i
+$   list_verify(lst, false);
+
 $   bool   ret = cache_list_erase(lst, $size - 1, data);
 $o  return ret;
 }
@@ -632,6 +643,8 @@ $o  return ret;
 bool cache_list_back(const cache_list *const lst, void *const data)
 {
 $i
+$   list_verify(lst, false);
+
 $   bool   ret = cache_list_get(lst, $size - 1, data);
 $o  return ret;
 }
@@ -773,9 +786,9 @@ $i
 
     for (size_t ind = 0; ind < $capacity; ++ind)
     {
-$       log_service_message("#%lu\n{", "\n", ind); LOG_TAB++;
+$       log_tab_service_message("#%lu\n{", "\n", ind); LOG_TAB++;
 $       list_node_static_dump(lst, $fictional + ind);
-$       LOG_TAB--; log_service_message("}", "\n");
+$       LOG_TAB--; log_tab_service_message("}", "\n");
     }
 $o
 }
@@ -794,7 +807,7 @@ $i
     else                    { $ usual_field_dump  ("next", "%lu", $next);  }
 
     if ($data == nullptr)   { $ warning_field_dump("data", "%p", nullptr); }
-    else                    { $ usual_field_dump  ("data", "%p", nullptr); }
+    else                    { $ usual_field_dump  ("data", "%p",   $data); }
 
     if ($data != nullptr)
     {
@@ -820,7 +833,7 @@ $   if ($el_dump == nullptr) { log_tab_warning_message("don't know how to dump t
 
     for (size_t ind = $fictional->next; ind != 0; ind = $fictional[ind].next)
     {
-$       log_service_message("#%lu\n", "\n", pos); pos++;
+$       log_tab_service_message("#%lu", "\n", pos); pos++;
 $       $el_dump($fictional[ind].data);
     }
 $o
