@@ -4,6 +4,9 @@
 // list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 static unsigned _list_verify(const list *const lst)
 {
 $i
@@ -28,6 +31,8 @@ $   err = err | list_busy_cycle_verify(lst);
 $   list_log_error(lst, err);
 $o  return err;
 }
+
+#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -62,11 +67,9 @@ $i
     unsigned err = LST_OK;
 
     if ($fictional == LST_POISON.fictional) err = err | (1 << LST_POISON_FICTIONAL);
-    if ($el_size   == LST_POISON.el_size  ) err = err | (1 << LST_POISON_EL_SIZE  );
     if ($el_free   == LST_POISON.el_free  ) err = err | (1 << LST_POISON_EL_FREE  );
     if ($size      == LST_POISON.size     ) err = err | (1 << LST_POISON_SIZE     );
     if ($capacity  == LST_POISON.capacity ) err = err | (1 << LST_POISON_CAPACITY );
-    if ($el_dtor   == LST_POISON.el_dtor  ) err = err | (1 << LST_POISON_EL_DTOR  );
     if ($el_dump   == LST_POISON.el_dump  ) err = err | (1 << LST_POISON_EL_DUMP  );
 
 $o  return err;
@@ -202,14 +205,11 @@ $o  return err;
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_ctor(cache_list *const lst, const size_t el_size, void (*el_dtor) (      void *const) /* = nullptr */,
-                                                                  void (*el_dump) (const void *const) /* = nullptr */)
+bool cache_list_ctor(cache_list *const lst, void (*el_dump) (const void *const) /* = nullptr */)
 {
 $i
     log_verify(lst != nullptr, false);
 
-    $el_size  = el_size;
-    $el_dtor  = el_dtor;
     $el_dump  = el_dump;
 
     $capacity = DEFAULT_LIST_CAPACITY;
@@ -224,8 +224,7 @@ $o  return true;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-cache_list *cache_list_new(const size_t el_size, void (*el_dtor) (      void *const) /* = nullptr */,
-                                                 void (*el_dump) (const void *const) /* = nullptr */)
+cache_list *cache_list_new(void (*el_dump) (const void *const) /* = nullptr */)
 {
 $i
 $   list *lst = (list *) log_calloc(1, sizeof(list));
@@ -235,7 +234,7 @@ $       log_error("log_calloc(1, sizeof(list) = %lu) returns nullptr\n", sizeof(
 $o      return nullptr;
     }
 
-$   if (!cache_list_ctor(lst, el_size, el_dtor, el_dump)) { log_free(lst); $o return nullptr; }
+$   if (!cache_list_ctor(lst, el_dump)) { log_free(lst); $o return nullptr; }
 
 $   list_debug_verify(lst);
 $o  return lst;
@@ -308,7 +307,7 @@ $o
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static void list_free_node_new(list *const lst, void *const data, const size_t ind_cur)
+static void *list_free_node_new(list *const lst, const size_t ind_cur)
 {
 $i
 $   list_debug_verify(lst);
@@ -316,9 +315,7 @@ $   list_debug_verify(lst);
     log_assert(ind_cur < $capacity);
     log_assert(ind_cur > 0);
 
-$   if (data != nullptr) memcpy(data, $fictional[ind_cur].data, $el_size);
-$   list_node_dtor(lst, $fictional + ind_cur);
-
+    const void *erased_el = $fictional[ind_cur].data;
     const size_t ind_prev = $fictional[ind_cur].prev;
     const size_t ind_next = $fictional[ind_cur].next;
 
@@ -331,7 +328,13 @@ $   list_node_dtor(lst, $fictional + ind_cur);
     $el_free = ind_cur;
 
 $   list_debug_verify(lst);
-$o
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+
+$o  return (void *) erased_el;
+
+#pragma GCC diagnostic pop
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -409,14 +412,7 @@ $i
 
     list_node *lst_node = $fictional + ind_cur;
 
-$   $data = log_calloc(1, $el_size);
-    if ($data == nullptr)
-    {
-$       log_error("log_calloc(1, $el_size = %lu) returns nullptr\n", $el_size);
-$o      return false;
-    }
-$   memcpy($data, data, $el_size);
-
+    $data = data;
     $next = ind_next; $fictional[ind_next].prev = ind_cur;
     $prev = ind_prev; $fictional[ind_prev].next = ind_cur;
 
@@ -431,6 +427,7 @@ static bool list_resize(list *const lst)
 {
 $i
 $   list_debug_verify(lst);
+    log_assert($size + 1 == $capacity);
 
     size_t      capacity_new = 2 * $capacity;
 $   list_node *fictional_new = (list_node *) log_realloc($fictional, capacity_new * sizeof(list_node));
@@ -464,7 +461,7 @@ $i
     list *const lst = (list *) _lst;
 $   list_verify(lst, (void) 0);
 
-$   list_fictional_dtor(lst);
+$   log_free($fictional);
     *lst = LST_POISON;
 $o
 }
@@ -476,41 +473,6 @@ void cache_list_free(void *const _lst)
 $i
 $   cache_list_dtor(_lst);
 $   log_free       (_lst);
-$o
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static void list_fictional_dtor(list *const lst)
-{
-$i
-$   list_debug_verify(lst);
-
-    list_node *node_cur  = $fictional + $fictional->next;
-    list_node *node_next = $fictional + node_cur  ->next;
-
-$   for (; node_cur != $fictional;)
-    {
-        list_node_dtor(lst, node_cur);
-
-        node_cur  = node_next;
-        node_next = $fictional + node_cur->next;
-    }
-
-$   log_free($fictional);
-$o
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-static void list_node_dtor(list *const lst, list_node *const lst_node)
-{
-$i
-    log_assert(lst      != nullptr);
-    log_assert(lst_node != nullptr);
-
-$   if ($el_dtor != nullptr) $el_dtor($data);
-$   log_free($data);
 $o
 }
 
@@ -576,77 +538,80 @@ $o  return ret;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_erase(cache_list *const lst, const size_t pos, void *const data /* = nullptr */)
+void *cache_list_erase(cache_list *const lst, const size_t pos)
 {
 $i
-$   list_verify(lst,         false);
-    log_verify (pos < $size, false);
+$   list_verify(lst,         nullptr);
+    log_verify (pos < $size, nullptr);
 
 $   size_t ind_cur = list_get_node_index(lst, pos);
-$   list_free_node_new(lst, data, ind_cur);
+$   void *erased_el = list_free_node_new(lst, ind_cur);
 
 $   list_debug_verify(lst);
-
-$o  return true;
+$o  return erased_el;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_pop_front(cache_list *const lst, void *const data /* = nullptr */)
+void *cache_list_pop_front(cache_list *const lst)
 {
 $i
-$   bool   ret = cache_list_erase(lst, 0, data);
-$o  return ret;
+$   void  *erased_el = cache_list_erase(lst, 0);
+$o  return erased_el;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_pop_back(cache_list *const lst, void *const data /* = nullptr */)
+void *cache_list_pop_back(cache_list *const lst)
 {
 $i
-$   list_verify(lst, false);
+$   list_verify(lst, nullptr);
 
-$   bool   ret = cache_list_erase(lst, $size - 1, data);
-$o  return ret;
+$   void  *erased_el = cache_list_erase(lst, $size - 1);
+$o  return erased_el;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_get(const cache_list *const lst, const size_t pos, void *const data)
+void *cache_list_get(const cache_list *const lst, const size_t pos)
 {
 $i
-$   list_verify(lst,             false);
-    log_verify (pos   <   $size, false);
-    log_verify (data != nullptr, false);
+$   list_verify(lst,             nullptr);
+    log_verify (pos   <   $size, nullptr);
 
 $   const list_node *lst_node = $fictional + list_get_node_index(lst, pos);
-$   memcpy(data, $data, $el_size);
+$   const void *geted_el = $data;
 
 $   list_debug_verify(lst);
 
-$o  return true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+
+$o  return (void *) geted_el;
+
+#pragma GCC diagnostic pop
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_front(const cache_list *const lst, void *const data)
+void *cache_list_front(const cache_list *const lst)
 {
 $i
-$   bool   ret = cache_list_get(lst, 0, data);
-$o  return ret;
+$   void  *geted_el = cache_list_get(lst, 0);
+$o  return geted_el;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_back(const cache_list *const lst, void *const data)
+void *cache_list_back(const cache_list *const lst)
 {
 $i
-$   list_verify(lst, false);
+$   list_verify(lst, nullptr);
 
-$   bool   ret = cache_list_get(lst, $size - 1, data);
-$o  return ret;
+$   void  *geted_el = cache_list_get(lst, $size - 1);
+$o  return geted_el;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -704,13 +669,6 @@ $i
     log_assert(lst != nullptr);
 
     bool is_any_invalid = false;
-
-    if      ($el_size == LST_POISON.el_size) { $ poison_field_dump ("el_size"); is_any_invalid = true; }
-    else                                     { $ usual_field_dump  ("el_size", "%lu", $el_size);       }
-
-    if      ($el_dtor == LST_POISON.el_dtor) { $ poison_field_dump ("el_dtor"); is_any_invalid = true; }
-    else if ($el_dtor == nullptr)            { $ warning_field_dump("el_dtor", "%p",   nullptr);       }
-    else                                     { $ usual_field_dump  ("el_dtor", "%p",  $el_dtor);       }
 
     if      ($el_dump == LST_POISON.el_dump) { $ poison_field_dump ("el_dump"); is_any_invalid = true; }
     else if ($el_dump == nullptr)            { $ warning_field_dump("el_dump", "%p",   nullptr);       }

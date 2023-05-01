@@ -14,9 +14,9 @@
 */
 struct cache_list_node
 {
-    void  *data;    ///< указатель на начало элемента листа
-    size_t prev;    ///< индекс предыдущей вершины листа
-    size_t next;    ///< индекс следущей вершины листа
+    const void *data;   ///< указатель на элемент листа
+    size_t      prev;   ///< индекс предыдущей вершины листа
+    size_t      next;   ///< индекс следущей вершины листа
 };
 
 /**
@@ -26,12 +26,10 @@ struct cache_list
 {
     cache_list_node *fictional;             ///< указатель на массив вершин листа
 
-    size_t el_size;                         ///< размер (в байтах) элемента листа
     size_t el_free;                         ///< индекс свободного элемента листа
     size_t    size;                         ///< количество элементов в листе
     size_t capacity;                        ///< емкость массива вершин листа
 
-    void (*el_dtor) (      void *const);    ///< указатель на dtor элемента листа
     void (*el_dump) (const void *const);    ///< указатель на dump элемента листа
 };
 
@@ -43,26 +41,20 @@ struct cache_list
 *   @brief cache_list_ctor.
 *
 *   @param lst     [out] - указатель на кэш-лист
-*   @param el_size [in]  - размер элемента листа
-*   @param el_dtor [in]  - указатель на dtor элемента листа
 *   @param el_dump [in]  - указатель на dump элемента листа
 */
-bool cache_list_ctor(cache_list *const lst, const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
-                                                                  void (*el_dump) (const void *const) = nullptr);
+bool cache_list_ctor(cache_list *const lst, void (*el_dump) (const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Создает кэш лист в динамической памяти.
 *
-*   @param el_size [in] - размер элемента листа
-*   @param el_dtor [in] - указатель на dtor элемента листа
 *   @param el_dump [in] - указатель на dump элемента листа
 *
 *   @return указатель на созданный лист или nullptr в случае ошибки
 */
-cache_list *cache_list_new(const size_t el_size,  void (*el_dtor) (      void *const) = nullptr,
-                                                  void (*el_dump) (const void *const) = nullptr);
+cache_list *cache_list_new(void (*el_dump) (const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
@@ -128,25 +120,23 @@ bool cache_list_push_back(cache_list *const lst, const void *const data);
 /**
 *   @brief Удаляет элемент из кэш-листа.
 *
-*   @param lst   [in, out] - указатель на кэш-лист
-*   @param index [in]      - порядковый номер удаляемого элемента
-*   @param data  [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*   @param lst  [in, out] - указатель на кэш-лист
+*   @param pos  [in]      - порядковый номер удаляемого элемента
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_erase(cache_list *const lst, const size_t pos, void *const data = nullptr);
+void *cache_list_erase(cache_list *const lst, const size_t pos);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из начала кэш-листа.
 *
-*   @param lst  [in, out] - лист
-*   @param data [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*   @param lst  [in, out] - указатель на кеш-лист
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_pop_front(cache_list *const lst, void *const data = nullptr);
+void *cache_list_pop_front(cache_list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -154,11 +144,10 @@ bool cache_list_pop_front(cache_list *const lst, void *const data = nullptr);
 *   @brief Удаляет элемент из конца кэш-листа.
 *
 *   @param lst  [in, out] - указатель на кэш-лист
-*   @param data [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_pop_back(cache_list *const lst, void *const data = nullptr);
+void *cache_list_pop_back(cache_list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
@@ -167,13 +156,12 @@ bool cache_list_pop_back(cache_list *const lst, void *const data = nullptr);
 /**
 *   @brief Показывает содержимое элемента кэш-листа.
 *
-*   @param lst   [in]  - указатель на кэш-лист
-*   @param index [in]  - порядковый номер элемента
-*   @param data  [out] - указатель, куда скопировать содержимое элемента
+*   @param lst  [in] - указатель на кэш-лист
+*   @param pos  [in] - порядковый номер элемента
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_get(const cache_list *const lst, const size_t pos, void *const data);
+void *cache_list_get(const cache_list *const lst, const size_t pos);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -181,11 +169,10 @@ bool cache_list_get(const cache_list *const lst, const size_t pos, void *const d
 *   @brief Показывает содержимое первого элемента кэш-листа.
 *
 *   @param lst  [in]  - указатель на кэш-лист
-*   @param data [out] - указатель, куда скопировать содержимое элемента
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_front(const cache_list *const lst, void *const data);
+void *cache_list_front(const cache_list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -193,11 +180,10 @@ bool cache_list_front(const cache_list *const lst, void *const data);
 *   @brief Показывает содержимое последнего элемента кэш-листа.
 *
 *   @param lst  [in]  - указатель на лист
-*   @param data [out] - указатель, куда скопировать содержимое элемента
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_back(const cache_list *const lst, void *const data);
+void *cache_list_back(const cache_list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump

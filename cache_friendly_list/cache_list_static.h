@@ -31,12 +31,10 @@ typedef cache_list      list;
 
 #define $fictional  (lst->fictional)
 
-#define $el_size    (lst->el_size)
 #define $el_free    (lst->el_free)
 #define $size       (lst->size)
 #define $capacity   (lst->capacity)
 
-#define $el_dtor    (lst->el_dtor)
 #define $el_dump    (lst->el_dump)
 
 //================================================================================================================================
@@ -52,11 +50,9 @@ enum LST_STATUS
     LST_NULLPTR                     ,   ///< lst = nullptr
 
     LST_POISON_FICTIONAL            ,   ///< .fictional        = LST_POISON.fictional
-    LST_POISON_EL_SIZE              ,   ///< .el_size          = LST_POISON.el_size
     LST_POISON_EL_FREE              ,   ///< .el_free          = LST_POISON.free
     LST_POISON_SIZE                 ,   ///< .size             = LST_POISON.size
     LST_POISON_CAPACITY             ,   ///< .capacity         = LST_POISON.capacity
-    LST_POISON_EL_DTOR              ,   ///< .el_dtor          = LST_POISON.el_dtor
     LST_POISON_EL_DUMP              ,   ///< .el_dump          = LST_POISON.el_dump
 
     LST_NULLPTR_FICTIONAL           ,   ///< .fictional        = nullptr
@@ -83,11 +79,9 @@ const char *LST_STATUS_MESSAGES[] =
     "cache_list is nullptr"                             ,
 
     "cache_list.fictional is invalid"                   ,
-    "cache_list.el_size is invalid"                     ,
     "cache_list.el_free is invalid"                     ,
     "cache_list.size is invalid"                        ,
     "cache_list.capacity is invalid"                    ,
-    "cache_list.el_dtor is invalid"                     ,
     "cache_list.el_dump is invalid"                     ,
 
     "cache_list.fictional is nullptr"                   ,
@@ -110,12 +104,10 @@ static const list LST_POISON =
 {
     (list_node *) 0x8BADF00D                    ,   // fictional
 
-    0xBAADF00D                                  ,   // el_size
     0xABADB002                                  ,   // el_free
     0xBADCAB1E                                  ,   // size
     0xABADBABE                                  ,   // capacity
 
-    (void (*) (      void *const)) 0xBADDCAFE   ,   // el_dtor
     (void (*) (const void *const)) 0xBEADFACE   ,   // el_dump
 };
 
@@ -250,11 +242,11 @@ static void list_free_node_init(list *const lst, const size_t ind_cur ,
 *   @brief Переводит вершину из цикла занятых элементов в цикл свободных.
 *
 *   @param lst [in, out] - указатель на кэш-лист
+*   @param ind_cur  [in] - индекс вершины в массиве
 *
-*   @param data    [out] - указатель, куда скопировать содержимое кэш-листа (nullptr по умолчанию)
-*   @param ind_cur [in]  - индекс вершины в массиве
+*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-static void list_free_node_new(list *const lst, void *const data, const size_t ind_cur);
+static void *list_free_node_new(list *const lst, const size_t ind_cur);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -311,22 +303,6 @@ static bool list_busy_node_ctor(list *const lst, const void *const data, const s
 *   @brief Реаллоцирует кэш-лист.
 */
 static bool list_resize(list *const lst);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// dtor
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Деструктор содержимого поля .fictional кэш-листа. 
-*/
-static void list_fictional_dtor(list *const lst);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Вызывает .el_dtor или ничего не делает, если поле равно nullptr.
-*/
-static void list_node_dtor(list *const lst, list_node *const lst_node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // insert erase
