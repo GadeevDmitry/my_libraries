@@ -16,9 +16,9 @@
 */
 struct list_node
 {
-    void      *data;    ///< указатель на начало элемента листа
-    list_node *prev;    ///< указатель на предыдущую вершину листа
-    list_node *next;    ///< указатель на следующую вершину листа
+    const void *data;    ///< указатель на элемент листа
+    list_node  *prev;    ///< указатель на предыдущую вершину листа
+    list_node  *next;    ///< указатель на следующую вершину листа
 };
 
 /**
@@ -28,10 +28,8 @@ struct list
 {
     list_node *fictional;                   ///< указатель на фиктивную вершину листа
 
-    size_t el_size;                         ///< размер (в байтах) элемента листа
-    size_t    size;                         ///< количество элементов в листе
+    size_t size;                            ///< количество элементов в листе
 
-    void (*el_dtor) (      void *const);    ///< указатель на dtor элемента листа
     void (*el_dump) (const void *const);    ///< указатель на dump элемента листа
 };
 
@@ -47,26 +45,20 @@ struct list
 *   @brief List_ctor.
 *
 *   @param lst     [out] - указатель на лист
-*   @param el_size [in]  - размер элемента листа
-*   @param el_dtor [in]  - указатель на dtor элемента листа
 *   @param el_dump [in]  - указатель на dump элемента листа
 */
-bool list_ctor(list *const lst, const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
-                                                      void (*el_dump) (const void *const) = nullptr);
+bool list_ctor(list *const lst, void (*el_dump) (const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Создает лист в динамической памяти.
 *
-*   @param el_size [in] - размер элемента листа
-*   @param el_dtor [in] - указатель на dtor элемента листа
 *   @param el_dump [in] - указатель на dump элемента листа
 *
 *   @return указатель на созданный лист или nullptr в случае ошибки
 */
-list *list_new(const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
-                                     void (*el_dump) (const void *const) = nullptr);
+list *list_new(void (*el_dump) (const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
@@ -134,35 +126,32 @@ bool list_push_back(list *const lst, const void *const data);
 *
 *   @param lst   [in, out] - указатель на лист
 *   @param index [in]      - порядковый номер удаляемого элемента
-*   @param data  [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool list_erase(list *const lst, const size_t index, void *const data = nullptr);
+void *list_erase(list *const lst, const size_t index);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из начала листа.
 *
-*   @param lst  [in, out] - указатель на лист
-*   @param data [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*   @param lst [in, out] - указатель на лист
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool list_pop_front(list *const lst, void *const data = nullptr);
+void *list_pop_front(list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из конца листа.
 *
-*   @param lst  [in, out] - указатель на лист
-*   @param data [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*   @param lst [in, out] - указатель на лист
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool list_pop_back(list *const lst, void *const data = nullptr);
+void *list_pop_back(list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
@@ -173,11 +162,10 @@ bool list_pop_back(list *const lst, void *const data = nullptr);
 *
 *   @param lst   [in]  - указатель на лист
 *   @param index [in]  - порядковый номер элемента
-*   @param data  [out] - указатель, куда скопировать содержимое элемента
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
-bool list_get(const list *const lst, const size_t index, void *const data);
+void *list_get(const list *const lst, const size_t index);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -185,11 +173,10 @@ bool list_get(const list *const lst, const size_t index, void *const data);
 *   @brief Показывает содержимое первого элемента листа.
 *
 *   @param lst  [in]  - указатель на лист
-*   @param data [out] - указатель, куда скопировать содержимое элемента
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
-bool list_front(const list *const lst, void *const data);
+void *list_front(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -199,9 +186,9 @@ bool list_front(const list *const lst, void *const data);
 *   @param lst  [in]  - указатель на лист
 *   @param data [out] - указатель, куда скопировать содержимое элемента
 *
-*   @return true, если все ОК, false в случае ошибки
+*   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
-bool list_back(const list *const lst, void *const data);
+void *list_back(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump

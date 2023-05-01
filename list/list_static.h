@@ -28,10 +28,8 @@
 
 #define $fictional  (lst->fictional)
 
-#define $el_size    (lst->el_size)
 #define $size       (lst->size)
 
-#define $el_dtor    (lst->el_dtor)
 #define $el_dump    (lst->el_dump)
 
 //================================================================================================================================
@@ -47,9 +45,7 @@ enum LST_STATUS
     LST_NULLPTR                     ,   ///< lst = nullptr
 
     LST_POISON_FICTIONAL            ,   ///< .fictional        = LST_POISON.fictional
-    LST_POISON_EL_SIZE              ,   ///< .el_size          = LST_POISON.el_size
     LST_POISON_SIZE                 ,   ///< .size             = LST_POISON.size
-    LST_POISON_EL_DTOR              ,   ///< .el_dtor          = LST_POISON.el_dtor
     LST_POISON_EL_DUMP              ,   ///< .el_dump          = LST_POISON.el_dump
     LST_NULLPTR_FICTIONAL           ,   ///< .fictional        = nullptr
 
@@ -74,9 +70,7 @@ const char *LST_STATUS_MESSAGES[] =
     "list is nullptr"                       ,
 
     "list.fictional is invalid"             ,
-    "list.el_size is invalid"               ,
     "list.size is invalid"                  ,
-    "list.el_dtor is invalid"               ,
     "list.el_dump is invalid"               ,
     "list.fictional is nullptr"             ,
 
@@ -97,10 +91,8 @@ static const list LST_POISON =
 {
     (list_node *) 0x8BADF00D                    ,   // fictional
 
-    0xBAADF00D                                  ,   // el_size
     0xBADCAB1E                                  ,   // size
 
-    (void (*) (      void *const)) 0xBADDCAFE   ,   // el_dtor
     (void (*) (const void *const)) 0xBEADFACE   ,   // el_dump
 };
 
@@ -239,13 +231,6 @@ static list_node *list_node_new(list *const lst, const void      *const data,
 *   @brief Деструктор пользовательских данных листа.
 */
 static void list_fictional_dtor(list *const lst);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Деструктор вершины листа.
-*/
-static void list_node_dtor(list *const lst, list_node *const lst_node);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // insert erase
