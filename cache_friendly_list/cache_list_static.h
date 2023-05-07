@@ -73,7 +73,7 @@ enum LST_STATUS
 *
 *   @see enum LST_STATUS
 */
-const char *LST_STATUS_MESSAGES[] = 
+static const char *LST_STATUS_MESSAGES[] = 
 {
     "cache_list is OK"                                  ,
     "cache_list is nullptr"                             ,
