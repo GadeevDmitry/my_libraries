@@ -615,6 +615,24 @@ $o  return geted_el;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+
+void *cache_list_find(const cache_list *const lst, const void *const target, int (*elem_cmp)(const void *elem_1, const void *elem_2))
+{
+$i
+$   list_verify(lst, nullptr);
+    log_verify (target   != nullptr, nullptr);
+    log_verify (elem_cmp != nullptr, nullptr);
+
+    list_node *lst_node = $fictional + $fictional->next;
+$   while (lst_node != $fictional)
+    {
+        if (elem_cmp($data, target) == 0) { $o return (void *) $data; }
+    }
+
+$o  return nullptr;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
