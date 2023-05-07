@@ -225,6 +225,25 @@ $o
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+// query
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool buffer_write(buffer *const buff, const void *data, const size_t data_size)
+{
+$i
+    log_verify(buff != nullptr, false);
+    log_verify(data != nullptr, false);
+
+    size_t buff_size_left  = $buff_size - (size_t) ($buff_pos - $buff_beg);
+$   size_t buff_size_write = size_t_min(buff_size_left, data_size);
+
+$   memcpy($buff_pos, data, data_size);
+    $buff_pos += buff_size_write;
+
+$o  return buff_size_write == data_size;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
