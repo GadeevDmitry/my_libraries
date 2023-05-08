@@ -623,10 +623,13 @@ $   list_verify(lst, nullptr);
     log_verify (target   != nullptr, nullptr);
     log_verify (elem_cmp != nullptr, nullptr);
 
-    list_node *lst_node = $fictional + $fictional->next;
+    list_node *lst_fict = $fictional;
+    list_node *lst_node = lst_fict + lst_fict->next;
+
 $   while (lst_node != $fictional)
     {
         if (elem_cmp($data, target) == 0) { $o return (void *) $data; }
+        lst_node = lst_fict + $next;
     }
 
 $o  return nullptr;
