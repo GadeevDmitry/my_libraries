@@ -25,7 +25,7 @@ $   err = err | list_fields_verify(lst);
 
 $   if (err != LST_OK) { list_log_error(lst, err); $o return err; }
 
-$   err =       list_free_cycle_verify(lst);
+$   err = err | list_free_cycle_verify(lst);
 $   err = err | list_busy_cycle_verify(lst);
 
 $   list_log_error(lst, err);
@@ -690,7 +690,7 @@ $o
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static __always_inline bool list_header_dump(const list *const lst)
+static bool list_header_dump(const list *const lst)
 {
 $i
 $   log_tab_service_message("cache_list (address: %p)\n"

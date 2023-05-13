@@ -10,4 +10,7 @@
 //#define LOG_NDEBUG
 //#define LOG_NVERIFY
 
+//#define BUFF_NDEBUG
+//#define BUFF_NVERIFY
+
 #endif //ALGORITHM_SETTINGS_H
