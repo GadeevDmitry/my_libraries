@@ -684,7 +684,7 @@ $   bool are_invalid_static_fields = is_full ? list_static_fields_dump(lst) : fa
 $   list_fictional_dump(lst, is_full, are_invalid_fields);
 
     LOG_TAB--;
-$   log_tab_message("}\n");
+$   log_tab_service_message("}", "\n");
 $o
 }
 

@@ -70,7 +70,7 @@ stack *stack_new(const size_t el_size, const void *const el_poison              
 /**
 *   @brief Stack_dtor.
 *
-*   @param stk      [in] - указатель на стек
+*   @param stk [in] - указатель на стек
 */
 void stack_dtor(void *const _stk);
 
@@ -90,8 +90,8 @@ void stack_free(void *const _stk);
 /**
 *   @brief Кладет элемент стека в конец.
 *
-*   @param stk      [in, out] - стек
-*   @param data     [in]      - указатель на элемент
+*   @param stk  [in, out] - стек
+*   @param data [in]      - указатель на элемент
 *
 *   @return true, если все ОК, false в случае ошибки
 */
@@ -102,8 +102,8 @@ bool stack_push(stack *const stk, const void *const data);
 /**
 *   @brief Удаляет последний элемент стека.
 *
-*   @param stk      [in, out] - стек
-*   @param data     [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
+*   @param stk  [in, out] - стек
+*   @param data [out]     - указатель, куда скопировать содержимое удаляемого элемента (nullptr по умолчанию)
 *
 *   @return true, если все ОК, false в случае ошибки
 */
@@ -116,8 +116,8 @@ bool stack_pop(stack *const stk, void *const data = nullptr);
 /**
 *   @brief Показывает содержимое последнего элемента стека.
 *
-*   @param stk      [in]  - стек
-*   @param data     [out] - указатель, куда скопировать содержимое удаляемого элемента
+*   @param stk  [in]  - стек
+*   @param data [out] - указатель, куда скопировать содержимое удаляемого элемента
 *
 *   @return true, если все ОК, false в случае ошибки
 */
@@ -128,7 +128,7 @@ bool stack_front(const stack *const stk, void *const data);
 /**
 *   @brief Проверяет, пустой ли стек.
 *
-*   @param stk      [in] - стек
+*   @param stk [in] - стек
 *
 *   @return true, если стек пустой, false иначе, или в случае ошибки
 */
@@ -141,7 +141,7 @@ bool stack_is_empty(const stack *const stk);
 /**
 *   @brief Stack_dump.
 *
-*   @param _stk     [in] - стек
+*   @param _stk [in] - стек
 */
 void stack_dump(const void *const _stk);
 
