@@ -4,6 +4,7 @@ TRC	      = logs/trace/trace
 LOG       = logs/log
 ALG       = algorithm/algorithm
 STK       = stack/stack
+VEC       = vector/vector
 LST       = list/list
 CACHE_LST = cache_friendly_list/cache_list
 
@@ -11,6 +12,7 @@ TRC_STAT_H       = $(TRC)_static.h
 LOG_STAT_H       = $(LOG)_static.h
 ALG_STAT_H       = $(ALG)_static.h
 STK_STAT_H       = $(STK)_static.h
+VEC_STAT_H       = $(VEC)_static.h
 LST_STAT_H       = $(LST)_static.h
 CACHE_LST_STAT_H = $(CACHE_LST)_static.h
 
@@ -18,6 +20,7 @@ TRC_H       = $(TRC).h       $(TRC)_settings.h
 LOG_H       = $(LOG).h       $(LOG)_settings.h $(LOG)_def.h $(LOG)_undef.h
 ALG_H       = $(ALG).h       $(ALG)_settings.h
 STK_H       = $(STK).h       $(STK)_settings.h
+VEC_H       = $(VEC).h
 LST_H       = $(LST).h       $(LST)_settings.h
 CACHE_LST_H = $(CACHE_LST).h $(CACHE_LST)_settings.h
 
@@ -31,7 +34,7 @@ CACHE_LST_O = $(CACHE_LST).o
 $(TRC_O):       $(TRC_H)       $(TRC_STAT_H)       $(LOG_H)
 $(LOG_O):       $(LOG_H)       $(LOG_STAT_H)       $(TRC_H)
 $(ALG_O):       $(ALG_H)       $(ALG_STAT_H)       $(LOG_H)
-$(STK_O):       $(STK_H)       $(STK_STAT_H)       $(LOG_H) $(ALG_H)
+$(STK_O):       $(STK_H)       $(STK_STAT_H)       $(LOG_H) $(ALG_H) $(VEC_STAT_H) $(VEC_H)
 $(LST_O):       $(LST_H)       $(LST_STAT_H)       $(LOG_H) $(ALG_H)
 $(CACHE_LST_O): $(CACHE_LST_H) $(CACHE_LST_STAT_H) $(LOG_H) $(ALG_H)
 

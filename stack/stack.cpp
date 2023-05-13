@@ -1,5 +1,9 @@
 #include "stack_static.h"
 
+//================================================================================================================================
+// STACK
+//================================================================================================================================
+
 //--------------------------------------------------------------------------------------------------------------------------------
 // stack poison
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -449,5 +453,296 @@ $o          return;
 
     if ($el_dump != nullptr) { $ (*$el_dump)(el); }
     else                     { $ log_tab_warning_message("can't dump stack element", "\n"); }
+$o
+}
+
+//================================================================================================================================
+// VECTOR
+//================================================================================================================================
+
+/*
+*   Далее определны функции структуры данных "vector", которая по сути является стеком (typedef stack vector),
+*   но дополнительно предоставляет возможность обращения/изменения любых элементов, а не только верхнего.
+*
+*   Большинство функций вектора являются inline оболочками для функций стека, поэтому определны в файле "../vector/vector.h",
+*   который включен в "../vector/vector_static.h".
+*
+*   Остальные функции определены в этом файле ниже.
+*/
+
+#include "../vector/vector_static.h"
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// vector iteration
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void *vector_get(const vector *const vec, const size_t index)
+{
+$i
+$   vec_verify(vec          , nullptr);
+    log_verify(index < $size, nullptr);
+
+$o  return (char *) $data + $el_size * index;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void *vector_begin(const vector *const vec)
+{
+$i
+$   vec_verify(vec, nullptr);
+
+$o  return ($size == 0) ? nullptr : $data;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void *vector_end(const vector *const vec)
+{
+$i
+$   vec_verify(vec, nullptr);
+
+$o  return ($size == 0) ? nullptr : (char *) $data + $el_size * $size;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// vector set
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool vector_set(vector *const vec, const size_t index, const void *const data)
+{
+$i
+$   vec_verify(vec,             false);
+    log_verify(index <   $size, false);
+    log_verify(data != nullptr, false);
+
+    void  *vec_el = (char *) $data + $el_size * index;
+$   memcpy(vec_el, data, $el_size);
+
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// vector dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void vector_dump(const void *const _vec)
+{
+$i
+    const vector *const vec = (const vector *) _vec;
+$   vec_verify(vec, (void) 0);
+
+$   vector_static_dump(vec, true);
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void vector_static_dump(const vector *const vec, const bool is_full)
+{
+$i
+$   if (!vector_header_dump(vec)) { $o return; }
+
+$   bool is_any_public_invalid =           vector_public_fields_dump(vec);
+$   bool is_any_static_invalid = is_full ? vector_static_fields_dump(vec) : false;
+
+    bool are_invalid_fields = is_any_public_invalid | is_any_static_invalid;
+
+$   vector_data_dump(vec, is_full, are_invalid_fields);
+
+    LOG_TAB--;
+$   log_tab_service_message("}", "\n");
+
+$o  return;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static __always_inline bool vector_header_dump(const vector *const vec)
+{
+$i
+$   log_tab_service_message("vector (addr: %p)\n"
+                            "{", "\n",    vec);
+
+$   if (vec == nullptr) { log_tab_service_message("{", "\n"); $o return false; }
+    LOG_TAB++;
+
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool vector_public_fields_dump(const vector *const vec)
+{
+$i
+    log_assert(vec != nullptr);
+
+    bool is_any_invalid = false;
+
+    if      ($size     == STK_POISON.size)     { $ poison_field_dump("size    ");                   is_any_invalid = true; }
+    else if ($size     > $capacity)            { $ error_field_dump ("size    ", "%lu", $size);     is_any_invalid = true; }
+    else                                       { $ usual_field_dump ("size    ", "%lu", $size);                            }
+
+    if      ($capacity == STK_POISON.capacity) { $ poison_field_dump("capacity");                   is_any_invalid = true; }
+    else if ($capacity <  $size)               { $ error_field_dump ("capacity", "%lu", $capacity); is_any_invalid = true; }
+    else                                       { $ usual_field_dump ("capacity", "%lu", $capacity);                        }
+
+    if      ($el_size  == STK_POISON.el_size)  { $ poison_field_dump("el_size ");                   is_any_invalid = true; }
+    else                                       { $ usual_field_dump ("el_size ", "%lu", $el_size);                         }
+
+$   log_message("\n");
+
+$o  return is_any_invalid;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static bool vector_static_fields_dump(const vector *const vec)
+{
+$i
+    log_assert(vec != nullptr);
+
+    bool is_any_invalid = false;
+
+    if      ($el_dtor   == STK_POISON.el_dtor)   { $ poison_field_dump ("el_dtor  "); is_any_invalid = true; }
+    else if ($el_dtor   == nullptr)              { $ warning_field_dump("el_dtor  ", "%p",  nullptr);        }
+    else                                         { $ usual_field_dump  ("el_dtor  ", "%p", $el_dtor);        }
+
+    if      ($el_dump   == STK_POISON.el_dump)   { $ poison_field_dump ("el_dump  "); is_any_invalid = true; }
+    else if ($el_dump   == nullptr)              { $ warning_field_dump("el_dump  ", "%p",  nullptr);        }
+    else                                         { $ usual_field_dump  ("el_dump  ", "%p", $el_dump);        }
+
+    if      ($el_poison == STK_POISON.el_poison) { $ poison_field_dump ("el_poison"); is_any_invalid = true; }
+    else if ($el_poison == nullptr)              { $ warning_field_dump("el_poison", "%p",    nullptr);      }
+    else                                         { $ usual_field_dump  ("el_poison", "%p", $el_poison);      }
+
+    if      ($data      == STK_POISON.data)      { $ poison_field_dump ("data     ");                is_any_invalid = true; }
+    else if ($data      == nullptr)              { $ error_field_dump  ("data     ", "%p", nullptr); is_any_invalid = true; }
+    else                                         { $ usual_field_dump  ("data     ", "%p",   $data);         }
+
+$   log_message("\n");
+
+$o  return is_any_invalid;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void vector_data_dump(const vector *const vec, const bool is_full,
+                                                      const bool is_any_invalid)
+{
+$i
+    log_assert(vec != nullptr);
+
+$   log_tab_service_message("data\n"
+                            "{", "\n");
+    LOG_TAB++;
+
+    if ($data == nullptr || is_any_invalid)
+    {
+$       log_tab_error_message("can't dump it because some of fields are invalid", "\n");
+    }
+    else if (is_full) { $ vector_data_static_dump(vec); }
+    else              { $ vector_data_public_dump(vec); }
+
+    LOG_TAB--;
+$   log_tab_service_message("}", "\n");
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void vector_data_public_dump(const vector *const vec)
+{
+$i
+    log_assert(vec      != nullptr);
+    log_assert($data    != nullptr);
+    log_assert($data    != STK_POISON.data);
+    log_assert($el_dump != STK_POISON.el_dump);
+
+$   if ($el_dump == nullptr) { log_tab_warning_message("don't know how to dump the content", "\n"); $o return; }
+
+    const char *vec_el = (const char *) $data;
+
+$   for (size_t index = 0; index < $size; ++index)
+    {
+        log_tab_service_message("#%lu", "\n", index);
+        $el_dump(vec_el);
+
+        vec_el += $el_size;
+    }
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void vector_data_static_dump(const vector *const vec)
+{
+$i
+    log_assert(vec   != nullptr);
+    log_assert($data != nullptr);
+
+    log_assert($data      != STK_POISON.data);
+    log_assert($el_dump   != STK_POISON.el_dump);
+    log_assert($el_poison != STK_POISON.el_poison);
+
+    if ($el_dump   == nullptr) { $ log_tab_warning_message("don't know how to dump the content", "\n"); }
+    else                       { $ vector_data_static_busy_dump(vec); }
+
+    if ($el_poison == nullptr) { $ log_tab_warning_message("don't know POISON-element to verify free elements", "\n"); }
+    else                       { $ vector_data_static_free_dump(vec); }
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void vector_data_static_busy_dump(const vector *const vec)
+{
+$i
+    log_assert(vec      != nullptr);
+    log_assert($data    != nullptr);
+    log_assert($data    != STK_POISON.data);
+    log_assert($el_dump != nullptr);
+    log_assert($el_dump != STK_POISON.el_dump);
+
+    const char *vec_el = (const char *) $data;
+
+$   for (size_t index = 0; index < $size; ++index)
+    {
+        log_tab_service_message("#%lu (busy)", "\n", index);
+        $el_dump(vec_el);
+
+        vec_el += $el_size;
+    }
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void vector_data_static_free_dump(const vector *const vec)
+{
+$i
+    log_assert(vec        != nullptr);
+    log_assert($data      != nullptr);
+    log_assert($el_dump   != nullptr);
+    log_assert($el_poison != nullptr);
+
+    log_assert($data      != STK_POISON.data);
+    log_assert($el_dump   != STK_POISON.el_dump);
+    log_assert($el_poison != STK_POISON.el_poison);
+
+    bool is_any_not_poison = false;
+
+$   for (size_t index = $size; index < $capacity; ++index)
+    {
+        if (!stack_el_is_poison(vec, index))
+        {
+            log_tab_service_message("#%lu (free)", "\n", index);
+            log_tab_error_message  ("free element is not equal to POISON-element", "\n");
+
+            is_any_not_poison = true;
+        }
+    }
+
+    if (!is_any_not_poison) log_tab_ok_message("all free elements are equal to POISON-element", "\n");
 $o
 }
