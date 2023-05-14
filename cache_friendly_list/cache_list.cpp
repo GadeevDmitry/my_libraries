@@ -4,10 +4,7 @@
 // list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-
-static unsigned _list_verify(const list *const lst)
+unsigned _cache_list_verify(const list *const lst)
 {
 $i
     unsigned err = LST_OK;
@@ -31,8 +28,6 @@ $   err = err | list_busy_cycle_verify(lst);
 $   list_log_error(lst, err);
 $o  return err;
 }
-
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -218,7 +213,7 @@ $i
 
 $   if (!list_fictional_ctor(lst)) { $o return false; }
 
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 $o  return true;
 }
 
@@ -236,7 +231,7 @@ $o      return nullptr;
 
 $   if (!cache_list_ctor(lst, el_dump)) { log_free(lst); $o return nullptr; }
 
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 $o  return lst;
 }
 
@@ -310,7 +305,7 @@ $o
 static void *list_free_node_new(list *const lst, const size_t ind_cur)
 {
 $i
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 
     log_assert(ind_cur < $capacity);
     log_assert(ind_cur > 0);
@@ -327,7 +322,7 @@ $   list_debug_verify(lst);
 
     $el_free = ind_cur;
 
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -368,7 +363,7 @@ static bool list_busy_node_new(list *const lst, const void *const data, const si
                                                                         const size_t ind_next)
 {
 $i
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
     log_assert(data != nullptr);
 
     log_assert(ind_prev < $capacity);
@@ -426,7 +421,7 @@ $o  return true;
 static bool list_resize(list *const lst)
 {
 $i
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
     log_assert($size + 1 == $capacity);
 
     size_t      capacity_new = 2 * $capacity;
@@ -443,8 +438,8 @@ $o      return false;
     $capacity *=         2;
     $el_free   = $size + 1;
 
-$   list_free_cycle_ctor(lst);
-$   list_debug_verify   (lst);
+$   list_free_cycle_ctor  (lst);
+$   cache_lst_debug_verify(lst);
 
 $o  return true;
 }
@@ -459,7 +454,7 @@ $i
     if (_lst == nullptr) { $o return; }
 
     list *const lst = (list *) _lst;
-$   list_verify(lst, (void) 0);
+$  cache_lst_verify(lst, (void) 0);
 
 $   log_free($fictional);
     *lst = LST_POISON;
@@ -483,7 +478,7 @@ $o
 static size_t list_get_node_index(const list *const lst, const size_t pos)
 {
 $i
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
     log_assert(pos <= $size);
 
     size_t cur_index = 0;
@@ -491,7 +486,7 @@ $   list_debug_verify(lst);
     if (pos <= $size / 2) { for (size_t i =     0; i <= pos; ++i) cur_index = $fictional[cur_index].next; }
     else                  { for (size_t i = $size; i >  pos; --i) cur_index = $fictional[cur_index].prev; }
 
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 $o  return cur_index;
 }
 
@@ -500,7 +495,7 @@ $o  return cur_index;
 bool cache_list_insert(cache_list *const lst, const void *const data, const size_t pos)
 {
 $i
-$   list_verify(lst,             false);
+$  cache_lst_verify(lst,             false);
     log_verify (data != nullptr, false);
     log_verify (pos  <=   $size, false);
 
@@ -512,7 +507,7 @@ $   list_verify(lst,             false);
 
 $   list_busy_node_new(lst, data, ind_prev, ind_next);
 
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 $o  return true;
 }
 
@@ -530,7 +525,7 @@ $o  return ret;
 bool cache_list_push_back(cache_list *const lst, const void *const data)
 {
 $i
-$   list_verify(lst, false);
+$  cache_lst_verify(lst, false);
 
 $   bool   ret = cache_list_insert(lst, data, $size);
 $o  return ret;
@@ -541,13 +536,13 @@ $o  return ret;
 void *cache_list_erase(cache_list *const lst, const size_t pos)
 {
 $i
-$   list_verify(lst,         nullptr);
+$  cache_lst_verify(lst,         nullptr);
     log_verify (pos < $size, nullptr);
 
 $   size_t ind_cur = list_get_node_index(lst, pos);
 $   void *erased_el = list_free_node_new(lst, ind_cur);
 
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 $o  return erased_el;
 }
 
@@ -565,7 +560,7 @@ $o  return erased_el;
 void *cache_list_pop_back(cache_list *const lst)
 {
 $i
-$   list_verify(lst, nullptr);
+$  cache_lst_verify(lst, nullptr);
 
 $   void  *erased_el = cache_list_erase(lst, $size - 1);
 $o  return erased_el;
@@ -578,13 +573,13 @@ $o  return erased_el;
 void *cache_list_get(const cache_list *const lst, const size_t pos)
 {
 $i
-$   list_verify(lst,             nullptr);
+$  cache_lst_verify(lst,             nullptr);
     log_verify (pos   <   $size, nullptr);
 
 $   const list_node *lst_node = $fictional + list_get_node_index(lst, pos);
 $   const void *geted_el = $data;
 
-$   list_debug_verify(lst);
+$   cache_lst_debug_verify(lst);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -608,7 +603,7 @@ $o  return geted_el;
 void *cache_list_back(const cache_list *const lst)
 {
 $i
-$   list_verify(lst, nullptr);
+$  cache_lst_verify(lst, nullptr);
 
 $   void  *geted_el = cache_list_get(lst, $size - 1);
 $o  return geted_el;
@@ -619,7 +614,7 @@ $o  return geted_el;
 void *cache_list_find(const cache_list *const lst, const void *const target, int (*elem_cmp)(const void *elem_1, const void *elem_2))
 {
 $i
-$   list_verify(lst, nullptr);
+$  cache_lst_verify(lst, nullptr);
     log_verify (target   != nullptr, nullptr);
     log_verify (elem_cmp != nullptr, nullptr);
 
@@ -640,7 +635,7 @@ $o  return nullptr;
 void *cache_list_find_through(const cache_list *const lst, const void *const target, int (*elem_cmp)(const void *elem_1, const void *elem_2))
 {
 $i
-$   list_verify(lst, nullptr);
+$  cache_lst_verify(lst, nullptr);
     log_verify (target   != nullptr, nullptr);
     log_verify (elem_cmp != nullptr, nullptr);
 
@@ -663,7 +658,7 @@ void cache_list_dump(const void *const _lst)
 {
 $i
     const list *const lst = (const list *) _lst;
-$   list_verify(lst, (void) 0);
+$  cache_lst_verify(lst, (void) 0);
 
 $   list_static_dump(lst, false);
 $o

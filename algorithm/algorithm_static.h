@@ -86,17 +86,6 @@ static const buffer BUFF_POISON =
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Верификатор буфура.
-*
-*   @return битовая маска кодов ошибок из enum BUFF_STATUS
-*
-*   @see enum BUFF_STATUS
-*/
-static unsigned _buff_verify(const buffer *const buff);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
 *   @brief Выводит сообщения об ошибках в буфере по битовой маске ошибок. Полный дамп буфера.
 */
 static void buff_log_error(const buffer *const buff, const unsigned err);
@@ -205,30 +194,5 @@ static void buffer_content_dump(const buffer *const buff, const bool is_any_inva
 *   @brief Дамп содержимого буфера при гарантии, что все поля валидны.
 */
 static void buffer_content_safety_dump(const buffer *const buff);
-
-//================================================================================================================================
-// MACRO
-//================================================================================================================================
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// list verify
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#if !defined(NVERIFY) && !defined(BUFF_NVERIFY)
-#define buf_verify(buf, ret_val)                                                                                    \
-    if (_buff_verify(buf) != BUFF_OK)                                                                               \
-    {                                                                                                               \
-    $o  return ret_val;                                                                                             \
-    }
-#else
-#define buf_verify(buf, ret_val)
-#endif
-
-#if !defined(NDEBUG) && !defined(BUFF_NDEBUG)
-#define buf_debug_verify(buf)                                                                                      \
-        log_assert(_buff_verify(buf) == BUFF_OK)
-#else
-#define buf_debug_verify(buf)
-#endif
 
 #endif //ALGORITHM_STATIC_H

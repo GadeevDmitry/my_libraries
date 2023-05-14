@@ -81,10 +81,7 @@ $o  return (char *) $data + (index * $el_size);
 // stack verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-
-static unsigned _stack_verify(const stack *const stk)
+unsigned _stack_verify(const stack *const stk)
 {
 $i
     unsigned err = STK_OK;
@@ -131,8 +128,6 @@ $   log_message("\n");
 $o
 }
 
-#pragma GCC diagnostic pop
-
 //--------------------------------------------------------------------------------------------------------------------------------
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -161,7 +156,7 @@ $o      return false;
     }
 
 $   stack_gap_fill_poison(stk);
-$   stack_debug_verify   (stk);
+$   stk_debug_verify     (stk);
 
 $o  return true;
 }
@@ -181,7 +176,7 @@ $o      return nullptr;
     }
 $   if (!stack_ctor(stk, el_size, el_poison, el_dtor, el_dump)) { log_free(stk); $o return nullptr; }
 
-$   stack_debug_verify(stk);
+$   stk_debug_verify(stk);
 $o  return stk;
 }
 
@@ -195,7 +190,7 @@ $i
     if (_stk == nullptr) { $o return; }
 
     stack *const stk = (stack *) _stk;
-$   stack_verify(stk, ;);
+$   stk_verify(stk, ;);
 
 $   stack_data_dtor(stk);
     *stk = STK_POISON;
@@ -217,7 +212,7 @@ $o
 static void stack_data_dtor(stack *const stk)
 {
 $i
-$   stack_debug_verify(stk);
+$   stk_debug_verify(stk);
 
 $   if ($el_dtor == nullptr) { log_warning("Can't dtor stack elements\n"); }
     else
@@ -236,7 +231,7 @@ $o
 bool stack_push(stack *const stk, const void *const data)
 {
 $i
-$   stack_verify(stk, false);
+$   stk_verify(stk, false);
     log_verify(data != nullptr, false);
 
     if ($size == $capacity)
@@ -247,7 +242,7 @@ $       if (stack_resize(stk, 2 * $capacity) == false) { $o return false; }
 $   memcpy(stack_get(stk, $size), data, $el_size);
     $size++;
 
-$   stack_debug_verify(stk);
+$   stk_debug_verify(stk);
 $o  return true;
 }
 
@@ -256,7 +251,7 @@ $o  return true;
 bool stack_pop(stack *const stk, void *const data /* = nullptr */)
 {
 $i
-$   stack_verify(stk, false);
+$   stk_verify(stk, false);
     log_verify($size != 0, false);
 
 $   if (data != nullptr) memcpy(data, stack_get(stk, $size - 1), $el_size);
@@ -270,7 +265,7 @@ $   stack_el_fill_poison(stk, $size);
 $       stack_resize(stk, new_capacity);
     }
 
-$   stack_debug_verify(stk);
+$   stk_debug_verify(stk);
 $o  return true;
 }
 
@@ -279,7 +274,7 @@ $o  return true;
 static bool stack_resize(stack *const stk, const size_t new_capacity)
 {
 $i
-$   stack_debug_verify(stk);
+$   stk_debug_verify(stk);
 
     if (new_capacity == $capacity) { $o return true; }
 
@@ -295,7 +290,7 @@ $o      return false;
 
     $capacity = new_capacity;
 $   stack_gap_fill_poison(stk);
-$   stack_debug_verify(stk);
+$   stk_debug_verify(stk);
 
 $o  return true;
 }
@@ -307,7 +302,7 @@ $o  return true;
 bool stack_front(const stack *const stk, void *const data)
 {
 $i
-$   stack_verify(stk, false);
+$   stk_verify(stk, false);
     log_verify(data  != nullptr, false);
     log_verify($size !=       0, false);
 
@@ -321,7 +316,7 @@ $o  return true;
 bool stack_is_empty(const stack *const stk)
 {
 $i
-$   stack_verify(stk, false);
+$   stk_verify(stk, false);
 
 $o  return $size == 0;
 }
@@ -334,7 +329,7 @@ void stack_dump(const void *const _stk)
 {
 $i
     const stack *const stk = (const stack *) _stk;
-$   stack_verify(stk, ;);
+$   stk_verify(stk, ;);
 
 $   stack_static_dump(stk, false);
 $o

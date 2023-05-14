@@ -93,10 +93,7 @@ $o  return cur_char == EOF ? EOF : 0;
 // verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-
-static unsigned _buff_verify(const buffer *const buff)
+unsigned _buff_verify(const buffer *const buff)
 {
 $i
     unsigned err = BUFF_OK;
@@ -111,8 +108,6 @@ $   if (err != BUFF_OK) { buff_log_error(buff, err); $o return err; }
 
 $o  return BUFF_OK;
 }
-
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

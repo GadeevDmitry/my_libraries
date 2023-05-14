@@ -118,6 +118,17 @@ num_cmp(unsigned long long,    ull_max, >)
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
+*   @brief Верификатор буфура.
+*
+*   @return битовая маска кодов ошибок из enum BUFF_STATUS
+*
+*   @see enum BUFF_STATUS
+*/
+unsigned _buff_verify(const buffer *const buff);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
 *   @brief Выделяет динамическую память для буфера buff размера buff_size.
 *
 *   @param buff      [out] - буфер
@@ -225,5 +236,30 @@ bool buffer_skip_spaces(buffer *const buff, size_t *const line_cnt = nullptr);
 *   @param _buff [in] - буффер
 */
 void buffer_dump(const void *const _buff);
+
+//================================================================================================================================
+// MACRO
+//================================================================================================================================
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// buffer verify
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#if !defined(NVERIFY) && !defined(BUFF_NVERIFY)
+#define buf_verify(buf, ret_val)                                                                                    \
+    if (_buff_verify(buf) != 0)                                                                                     \
+    {                                                                                                               \
+    $o  return ret_val;                                                                                             \
+    }
+#else
+#define buf_verify(buf, ret_val)
+#endif
+
+#if !defined(NDEBUG) && !defined(BUFF_NDEBUG)
+#define buf_debug_verify(buf)                                                                                      \
+        log_assert(_buff_verify(buf) == 0)
+#else
+#define buf_debug_verify(buf)
+#endif
 
 #endif //ALGORITHM_H

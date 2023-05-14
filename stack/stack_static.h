@@ -142,17 +142,6 @@ static void *stack_get(const stack *const stk, const size_t index);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Верификатор стека.
-*
-*   @return битовая маска кодов ошибок из enum STK_STATUS
-*
-*   @see enum STK_STATUS
-*/
-static unsigned _stack_verify(const stack *const stk);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
 *   @brief Выводит сообщения об ошибках в стеке в лог.
 */
 static void stack_log_error(const stack *const stk, const unsigned err);
@@ -207,30 +196,5 @@ static void stack_data_dump(const stack *const stk, const bool is_full);
 *   @brief Дамп элемента стека.
 */
 static void stack_el_dump(const stack *const stk, const void *const el);
-
-//================================================================================================================================
-// MACRO DEFINITIONS
-//================================================================================================================================
-
-//--------------------------------------------------------------------------------------------------------------------------------
-// stack verify
-//--------------------------------------------------------------------------------------------------------------------------------
-
-#if !defined(NVERIFY) && !defined(STACK_NVERIFY)
-#define stack_verify(stk, ret_val)              \
-    if (_stack_verify(stk) != STK_OK)           \
-    {                                           \
-    $o  return ret_val;                         \
-    }
-#else
-#define stack_verify(stk, ret_val)
-#endif
-
-#if !defined(NDEBUG) && !defined(STACK_NDEBUG)
-#define stack_debug_verify(stk)                 \
-        log_assert(_stack_verify(stk) == STK_OK)
-#else
-#define stack_debug_verify(stk)
-#endif
 
 #endif //STACK_STATIC_H

@@ -4,10 +4,7 @@
 // list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-
-static unsigned _list_verify(const list *const lst)
+unsigned _list_verify(const list *const lst)
 {
 $i
     unsigned err = LST_OK;
@@ -28,8 +25,6 @@ $   if (err == LST_OK) err = err | list_data_verify(lst);
 $   list_log_error(lst, err);
 $o  return err;
 }
-
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -186,7 +181,7 @@ $i
 
 $   if (!list_fictional_ctor(lst)) { $o return false; }
 
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
 $o  return true;
 }
 
@@ -203,7 +198,7 @@ $o      return nullptr;
     }
 $   if (!list_ctor(lst, el_dump)) { log_free(lst); $o return nullptr; }
 
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
 $o  return lst;
 }
 
@@ -240,7 +235,7 @@ static bool list_node_ctor(list      *const lst,
 {
 #pragma GCC diagnostic pop
 $i
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
     log_assert(lst_node != nullptr);
 
 #pragma GCC diagnostic push
@@ -286,7 +281,7 @@ $i
     if (_lst == nullptr) { $o return; }
 
     list *const lst = (list *) _lst;
-$   list_verify(lst, ;);
+$   lst_verify(lst, ;);
 
 $   list_fictional_dtor(lst);
     *lst = LST_POISON;
@@ -308,7 +303,7 @@ $o
 static void list_fictional_dtor(list *const lst)
 {
 $i
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
     log_assert($fictional != nullptr);
 
     list_node *cur_node = $fictional->next;
@@ -330,7 +325,7 @@ $o
 static list_node *list_get_node(const list *const lst, const size_t index)
 {
 $i
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
     log_verify(index < $size, nullptr);
 
     list_node *cur_node = $fictional;
@@ -344,7 +339,7 @@ $   list_debug_verify(lst);
         for (size_t i = $size; i > index; --i) cur_node = cur_node->prev;
     }
 
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
 
 $o  return cur_node;
 }
@@ -354,7 +349,7 @@ $o  return cur_node;
 bool list_insert(list *const lst, const void *const data, const size_t index)
 {
 $i
-$   list_verify(lst,              false);
+$   lst_verify(lst,              false);
     log_verify (data  != nullptr, false);
     log_verify (index <=   $size, false);
 
@@ -372,7 +367,7 @@ $   list_node *cur_node = list_node_new(lst, data, prev_node, next_node);
 
     $size += 1;
 
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
 $o  return true;
 }
 
@@ -381,7 +376,7 @@ $o  return true;
 bool list_push_front(list *const lst, const void *const data)
 {
 $i
-$   list_verify(lst, false);
+$   lst_verify(lst, false);
 
 $   bool   ret = list_insert(lst, data, 0);
 $o  return ret;
@@ -392,7 +387,7 @@ $o  return ret;
 bool list_push_back(list *const lst, const void *const data)
 {
 $i
-$   list_verify(lst, false);
+$   lst_verify(lst, false);
 
 $   bool   ret = list_insert(lst, data, $size);
 $o  return ret;
@@ -403,7 +398,7 @@ $o  return ret;
 void *list_erase(list *const lst, const size_t index)
 {
 $i
-$   list_verify(lst,           nullptr);
+$   lst_verify(lst,           nullptr);
     log_verify (index < $size, nullptr);
 
 $   list_node  *cur_node  = list_get_node(lst, index);
@@ -415,7 +410,7 @@ $   const void *erased_el = cur_node->data;
 
 $   log_free(cur_node);
 
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -439,7 +434,7 @@ $o  return erased_el;
 void *list_pop_back(list *const lst)
 {
 $i
-$   list_verify(lst, nullptr);
+$   lst_verify(lst, nullptr);
 
 $   void  *erased_el = list_erase(lst, $size - 1);
 $o  return erased_el;
@@ -452,13 +447,13 @@ $o  return erased_el;
 void *list_get(const list *const lst, const size_t index)
 {
 $i
-$   list_verify(lst,           nullptr);
+$   lst_verify(lst,           nullptr);
     log_verify (index < $size, nullptr);
 
 $   const list_node *cur_node = list_get_node(lst, index);
 $   const void      *geted_el = cur_node->data;
 
-$   list_debug_verify(lst);
+$   lst_debug_verify(lst);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
@@ -482,7 +477,7 @@ $o  return geted_el;
 void *list_back(const list *const lst)
 {
 $i
-$   list_verify(lst, nullptr);
+$   lst_verify(lst, nullptr);
 
 $   void  *geted_el = list_get(lst, $size - 1);
 $o  return geted_el;
@@ -493,7 +488,7 @@ $o  return geted_el;
 void *list_find(const list *const lst, const void *const target, int (*elem_cmp)(const void *elem_1, const void *elem_2))
 {
 $i
-$   list_verify(lst, nullptr);
+$   lst_verify(lst, nullptr);
 
     log_verify (target   != nullptr, nullptr);
     log_verify (elem_cmp != nullptr, nullptr);
@@ -518,7 +513,7 @@ void list_dump(const void *const _lst)
 {
 $i
     const list *const lst = (const list *) _lst;
-$   list_verify(lst, ;);
+$   lst_verify(lst, ;);
 
 $   list_static_dump(lst, false);
 $o
