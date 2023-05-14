@@ -331,6 +331,48 @@ $o  return buff_size_write == data_size;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
+
+bool buffer_skip_spaces(buffer *const buff, int *const line_cnt /* = nullptr */)
+{
+    buf_verify(buff, false);
+
+    if (line_cnt == nullptr) return buffer_skip_spaces_only(buff);
+
+    int     line_add = 0;
+    char   *buff_end = $buff_beg + $buff_size;
+    while ($buff_pos != buff_end)
+    {
+        if (*$buff_pos == '\0') break;
+        if (*$buff_pos == '\n') line_add++;
+        if (!isspace(*$buff_pos)) break;
+
+        $buff_pos++;
+    }
+
+    *line_cnt += line_add;
+
+    return ($buff_pos != buff_end) && (*$buff_pos != '\0');
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static inline bool buffer_skip_spaces_only(buffer *const buff)
+{
+    buf_debug_verify(buff);
+
+    char   *buff_end = $buff_beg + $buff_size;
+    while ($buff_pos != buff_end)
+    {
+        if (*$buff_pos == '\0') return false;
+        if (!isspace(*$buff_pos)) break;
+
+        $buff_pos++;
+    }
+
+    return $buff_pos != buff_end;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
 // dump
 //--------------------------------------------------------------------------------------------------------------------------------
 
