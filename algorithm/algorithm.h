@@ -209,7 +209,7 @@ bool buffer_write(buffer *const buff, const void *data, const size_t data_size);
 *
 *   @return false, в случае ошибки, или если достигнут конец буфера или нулевой символ
 */
-bool buffer_skip_spaces(buffer *const buff, int *const line_cnt = nullptr);
+bool buffer_skip_spaces(buffer *const buff, size_t *const line_cnt = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

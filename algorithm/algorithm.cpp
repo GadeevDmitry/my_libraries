@@ -332,13 +332,13 @@ $o  return buff_size_write == data_size;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool buffer_skip_spaces(buffer *const buff, int *const line_cnt /* = nullptr */)
+bool buffer_skip_spaces(buffer *const buff, size_t *const line_cnt /* = nullptr */)
 {
     buf_verify(buff, false);
 
     if (line_cnt == nullptr) return buffer_skip_spaces_only(buff);
 
-    int     line_add = 0;
+    size_t  line_add = 0;
     char   *buff_end = $buff_beg + $buff_size;
     while ($buff_pos != buff_end)
     {
