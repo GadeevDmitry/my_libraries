@@ -527,7 +527,7 @@ $i
     const vector *const vec = (const vector *) _vec;
 $   vec_verify(vec, (void) 0);
 
-$   vector_static_dump(vec, true);
+$   vector_static_dump(vec, false);
 $o
 }
 

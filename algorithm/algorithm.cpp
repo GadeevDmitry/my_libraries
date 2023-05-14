@@ -85,6 +85,21 @@ $i
 $o  return cur_char == EOF ? EOF : 0;
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------
+// is_char_in_str
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool is_char_in_str(const char to_check, const char *str)
+{
+
+    if (str == nullptr) return false;
+
+    for (;  *str != '\0'; ++str)
+        if (*str == to_check) return true;
+
+    return false;
+}
+
 //================================================================================================================================
 // BUFFER
 //================================================================================================================================
@@ -329,53 +344,133 @@ $o  return buff_size_write == data_size;
 
 bool buffer_is_end(buffer *const buff)
 {
-    buf_verify(buff, false);
+$i
+$   buf_verify(buff, false);
 
     char *buff_end = $buff_beg + $buff_size;
 
-    return ($buff_pos == buff_end) || (*$buff_pos == '\0');
+$o  return ($buff_pos == buff_end) || (*$buff_pos == '\0');
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool buffer_skip_split_chars(buffer *const buff, const char *split_chars, size_t *const line_cnt /* = nullptr */)
+{
+$i
+$   buf_verify(buff, false);
+
+    if (split_chars == nullptr) { $o return buffer_skip_spaces(buff, line_cnt); }
+
+    size_t  line_add = 0;
+    char   *buff_end = $buff_beg + $buff_size;
+$   for (; $buff_pos != buff_end; ++$buff_pos)
+    {
+        if (*$buff_pos == '\n') { line_add++; continue; }
+        if (*$buff_pos == '\0')   break;
+
+        if (isspace       (*$buff_pos))              continue;
+        if (is_char_in_str(*$buff_pos, split_chars)) continue;
+
+        break;
+    }
+
+    if (line_cnt != nullptr) *line_cnt += line_add;
+
+$o  return ($buff_pos != buff_end) && (*$buff_pos != '\0');
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 bool buffer_skip_spaces(buffer *const buff, size_t *const line_cnt /* = nullptr */)
 {
-    buf_verify(buff, false);
-
-    if (line_cnt == nullptr) return buffer_skip_spaces_only(buff);
+$i
+$   buf_verify(buff, false);
 
     size_t  line_add = 0;
     char   *buff_end = $buff_beg + $buff_size;
-    while ($buff_pos != buff_end)
+$   for (; $buff_pos != buff_end; ++$buff_pos)
     {
-        if (*$buff_pos == '\0') break;
-        if (*$buff_pos == '\n') line_add++;
+        if (*$buff_pos == '\n') { line_add++; continue; }
+        if (*$buff_pos == '\0')   break;
         if (!isspace(*$buff_pos)) break;
-
-        $buff_pos++;
     }
 
-    *line_cnt += line_add;
+    if (line_cnt != nullptr) *line_cnt += line_add;
 
-    return ($buff_pos != buff_end) && (*$buff_pos != '\0');
+$o  return ($buff_pos != buff_end) && (*$buff_pos != '\0');
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static inline bool buffer_skip_spaces_only(buffer *const buff)
+bool buffer_skip_line(buffer *const buff, size_t *const line_cnt /* = nullptr */)
 {
-    buf_debug_verify(buff);
+$i
+$   buf_verify(buff, false);
 
     char   *buff_end = $buff_beg + $buff_size;
-    while ($buff_pos != buff_end)
+$   for (; $buff_pos != buff_end; ++$buff_pos)
     {
-        if (*$buff_pos == '\0') return false;
-        if (!isspace(*$buff_pos)) break;
-
-        $buff_pos++;
+        if (*$buff_pos == '\0') { $o return false; }
+        if (*$buff_pos == '\n') { $buff_pos++; break; }
     }
 
-    return $buff_pos != buff_end;
+    if (line_cnt != nullptr) *line_cnt += 1;
+
+$o  return $buff_pos != buff_end;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool buffer_next_token(buffer *const buff, const char *split_chars /* = nullptr */, size_t *const line_cnt /* = nullptr */)
+{
+$i
+$   buf_verify(buff, false);
+
+$   if         (!buffer_skip_token      (buff, split_chars)) { $o return false; }
+$   bool   ret = buffer_skip_split_chars(buff, split_chars, line_cnt);
+$o  return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool buffer_skip_token(buffer *const buff, const char *split_chars /* = nullptr */)
+{
+$i
+$   buf_debug_verify(buff);
+
+    char   *buff_end = $buff_beg + $buff_size;
+$   for (; $buff_pos != buff_end; ++$buff_pos)
+    {
+        if (*$buff_pos == '\0') { $o return false; }
+
+        if (is_char_in_str(*$buff_pos, split_chars)) { $o return true; }
+        if (isspace       (*$buff_pos))              { $o return true; }
+    }
+
+$o  return false;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+size_t buffer_get_token_size(const buffer *const buff, const char *split_chars /* = nullptr */)
+{
+$i
+$   buf_verify(buff, 0);
+
+    size_t size_token = 0;
+
+    char  *buff_end  = $buff_beg + $buff_size;
+    char  *buff_pos  = $buff_pos;
+$   for (; buff_pos != buff_end; ++buff_pos)
+    {
+        if (*buff_pos == '\0') break;
+        if (isspace       (*buff_pos))              break;
+        if (is_char_in_str(*buff_pos, split_chars)) break;
+
+        size_token++;
+    }
+
+$o  return size_token;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
