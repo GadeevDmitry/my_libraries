@@ -332,6 +332,17 @@ $o  return buff_size_write == data_size;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+bool buffer_is_end(buffer *const buff)
+{
+    buf_verify(buff, false);
+
+    char *buff_end = $buff_beg + $buff_size;
+
+    return ($buff_pos == buff_end) || (*$buff_pos == '\0');
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 bool buffer_skip_spaces(buffer *const buff, size_t *const line_cnt /* = nullptr */)
 {
     buf_verify(buff, false);
