@@ -125,4 +125,14 @@
 
 #endif
 
+//--------------------------------------------------------------------------------------------------------------------------------
+// BASH
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#define fprintf_ok_message(   stream, fmt, ...) fprintf(stream, BASH_COLOR_GREEN fmt BASH_COLOR_WHITE, ##__VA_ARGS__)
+#define fprintf_error_message(stream, fmt, ...) fprintf(stream, BASH_COLOR_RED   fmt BASH_COLOR_WHITE, ##__VA_ARGS__)
+
+#define printf_ok_message(   fmt, ...) fprintf_ok_message   (stdout, fmt, ##__VA_ARGS__)
+#define printf_error_message(fmt, ...) fprintf_error_message(stdout, fmt, ##__VA_ARGS__)
+
 #endif //LOG_DEF_H
