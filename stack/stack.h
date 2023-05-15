@@ -168,7 +168,7 @@ void stack_dump(const void *const _stk);
 
 #if !defined(NVERIFY) && !defined(STACK_NVERIFY)
 #define stk_verify(stk, ret_val)                \
-    if (_stack_verify(stk) != STK_OK)           \
+    if (_stack_verify(stk) != 0)                \
     {                                           \
     $o  return ret_val;                         \
     }
@@ -178,7 +178,7 @@ void stack_dump(const void *const _stk);
 
 #if !defined(NDEBUG) && !defined(STACK_NDEBUG)
 #define stk_debug_verify(stk)                   \
-        log_assert(_stack_verify(stk) == STK_OK)
+        log_assert(_stack_verify(stk) == 0)
 #else
 #define stk_debug_verify(stk)
 #endif
