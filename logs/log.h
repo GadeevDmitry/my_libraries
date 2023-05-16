@@ -50,7 +50,7 @@ void _log_tab_message(const char *fmt, ...);
 *
 *   @see _trace_push(trace*)
 */
-void _trace_push();
+void log_trace_push();
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -60,9 +60,9 @@ void _trace_push();
 *
 *   @see _trace_front_upd(const char* const file, const char* const func, const int line)
 */
-void _trace_upd(const char *const file,
-                const char *const func,
-                const int         line);
+void log_trace_upd(const char *const file,
+                   const char *const func,
+                   const int         line);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ void _trace_upd(const char *const file,
 *
 *   @see _trace_pop(trace*)
 */
-void _trace_pop();
+void log_trace_pop();
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -82,7 +82,7 @@ void _trace_pop();
 *
 *   @see _trace_dump(const trace*)
 */
-void _trace_dump();
+void _log_trace_dump();
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_ERROR
@@ -96,13 +96,11 @@ void _trace_dump();
 *   @param cur_func       [in] - функция в точке вызова
 *   @param cur_line       [in] - строка в точке вызова
 *
-*   @param is_local_trace [in] - false, если в точке вызова режим LOG_NTRACE, true - иначе
-*
 *   @param fmt            [in] - формат вывода
 */
 void _log_error(const char *const cur_file,
                 const char *const cur_func,
-                const int         cur_line, const bool is_local_trace, const char *fmt, ...);
+                const int         cur_line, const char *fmt, ...);
 
 /**
 *   @brief Выводит сообщение об ошибке с координатами в точке вызова.
@@ -116,9 +114,7 @@ void _log_error(const char *const cur_file,
 */
 void _log_oneline_error(const char *const cur_file,
                         const char *const cur_func,
-                        const int         cur_line,
-
-                        const char *fmt, ...);
+                        const int         cur_line, const char *fmt, ...);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_WARNING
@@ -132,13 +128,11 @@ void _log_oneline_error(const char *const cur_file,
 *   @param cur_func       [in] - функция в точке вызова
 *   @param cur_line       [in] - строка в точке вызова
 *
-*   @param is_local_trace [in] - false, если в точке вызова режим LOG_NTRACE, true - иначе
-*
 *   @param fmt            [in] - формат вывода
 */
 void _log_warning(const char *const cur_file,
                   const char *const cur_func,
-                  const int         cur_line, const bool is_local_trace, const char *fmt, ...);
+                  const int         cur_line, const char *fmt, ...);
 
 /**
 *   @brief Выводит warning с координатами в точке вызова.
@@ -152,9 +146,7 @@ void _log_warning(const char *const cur_file,
 */
 void _log_oneline_warning(const char *const cur_file,
                           const char *const cur_func,
-                          const int         cur_line,
-
-                          const char *fmt, ...);
+                          const int         cur_line, const char *fmt, ...);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_SMTH
@@ -268,7 +260,9 @@ void _log_free(void *ptr);
                                 "ASSERTION FAILED: %s\n",           \
 				                #condition);                        \
                 log_tab_message("====================\n");          \
-            $   trace_dump();                                       \
+                log_place();                                        \
+                log_tab_message("====================\n");          \
+            $   log_trace_dump();                                   \
                 log_tab_message("===================="              \
                                 HTML_COLOR_CANCEL "\n\n");          \
                                                                     \
@@ -298,7 +292,9 @@ void _log_free(void *ptr);
                             "VERIFY FAILED: %s\n",                  \
                             #condition);                            \
             log_tab_message("====================\n");              \
-        $   trace_dump();                                           \
+            log_place();                                            \
+            log_tab_message("====================\n");              \
+        $   log_trace_dump();                                       \
             log_tab_message("===================="                  \
                             HTML_COLOR_CANCEL "\n\n");              \
                                                                     \

@@ -10,18 +10,22 @@
 
 #if !defined(NLOG) && !defined(LOG_NTRACE)
 
-#define $            _trace_upd (__FILE__, __PRETTY_FUNCTION__, __LINE__);  ///< обновление строки для следующего push
-#define $i           _trace_push();                                         ///< push в стек trace
-#define $o           _trace_pop ();                                         ///< pop из стека trace
-#define trace_dump() _trace_dump()                                          ///< dump стека trace
+#define $  log_trace_upd (__FILE__, __PRETTY_FUNCTION__, __LINE__);  ///< обновление строки для следующего push
+#define $i log_trace_push();                                         ///< push в стек trace
+#define $o log_trace_pop ();                                         ///< pop из стека trace
 
 #else
 
 #define $
 #define $i
 #define $o
-#define trace_dump()
 
+#endif
+
+#ifndef NLOG
+#define log_trace_dump() _log_trace_dump()  ///< дамп стека trace
+#else
+#define log_trace_dump()
 #endif
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -40,17 +44,12 @@
 // LOG_ERROR/WARNING
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#if   !defined(NLOG) && !defined(LOG_NTRACE)
+#if !defined(NLOG)
 
-#define log_error(  fmt, ...) _log_error  (__FILE__, __PRETTY_FUNCTION__, __LINE__, true, fmt, ##__VA_ARGS__)
-#define log_warning(fmt, ...) _log_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, true, fmt, ##__VA_ARGS__)
+#define log_error(  fmt, ...) _log_error  (__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_warning(fmt, ...) _log_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
-#elif !defined(NLOG) &&  defined(LOG_NTRACE)
-
-#define log_error(  fmt, ...) _log_error  (__FILE__, __PRETTY_FUNCTION__, __LINE__, false, fmt, ##__VA_ARGS__)
-#define log_warning(fmt, ...) _log_warning(__FILE__, __PRETTY_FUNCTION__, __LINE__, false, fmt, ##__VA_ARGS__)
-
-#else // defined(NLOG)
+#else
 
 #define log_error(  fmt, ...)
 #define log_warning(fmt, ...)

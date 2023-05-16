@@ -54,7 +54,7 @@ static void LOG_STREAM_CLOSE()
 // TRACE SHELL
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void _trace_push()
+void log_trace_push()
 {
     #if defined(NLOG) || defined(LOG_NTRACE)
     return;
@@ -73,9 +73,9 @@ void _trace_push()
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-void _trace_upd(const char *const file,
-                const char *const func,
-                const int         line)
+void log_trace_upd(const char *const file,
+                   const char *const func,
+                   const int         line)
 {
     #if defined(NLOG) || defined(LOG_NTRACE)
     return;
@@ -96,7 +96,7 @@ void _trace_upd(const char *const file,
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void _trace_pop()
+void log_trace_pop()
 {
     #if defined(NLOG) || defined(LOG_NTRACE)
     return;
@@ -112,9 +112,10 @@ void _trace_pop()
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-void _trace_dump()
+void _log_trace_dump()
 {
     #if defined(NLOG) || defined(LOG_NTRACE)
+    log_tab_message("NO TRACE SUPPORT\n");
     return;
     #else
 
@@ -209,12 +210,9 @@ static inline void _log_tab_message(const char *fmt, va_list ap)
 // LOG_ERROR
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 void _log_error(const char *const cur_file,
                 const char *const cur_func,
-                const int         cur_line, const bool is_local_trace, const char *fmt, ...)
+                const int         cur_line, const char *fmt, ...)
 {
     log_assert(cur_file != nullptr);
     log_assert(cur_func != nullptr);
@@ -227,10 +225,13 @@ void _log_error(const char *const cur_file,
     va_list  ap;
     va_start(ap, fmt);
    _log_tab_message(fmt, ap);
+
+    log_tab_message("====================\n");
+    log_param_place(cur_file, cur_func, cur_line);
     log_tab_message("====================\n");
 
     #if !defined(NLOG) && !defined(LOG_NTRACE)
-    if (is_local_trace) _trace_dump();
+    _log_trace_dump();
     #endif
 
     log_tab_message("====================" HTML_COLOR_CANCEL "\n");
@@ -266,7 +267,7 @@ void _log_oneline_error(const char *const cur_file,
 
 void _log_warning(const char *const cur_file,
                   const char *const cur_func,
-                  const int         cur_line, const bool is_local_trace, const char *fmt, ...)
+                  const int         cur_line, const char *fmt, ...)
 {
     log_assert(cur_file != nullptr);
     log_assert(cur_func != nullptr);
@@ -280,10 +281,13 @@ void _log_warning(const char *const cur_file,
     va_list ap;
     va_start(ap, fmt);
    _log_tab_message(fmt, ap);
+
+    log_tab_message("====================\n");
+    log_param_place(cur_file, cur_func, cur_line);
     log_tab_message("====================\n");
 
     #if !defined(NLOG) && !defined(LOG_NTRACE)
-    if (is_local_trace) _trace_dump();
+    _log_trace_dump();
     #endif
 
     log_tab_message("====================" HTML_COLOR_CANCEL "\n");
@@ -345,8 +349,6 @@ void _log_param_place(const char *const file,
                     "FUNCTION: %s\n"
                     "    LINE: %d\n", file, func, line);
 }
-
-#pragma GCC diagnostic pop
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // LOG_MEMORY
