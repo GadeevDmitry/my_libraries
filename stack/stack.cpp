@@ -30,6 +30,9 @@ $i
     log_assert($data != nullptr);
     log_assert(filled_index < $capacity);
 
+    log_assert($el_poison !=              nullptr);
+    log_assert($el_poison != STK_POISON.el_poison);
+
 $   memcpy(stack_get(stk, filled_index), $el_poison, $el_size);
 $o
 }
@@ -58,6 +61,9 @@ $i
     log_assert(stk   != nullptr);
     log_assert($data != nullptr);
     log_assert(check_index < $capacity);
+
+    log_assert($el_poison !=              nullptr);
+    log_assert($el_poison != STK_POISON.el_poison);
 
 $   bool   ret = is_byte_equal(stack_get(stk, check_index), $el_poison, $el_size);
 $o  return ret;
@@ -256,7 +262,9 @@ $   stk_verify(stk, false);
 
 $   if (data != nullptr) memcpy(data, stack_get(stk, $size - 1), $el_size);
     $size--;
-$   stack_el_fill_poison(stk, $size);
+
+$   if ($el_dtor   != nullptr) $el_dtor  (stack_get(stk, $size));
+$   if ($el_poison != nullptr) stack_el_fill_poison(stk, $size);
 
     if (4 * $size <= $capacity)
     {
