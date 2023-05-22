@@ -1,3 +1,4 @@
+/** @file */
 #ifndef VECTOR_STATIC_H
 #define VECTOR_STATIC_H
 

@@ -1,3 +1,4 @@
+/** @file */
 #ifndef VECTOR_H
 #define VECTOR_H
 
@@ -71,7 +72,7 @@ static inline vector *vector_new(const size_t el_size, const void *const el_pois
 /**
 *   @brief Vector_dtor.
 *
-*   @param vec [in] - указатель на вектор
+*   @param _vec [in] - указатель на вектор
 */
 static inline void vector_dtor(void *const _vec);
 static inline void vector_dtor(void *const _vec)
