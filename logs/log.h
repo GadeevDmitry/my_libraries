@@ -253,61 +253,70 @@ void _log_free(void *ptr);
 /**
 *   @brief assert с сообщением в лог файл
 */
-#define log_assert(condition)                                       \
-            if  (!(condition))                                      \
-            {                                                       \
-			    log_tab_message(HTML_COLOR_DARK_RED "\n"            \
-                                "ASSERTION FAILED: %s\n",           \
-				                #condition);                        \
-                log_tab_message("====================\n");          \
-                log_place();                                        \
-                log_tab_message("====================\n");          \
-            $   log_trace_dump();                                   \
-                log_tab_message("===================="              \
-                                HTML_COLOR_CANCEL "\n\n");          \
-                                                                    \
-                fprintf(stderr, BASH_COLOR_RED                      \
-                                "ASSERTION FAILED "                 \
-                                BASH_COLOR_CYAN                     \
-                                "(check log)\n"                     \
-                                BASH_COLOR_WHITE);                  \
-			    abort();                                            \
-            }
+#define log_assert_verbose(condition, message)              \
+    if (!(condition))                                       \
+    {                                                       \
+        log_tab_message(HTML_COLOR_DARK_RED "\n"            \
+                        "ASSERTION FAILED: %s\n",           \
+                        message);                           \
+        log_tab_message("====================\n");          \
+        log_place();                                        \
+        log_tab_message("====================\n");          \
+    $   log_trace_dump();                                   \
+        log_tab_message("===================="              \
+                        HTML_COLOR_CANCEL "\n\n");          \
+                                                            \
+        fprintf(stderr, BASH_COLOR_RED                      \
+                        "ASSERTION FAILED "                 \
+                        BASH_COLOR_CYAN                     \
+                        "(check log)\n"                     \
+                        BASH_COLOR_WHITE);                  \
+	    abort();                                            \
+    }
+
+#define log_assert(condition) log_assert_verbose(condition, #condition)
 
 #else // defined(NDEBUG) || defined(NLOG) || defined(LOG_NDEBUG)
 /**
 *   @brief <=> assert
 */
-#define log_assert(condition) assert(condition)
+#define log_assert_verbose(condition, message) assert(condition)
+#define log_assert(        condition)          assert(condition)
 #endif
 
-#if   !defined(NVERIFY) && !defined(NLOG) && !defined(LOG_NVERIFY)
+#if !defined(NVERIFY) && !defined(NLOG) && !defined(LOG_NVERIFY)
 /**
 *   @brief "мягкий" assert с сообщением в лог
 */
-#define log_verify(condition, ret_val)                              \
-        if (!(condition))                                           \
-        {                                                           \
-            log_tab_message(HTML_COLOR_DARK_RED "\n"                \
-                            "VERIFY FAILED: %s\n",                  \
-                            #condition);                            \
-            log_tab_message("====================\n");              \
-            log_place();                                            \
-            log_tab_message("====================\n");              \
-        $   log_trace_dump();                                       \
-            log_tab_message("===================="                  \
-                            HTML_COLOR_CANCEL "\n\n");              \
-                                                                    \
-        $o  return ret_val;                                         \
-        }
+#define log_verify_verbose(condition, message, ret_val)     \
+    if (!(condition))                                       \
+    {                                                       \
+        log_tab_message(HTML_COLOR_DARK_RED "\n"            \
+                        "VERIFY FAILED: %s\n",              \
+                        message);                           \
+        log_tab_message("====================\n");          \
+        log_place();                                        \
+        log_tab_message("====================\n");          \
+    $   log_trace_dump();                                   \
+        log_tab_message("===================="              \
+                        HTML_COLOR_CANCEL "\n\n");          \
+                                                            \
+    $o  return ret_val;                                     \
+    }
+
+#define log_verify(condition, ret_val) log_verify_verbose(condition, #condition, ret_val)
 
 #elif !defined(NVERIFY)
 /**
 *   @brief "мягкий" assert без сообщения в лог
 */
+#define log_verify_verbose(condition, message, ret_val)             \
+    if (!(condition)) { $o return ret_val; }
 #define log_verify(condition, ret_val)                              \
-        if (!(condition)) { $o return ret_val; }
+    if (!(condition)) { $o return ret_val; }
+
 #else
+#define log_verify_verbose(condition, message, ret_val)
 #define log_verify(condition, ret_val)
 #endif
 
