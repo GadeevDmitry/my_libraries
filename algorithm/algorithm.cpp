@@ -334,7 +334,7 @@ $   buf_verify(buff           , false);
     size_t buff_size_left  = $buff_size - (size_t) ($buff_pos - $buff_beg);
 $   size_t buff_size_write = size_t_min(buff_size_left, data_size);
 
-$   memcpy($buff_pos, data, data_size);
+$   memcpy($buff_pos, data, buff_size_write);
     $buff_pos += buff_size_write;
 
 $o  return buff_size_write == data_size;
