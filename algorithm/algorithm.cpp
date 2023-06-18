@@ -500,9 +500,7 @@ $   bool are_invalid_static_fields = is_full ? buffer_static_fields_dump(buff) :
     bool are_invalid_fields = are_invalid_public_fields | are_invalid_static_fields;
 
 $   buffer_content_dump(buff, are_invalid_fields);
-
-    LOG_TAB--;
-$   log_tab_service_message("}", "\n");
+$   buffer_ending_dump ();
 $o
 }
 
@@ -518,6 +516,16 @@ $   if (buff == nullptr) { log_tab_service_message("}", "\n"); $o return false; 
     LOG_TAB++;
 
 $o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void __always_inline buffer_ending_dump()
+{
+$i
+    LOG_TAB--;
+$   log_tab_service_message("}", "\n\n");
+$o
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -615,3 +623,52 @@ $   log_tab_service_message("\"", "");
     }
 $o
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// { hex dump
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void buffer_hex_dump(const void *const _buff)
+{
+    const buffer *const buff = (const buffer *) _buff;
+    buf_verify(buff, (void) 0);
+
+    buffer_header_dump     (buff);
+    buffer_hex_content_dump(buff);
+    buffer_ending_dump     ();
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void buffer_hex_content_dump(const buffer *const buff)
+{
+    buf_debug_verify(buff);
+
+    usual_field_dump("buff_beg ", "%p" , $buff_beg );
+    usual_field_dump("buff_pos ", "%p" , $buff_pos );
+    usual_field_dump("buff_size", "%lu", $buff_size);
+
+    log_message("\n");
+
+    const unsigned char *pos = (unsigned char *) $buff_beg;
+    const unsigned char *end = (unsigned char *) $buff_beg + $buff_size;
+
+    for (size_t y = 1; pos != end           ; ++y) { log_tab_message(" ");
+    for (size_t x = 1; pos != end && x <= 16; ++x)
+        {
+            unsigned char high = (*pos >> 4);
+            unsigned char low  = (*pos % 16);
+            pos++;
+
+            log_message("%x%x ", high, low);
+
+            if (x % 4 == 0) log_message(" ");
+        }
+
+        log_message("\n");
+        if (y % 4 == 0) log_message("\n");
+    }
+}
+
+// } hex dump
+//--------------------------------------------------------------------------------------------------------------------------------

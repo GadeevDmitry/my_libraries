@@ -150,6 +150,15 @@ static bool buffer_header_dump(const buffer *const buff);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
+*   @brief Конец дампа буфера.
+*
+*   @return true, если buff != nullptr
+*/
+static void buffer_ending_dump();
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
 *   @brief Дамп "public" полей буфера.
 *
 *   @return true, если хоть одно поле невалидно
@@ -181,5 +190,12 @@ static void buffer_content_dump(const buffer *const buff, const bool is_any_inva
 *   @brief Дамп содержимого буфера при гарантии, что все поля валидны.
 */
 static void buffer_content_safety_dump(const buffer *const buff);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Дамп содержимого буфера в виде последовательности hex-байтов при гарантии, что все поля валидны.
+*/
+static void buffer_hex_content_dump(const buffer *const buff);
 
 #endif //ALGORITHM_STATIC_H
