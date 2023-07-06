@@ -26,6 +26,8 @@ struct stack
     void (*el_dump)      (const void *const el);    ///< указатель на dump элемента стека
 };
 
+const size_t DEFAULT_STACK_CAPACITY = 4;
+
 //================================================================================================================================
 // FUNCTION DECLARATION
 //================================================================================================================================
@@ -50,31 +52,37 @@ unsigned _stack_verify(const stack *const stk);
 /**
 *   @brief Stack_ctor.
 *
-*   @param stk       [out] - указатель на стек
-*   @param el_size   [in]  - размер элемента стека
-*   @param el_poison [in]  - указатель на POISON-элемент стека
-*   @param el_dtor   [in]  - указатель на dtor элемента стека
-*   @param el_dump   [in]  - указатель на dump элемента стека
+*   @param stk            [out] - указатель на стек
+*   @param el_size        [in]  - размер элемента стека
+*   @param el_poison      [in]  - указатель на POISON-элемент стека
+*   @param el_dtor        [in]  - указатель на dtor элемента стека
+*   @param el_dump        [in]  - указатель на dump элемента стека
+*   @param stack_capacity [in]  - начальная емкость стека
 */
 bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison                     = nullptr,
                                                               void (     *el_dtor  )(      void *const) = nullptr,
-                                                              void (     *el_dump  )(const void *const) = nullptr);
+                                                              void (     *el_dump  )(const void *const) = nullptr,
+
+                                                              const size_t stack_capacity = DEFAULT_STACK_CAPACITY);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Создает стек в динамической памяти.
 *
-*   @param el_size   [in]  - размер элемента стека
-*   @param el_poison [in]  - указатель на POISON-элемент стека
-*   @param el_dtor   [in]  - указатель на dtor элемента стека
-*   @param el_dump   [in]  - указатель на dump элемента стека
+*   @param el_size        [in] - размер элемента стека
+*   @param el_poison      [in] - указатель на POISON-элемент стека
+*   @param el_dtor        [in] - указатель на dtor элемента стека
+*   @param el_dump        [in] - указатель на dump элемента стека
+*   @param stack_capacity [in] - начальная емкость стека
 *
 *   @return указатель на созданный стек или nullptr в случае ошибки
 */
 stack *stack_new(const size_t el_size, const void *const el_poison                     = nullptr,
                                              void (     *el_dtor  )(      void *const) = nullptr,
-                                             void (     *el_dump  )(const void *const) = nullptr);
+                                             void (     *el_dump  )(const void *const) = nullptr,
+
+                                             const size_t stack_capacity = DEFAULT_STACK_CAPACITY);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor

@@ -13,6 +13,4 @@
 //#define STACK_NVERIFY
 //#define STACK_NDEBUG
 
-static const size_t DEFAULT_STACK_CAPACITY = 4;
-
 #endif //STACK_SETTINGS_H

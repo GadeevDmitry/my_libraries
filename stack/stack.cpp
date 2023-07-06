@@ -140,14 +140,17 @@ $o
 
 bool stack_ctor(stack *const stk, const size_t el_size, const void *const el_poison                     /* = nullptr */,
                                                               void (     *el_dtor  )(      void *const) /* = nullptr */,
-                                                              void (     *el_dump  )(const void *const) /* = nulltpr */)
+                                                              void (     *el_dump  )(const void *const) /* = nullptr */,
+
+                                                              const size_t stack_capacity /* = DEFAULT_STACK_CAPACITY */)
 {
 $i
-    log_verify(stk != nullptr, false);
+    log_verify(stk      != nullptr, false);
+    log_verify(stack_capacity != 0, false);
 
     $el_size   = el_size;
     $size      = 0;
-    $capacity  = DEFAULT_STACK_CAPACITY;
+    $capacity  = stack_capacity;
 
     $el_poison = el_poison;
     $el_dtor   = el_dtor;
@@ -156,8 +159,8 @@ $i
 $   $data      = log_calloc($el_size, $capacity);
     if ($data == nullptr)
     {
-$       log_error("log_calloc(el_size                = %lu,"
-                            " DEFAULT_STACK_CAPACITY = %lu) returns nullptr\n", $el_size, DEFAULT_STACK_CAPACITY);
+$       log_error("log_calloc(el_size = %lu, stack_capacity = %lu) returns nullptr\n",
+                             $el_size      , stack_capacity);
 $o      return false;
     }
 
@@ -171,7 +174,9 @@ $o  return true;
 
 stack *stack_new(const size_t el_size, const void *const el_poison                     /* = nullptr */,
                                              void (     *el_dtor  )(      void *const) /* = nullptr */,
-                                             void (     *el_dump  )(const void *const) /* = nullptr */)
+                                             void (     *el_dump  )(const void *const) /* = nullptr */,
+
+                                             const size_t stack_capacity /* = DEFAULT_STACK_CAPACITY */)
 {
 $i
 $   stack *const stk = (stack *) log_calloc(1, sizeof(stack));
@@ -180,7 +185,7 @@ $   stack *const stk = (stack *) log_calloc(1, sizeof(stack));
 $       log_error("log_calloc(1, sizeof(stack) = %lu) returns nullptr\n", sizeof(stack));
 $o      return nullptr;
     }
-$   if (!stack_ctor(stk, el_size, el_poison, el_dtor, el_dump)) { log_free(stk); $o return nullptr; }
+$   if (!stack_ctor(stk, el_size, el_poison, el_dtor, el_dump, stack_capacity)) { log_free(stk); $o return nullptr; }
 
 $   stk_debug_verify(stk);
 $o  return stk;
@@ -287,11 +292,11 @@ $   stk_debug_verify(stk);
     if (new_capacity == $capacity) { $o return true; }
 
     void *old_data = $data;
-$   $data = log_realloc($data, new_capacity * $el_size);
+$   $data = log_recalloc($data, $capacity * $el_size, new_capacity * $el_size);
     if ($data == nullptr)
     {
-$       log_error("log_realloc(stack.data,  (new_capacity = %lu) * (el_size = %lu)) returns nullptr",
-                                             new_capacity,         $el_size);
+$       log_error("log_recalloc(stack.data, (capacity = %lu) * (el_size = %lu), (new_capacity = %lu) * (el_size = %lu)) returns nullptr",
+                                            $capacity,         $el_size,         new_capacity,         $el_size);
         $data = old_data;
 $o      return false;
     }
@@ -523,6 +528,26 @@ $   vec_verify(vec,             false);
 $   memcpy(vec_el, data, $el_size);
 
 $o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// vector resize
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool vector_resize(vector *const vec, const size_t count)
+{
+$i
+$   vec_verify(vec, false);
+
+    if (count == $size) { $o return true; }
+
+    $size = count;
+    bool result = true;
+
+    if  (4 * count < $capacity) { $ result = stack_resize(vec, count * 2);  }
+    else if (count > $capacity) { $ result = stack_resize(vec, count);      }
+
+$o  return result;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

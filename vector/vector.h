@@ -25,21 +25,26 @@ typedef stack vector;
 /**
 *   @brief Vector_ctor.
 *
-*   @param vec       [out] - указатель на вектор
-*   @param el_size   [in]  - размер элемента вектора
-*   @param el_poison [in]  - указатель на POISON-элемент вектора
-*   @param el_dtor   [in]  - указатель на dtor элемента вектора
-*   @param el_dump   [in]  - указатель на dump элемента вектора
+*   @param vec             [out] - указатель на вектор
+*   @param el_size         [in]  - размер элемента вектора
+*   @param el_poison       [in]  - указатель на POISON-элемент вектора
+*   @param el_dtor         [in]  - указатель на dtor элемента вектора
+*   @param el_dump         [in]  - указатель на dump элемента вектора
+*   @param vector_capacity [in]  - начальная емкость вектора
 */
 static inline bool vector_ctor(vector *const vec, const size_t el_size, const void *const el_poison                     = nullptr,
                                                                               void (     *el_dtor  )(      void *const) = nullptr,
-                                                                              void (     *el_dump  )(const void *const) = nullptr);
+                                                                              void (     *el_dump  )(const void *const) = nullptr,
+
+                                                                              const size_t vector_capacity = DEFAULT_STACK_CAPACITY);
 
 static inline bool vector_ctor(vector *const vec, const size_t el_size, const void *const el_poison                     /* = nullptr */,
                                                                               void (     *el_dtor  )(      void *const) /* = nullptr */,
-                                                                              void (     *el_dump  )(const void *const) /* = nullptr */)
+                                                                              void (     *el_dump  )(const void *const) /* = nullptr */,
+
+                                                                              const size_t vector_capacity /* = DEFAULT_STACK_CAPACITY */)
 {
-    return stack_ctor(vec, el_size, el_poison, el_dtor, el_dump);
+    return stack_ctor(vec, el_size, el_poison, el_dtor, el_dump, vector_capacity);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -47,22 +52,27 @@ static inline bool vector_ctor(vector *const vec, const size_t el_size, const vo
 /**
 *   @brief Создает вектор в динамической памяти.
 *
-*   @param el_size   [in]  - размер элемента вектора
-*   @param el_poison [in]  - указатель на POISON-элемент вектора
-*   @param el_dtor   [in]  - указатель на dtor элемента вектора
-*   @param el_dump   [in]  - указатель на dump элемента вектора
+*   @param el_size         [in] - размер элемента вектора
+*   @param el_poison       [in] - указатель на POISON-элемент вектора
+*   @param el_dtor         [in] - указатель на dtor элемента вектора
+*   @param el_dump         [in] - указатель на dump элемента вектора
+*   @param vector_capacity [in] - начальная емкость вектора
 *
 *   @return указатель на созданный вектор или nullptr в случае ошибки
 */
 static inline vector *vector_new(const size_t el_size, const void *const el_poison                     = nullptr,
                                                              void (     *el_dtor  )(      void *const) = nullptr,
-                                                             void (     *el_dump  )(const void *const) = nullptr);
+                                                             void (     *el_dump  )(const void *const) = nullptr,
+
+                                                             const size_t vector_capacity = DEFAULT_STACK_CAPACITY);
 
 static inline vector *vector_new(const size_t el_size, const void *const el_poison                     /* = nullptr */,
                                                              void (     *el_dtor  )(      void *const) /* = nullptr */,
-                                                             void (     *el_dump  )(const void *const) /* = nullptr */)
+                                                             void (     *el_dump  )(const void *const) /* = nullptr */,
+
+                                                             const size_t vector_capacity /* = DEFAULT_STACK_CAPACITY */)
 {
-    return stack_new(el_size, el_poison, el_dtor, el_dump);
+    return stack_new(el_size, el_poison, el_dtor, el_dump, vector_capacity);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -167,6 +177,22 @@ void *vector_end(const vector *const vec);
 *   @return true, если все ОК, false в случае ошибки
 */
 bool vector_set(vector *const vec, const size_t index, const void *const data);
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+/**
+*   @brief Меняет размер вектора.
+*   Если новый размер равен старому, ничего не происходит.
+*   Если новый размер больше старого, инициализирует новую память нулями.
+*   Если новый размер меньше старого, отбрасываются последние элементы.
+*
+*   @param vec   [in] - указатель на вектор
+*   @param count [in] - новый размер вектора
+*
+*   @return false в случае ошибки, true иначе
+*
+*/
+bool vector_resize(vector *const vec, const size_t count);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
