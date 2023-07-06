@@ -380,6 +380,22 @@ void *_log_realloc(void *ptr, size_t size)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void *_log_recalloc(void *ptr, size_t old_size,
+                               size_t new_size, const bool is_nleak)
+{
+    void *ret = realloc(ptr, new_size);
+
+    if (ptr == nullptr && new_size == 0)                                        return ret;
+    if (ptr == nullptr)                  { if (!is_nleak) { ++DYNAMIC_MEMORY; } return ret; }
+    if (                  new_size == 0) { if (!is_nleak) { --DYNAMIC_MEMORY; } return ret; }
+
+    if (new_size > old_size) memset((char *) ret + old_size, 0, new_size - old_size);
+
+    return ret;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 void _log_free(void *ptr)
 {
     if (ptr == nullptr) return;

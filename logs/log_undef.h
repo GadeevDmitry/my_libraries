@@ -46,5 +46,6 @@
 #undef log_calloc
 #undef log_realloc
 #undef log_free
+#undef log_recalloc
 
 #endif // !LOG_DEF_H

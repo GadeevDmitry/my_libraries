@@ -180,6 +180,7 @@ void _log_param_place(const char *const file,
 *
 *   @see DYNAMIC_MEMORY
 *   @see log_realloc(void *, size_t)
+*   @see log_recalloc(void *, size_t, size_t, bool)
 *   @see log_free(void *)
 */
 void *_log_calloc(size_t number, size_t size);
@@ -189,9 +190,29 @@ void *_log_calloc(size_t number, size_t size);
 *
 *   @see DYNAMIC_MEMORY
 *   @see log_calloc(size_t, size_t)
+*   @see log_recalloc(void *, size_t, size_t, bool)
 *   @see log_free(void *)
 */
 void *_log_realloc(void *ptr, size_t size);
+
+/**
+*   @brief Меняет размер блока динамической памяти, используя realloc(). Если размер блока увеличился, инициализирует дополнительную память нулями.
+*   Меняет DYNAMIC_MEMORY в зависимости от значения параметра is_nleak.
+*
+*   @param ptr      [in] - указатель на блок для реаллокации
+*   @param old_size [in] - старый размер блока
+*   @param new_size [in] - новый размер блока
+*   @param is_nleak [in] - если true, то DYNAMIC_MEMORY не меняется
+*
+*   @return указатель на реаллоцированный блок
+*
+*   @see DYNAMIC_MEMORY
+*   @see log_calloc(size_t, size_t)
+*   @see log_realloc(void *, size_t)
+*   @see log_free(void *)
+*/
+void *_log_recalloc(void *ptr, size_t old_size,
+                               size_t new_size, const bool is_nleak);
 
 /**
 *   @brief Освобождает блок динамической памяти, используя free(). Уменяшает DYNAMIC_MEMORY, если блок был не пуст.
@@ -199,6 +220,7 @@ void *_log_realloc(void *ptr, size_t size);
 *   @see DYNAMIC_MEMORY
 *   @see log_calloc(size_t, size_t)
 *   @see log_realloc(void *, size_t)
+*   @see log_recalloc(void *, size_t, size_t, bool)
 */
 void _log_free(void *ptr);
 
