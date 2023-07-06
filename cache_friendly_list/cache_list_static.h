@@ -21,7 +21,7 @@ typedef cache_list      list;
 // list_node
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#define $data       (lst_node->data)
+#define $is_busy    (lst_node->is_busy)
 #define $prev       (lst_node->prev)
 #define $next       (lst_node->next)
 
@@ -30,11 +30,15 @@ typedef cache_list      list;
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #define $fictional  (lst->fictional)
+#define $data       (lst->data)
 
-#define $el_free    (lst->el_free)
 #define $size       (lst->size)
 #define $capacity   (lst->capacity)
 
+#define $el_free    (lst->el_free)
+#define $el_size    (lst->el_size)
+
+#define $el_dtor    (lst->el_dtor)
 #define $el_dump    (lst->el_dump)
 
 //================================================================================================================================
@@ -46,26 +50,24 @@ typedef cache_list      list;
 */
 enum LST_STATUS
 {
-    LST_OK                          ,   ///< OK
-    LST_NULLPTR                     ,   ///< lst = nullptr
+    LST_OK                      ,   ///< OK
+    LST_NULLPTR                 ,   ///< lst = nullptr
 
-    LST_POISON_FICTIONAL            ,   ///< .fictional        = LST_POISON.fictional
-    LST_POISON_EL_FREE              ,   ///< .el_free          = LST_POISON.free
-    LST_POISON_SIZE                 ,   ///< .size             = LST_POISON.size
-    LST_POISON_CAPACITY             ,   ///< .capacity         = LST_POISON.capacity
-    LST_POISON_EL_DUMP              ,   ///< .el_dump          = LST_POISON.el_dump
+    LST_POISON_FICTIONAL        ,   ///< .fictional = LST_POISON.service
+    LST_POISON_DATA             ,   ///< .data      = LST_POISON.data
+    LST_POISON_SIZE             ,   ///< .size      = LST_POISON.size
+    LST_POISON_CAPACITY         ,   ///< .capacity  = LST_POISON.capacity
+    LST_POISON_EL_FREE          ,   ///< .el_free   = LST_POISON.free
+    LST_POISON_EL_SIZE          ,   ///< .el_size   = LST_POISON.size
+    LST_POISON_EL_DTOR          ,   ///< .el_dtor   = LST_POISON.el_dtor
+    LST_POISON_EL_DUMP          ,   ///< .el_dump   = LST_POISON.el_dump
 
-    LST_NULLPTR_FICTIONAL           ,   ///< .fictional        = nullptr
-    LST_FICTIONAL_DATA_NOT_NULLPTR  ,   ///< .fictional->data != nullptr
-    LST_INVALID_SIZE_CAPACITY       ,   ///< .size > .capacity
-    LST_INVALID_EL_FREE             ,   ///< .el_free > .size
+    LST_NULLPTR_FICTIONAL       ,   ///< .fictional = nullptr
+    LST_NULLPTR_DATA            ,   ///< .data      = nullptr
+    LST_INVALID_SIZE_CAPACITY   ,   ///< .size      >= .capacity
+    LST_INVALID_EL_FREE         ,   ///< .el_free   >  .capacity
 
-    LST_FREE_NODE_NOT_NULLPTR_DATA  ,   ///< .data of free node == nullptr
-    LST_BUSY_NODE_NULLPTR_DATA      ,   ///< .data of busy node == nullptr
-
-    LST_NODE_INVALID_NEXT           ,   ///< .next >= capacity
-    LST_NODE_INVALID_PREV           ,   ///< .prev >= capacity
-    LST_INVALID_CYCLE               ,   ///< нарушен цикл
+    LST_INVALID_CYCLE           ,   ///< нарушен цикл
 };
 
 /**
@@ -73,28 +75,26 @@ enum LST_STATUS
 *
 *   @see enum LST_STATUS
 */
-static const char *LST_STATUS_MESSAGES[] = 
+static const char *LST_STATUS_MESSAGES[] =
 {
-    "cache_list is OK"                                  ,
-    "cache_list is nullptr"                             ,
+    "cache_list is OK"                                          ,
+    "cache_list is nullptr"                                     ,
 
-    "cache_list.fictional is invalid"                   ,
-    "cache_list.el_free is invalid"                     ,
-    "cache_list.size is invalid"                        ,
-    "cache_list.capacity is invalid"                    ,
-    "cache_list.el_dump is invalid"                     ,
+    "cache_list.fictional"" is poison"                          ,
+    "cache_list.data"     " is poison"                          ,
+    "cache_list.size"     " is poison"                          ,
+    "cache_list.capacity" " is poison"
+    "cache_list.el_free"  " is poison"                          ,
+    "cache_list.el_size"  " is poison"                          ,
+    "cache_list.el_dtor"  " is poison"                          ,
+    "cache_list.el_dump"  " is poison"                          ,
 
-    "cache_list.fictional is nullptr"                   ,
-    "cache_list.fictional->data is not nullptr"         ,
-    "cache_list.size >= cache_list.capacity"            ,
-    "cache_list.el_free > cache_list.capacity"          ,
+    "cache_list.fictional is nullptr"                           ,
+    "cache_list.data"   " is nullptr"                           ,
+    "cache_list.size >= cache_list.capacity"                    ,
+    "cache_list.el_free"" is invalid"                           ,
 
-    "cache_list_node.data of free node is not nullptr"  ,
-    "cache_list_node.data of busy node is nullptr"      ,
-
-    "cache_list_node.next is invalid"                   ,
-    "cache_list_node.prev is invalid"                   ,
-    "cache_list cycle is invalid"                       ,
+    "cycle of list_node is invalid"                             ,
 };
 
 /**
@@ -102,13 +102,17 @@ static const char *LST_STATUS_MESSAGES[] =
 */
 static const list LST_POISON =
 {
-    (list_node *) 0x8BADF00D                    ,   // fictional
+    (list_node *) 0xABADBABE,   // fictional
+    (void      *) 0xDEADBEEF,   // data
 
-    0xABADB002                                  ,   // el_free
-    0xBADCAB1E                                  ,   // size
-    0xABADBABE                                  ,   // capacity
+    -1UL                    ,   // size
+    -1UL                    ,   // capacity
 
-    (void (*) (const void *const)) 0xBEADFACE   ,   // el_dump
+    -1UL                    ,   // el_free
+    -1UL                    ,   // el_size
+
+    (void (*)(      void *)) 0xABADF00D, // el_dtor
+    (void (*)(const void *)) 0xBADCAB1E, // el_dump
 };
 
 //================================================================================================================================
@@ -171,24 +175,17 @@ static unsigned list_busy_cycle_verify(const list *const lst);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Верификатор полей в свободной вершине кэш-листа.
+*   @brief Верификатор вершины кэш-листа.
+*
+*   @param lst      [in] - указатель на лист, к которому относится вершина
+*   @param lst_node [in] - указатель на вершину для верификации
+*   @param is_busy  [in] - true, если вершина должна быть "занятой", false - иначе
 *
 *   @return битовая маска кодов ошибок из enum LST_STATUS
 *
 *   @see enum LST_STATUS
 */
-static unsigned _list_free_node_verify(const list *const lst, const list_node *const lst_node);
-
-//--------------------------------------------------------------------------------------------------------------------------------
-
-/**
-*   @brief Верификатор полей в занятой вершине кэш-листа.
-*
-*   @return битовая маска кодов ошибок из enum LST_STATUS
-*
-*   @see enum LST_STATUS
-*/
-static unsigned _list_busy_node_verify(const list *const lst, const list_node *const lst_node);
+static unsigned _list_node_verify(const list *const lst, const list_node *const lst_node, const bool is_busy);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // ctor
@@ -230,12 +227,13 @@ static void list_free_node_init(list *const lst, const size_t ind_cur ,
 /**
 *   @brief Переводит вершину из цикла занятых элементов в цикл свободных.
 *
-*   @param lst [in, out] - указатель на кэш-лист
-*   @param ind_cur  [in] - индекс вершины в массиве
+*   @param lst         [in, out] - указатель на кэш-лист
+*   @param ind_cur     [in]      - индекс вершины в массиве
+*   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr, если копировать не надо)
 *
 *   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-static void *list_free_node_new(list *const lst, const size_t ind_cur);
+static bool list_free_node_new(list *const lst, const size_t ind_cur, void *const erased_data);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -346,34 +344,35 @@ static bool list_static_fields_dump(const list *const lst);
 /**
 *   @brief Дамп содержимого массива кэш-листа.
 *
+*   @param lst            [in] - указатель на кеш-лист для дампа
 *   @param is_full        [in] - true, если нужен дамп "static" полей
 *   @param is_any_invalid [in] - true, если хоть одно поле невалидно
 */
-static void list_fictional_dump(const list *const lst, const bool is_full,
-                                                       const bool is_any_invalid);
+static void list_data_dump(const list *const lst, const bool is_full,
+                                                  const bool is_any_invalid);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief "Static" дамп массива кэш-листа.
+*   @brief "Debug" дамп содержимого кэш-листа.
 *   Дамп в порядке индексации в массиве, содержит свободные элементы.
 */
-static void list_fictional_static_dump(const list *const lst);
+static void list_data_debug_dump(const list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief "Static" дамп вершины кэш-листа.
-*   Дамп полей вершины с вызовом .el_dump, если .el_dump != nullptr.
+*   @brief "Debug" дамп вершины кэш-листа.
+*   Дамп полей вершины, вызов .el_dump, если вершина занята.
 */
-static void list_node_static_dump(const list *const lst, const list_node *const lst_node);
+static void list_node_debug_dump(const list *const lst, const list_node *const lst_node, const void *const el_data);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief "Public" дамп массива кэш-листа.
+*   @brief "Pretty" дамп массива кэш-листа.
 *   Дамп в порядке кэш-листа, не содержит свободных элементов.
 */
-static void list_fictional_public_dump(const list *const lst);
+static void list_data_pretty_dump(const list *const lst);
 
 #endif //CACHE_LIST_STATIC_H

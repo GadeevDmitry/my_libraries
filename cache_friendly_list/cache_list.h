@@ -4,6 +4,7 @@
 
 #include "../logs/log.h"
 #include "../algorithm/algorithm.h"
+#include "../vector/vector.h"
 
 //================================================================================================================================
 // STRUCT
@@ -14,9 +15,10 @@
 */
 struct cache_list_node
 {
-    const void *data;   ///< указатель на элемент листа
-    size_t      prev;   ///< индекс предыдущей вершины листа
-    size_t      next;   ///< индекс следущей вершины листа
+    bool is_busy; ///< true, если вершина занята
+
+    size_t prev;  ///< индекс предыдущей вершины листа
+    size_t next;  ///< индекс следущей вершины листа
 };
 
 /**
@@ -24,14 +26,20 @@ struct cache_list_node
 */
 struct cache_list
 {
-    cache_list_node *fictional;             ///< указатель на массив вершин листа
+    list_node *fictional; ///< массив с данными о порядке вершин в листе (первая вершина фиктивная)
+    void      *data;      ///< массив с пользовательскими данными
 
-    size_t el_free;                         ///< индекс свободного элемента листа
-    size_t    size;                         ///< количество элементов в листе
-    size_t capacity;                        ///< емкость массива вершин листа
+    size_t size;          ///< размер  массивов .service и .data
+    size_t capacity;      ///< емкость массивов .service и .data
 
+    size_t el_free;       ///< индекс свободного элемента листа
+    size_t el_size;       ///< размер элемента листа
+
+    void (*el_dtor) (      void *const);    ///< указатель на dtor элемента листа
     void (*el_dump) (const void *const);    ///< указатель на dump элемента листа
 };
+
+const size_t DEFAULT_CACHE_LIST_CAPACITY = 4;
 
 //================================================================================================================================
 // FUNCTION DECLARATION
@@ -57,21 +65,31 @@ unsigned _cache_list_verify(const cache_list *const lst);
 /**
 *   @brief cache_list_ctor.
 *
-*   @param lst     [out] - указатель на кэш-лист
-*   @param el_dump [in]  - указатель на dump элемента листа
+*   @param lst           [out] - указатель на кэш-лист
+*   @param el_dtor       [in]  - указатель на dtor элемента листа
+*   @param el_dump       [in]  - указатель на dump элемента листа
+*   @param list_capacity [in]  - начальная емкость кеш-листа
 */
-bool cache_list_ctor(cache_list *const lst, void (*el_dump) (const void *const) = nullptr);
+bool cache_list_ctor(cache_list *const lst, void (*el_dtor) (      void *const) = nullptr,
+                                            void (*el_dump) (const void *const) = nullptr,
+
+                                            const size_t list_capacity = DEFAULT_CACHE_LIST_CAPACITY);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Создает кэш лист в динамической памяти.
 *
-*   @param el_dump [in] - указатель на dump элемента листа
+*   @param el_dtor       [in] - указатель на dtor элемента листа
+*   @param el_dump       [in] - указатель на dump элемента листа
+*   @param list_capacity [in] - начальная емкость кеш-листа
 *
 *   @return указатель на созданный лист или nullptr в случае ошибки
 */
-cache_list *cache_list_new(void (*el_dump) (const void *const) = nullptr);
+cache_list *cache_list_new(void (*el_dtor) (      void *const) = nullptr,
+                           void (*el_dump) (const void *const) = nullptr,
+
+                           const size_t list_capacity = DEFAULT_CACHE_LIST_CAPACITY);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
@@ -137,34 +155,37 @@ bool cache_list_push_back(cache_list *const lst, const void *const data);
 /**
 *   @brief Удаляет элемент из кэш-листа.
 *
-*   @param lst  [in, out] - указатель на кэш-лист
-*   @param pos  [in]      - порядковый номер удаляемого элемента
+*   @param lst         [in, out] - указатель на кэш-лист
+*   @param pos         [in]      - порядковый номер удаляемого элемента
+*   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
 *   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-void *cache_list_erase(cache_list *const lst, const size_t pos);
+bool cache_list_erase(cache_list *const lst, const size_t pos, void *const erased_data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из начала кэш-листа.
 *
-*   @param lst  [in, out] - указатель на кеш-лист
+*   @param lst         [in, out] - указатель на кеш-лист
+*   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
 *   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-void *cache_list_pop_front(cache_list *const lst);
+bool cache_list_pop_front(cache_list *const lst, void *const erased_data);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из конца кэш-листа.
 *
-*   @param lst  [in, out] - указатель на кэш-лист
+*   @param lst         [in, out] - указатель на кэш-лист
+*   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
 *   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-void *cache_list_pop_back(cache_list *const lst);
+bool cache_list_pop_back(cache_list *const lst, void *const erased_data);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
@@ -213,7 +234,7 @@ void *cache_list_back(const cache_list *const lst);
 *
 *   @return указатель на первое вхождение найденного элемента или nullptr, если его в листе нет.
 */
-void *cache_list_find(const cache_list *const lst, const void *const target, int (*elem_cmp)(const void *elem_1, const void *elem_2));
+void *cache_list_find(const cache_list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2));
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -228,7 +249,7 @@ void *cache_list_find(const cache_list *const lst, const void *const target, int
 *
 *   @return указатель на первое (в порядке массива) вхождение найденного элемента или nullptr, если его в листе нет.
 */
-void *cache_list_find_through(const cache_list *const lst, const void *const target, int (*elem_cmp)(const void *elem_1, const void *elem_2));
+void *cache_list_find_through(const cache_list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2));
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
@@ -251,7 +272,7 @@ void cache_list_dump(const void *const _lst);
 
 #if !defined(NVERIFY) && !defined(LIST_NVERIFY)
 #define cache_lst_verify(lst, ret_val)                                                                              \
-    if (_cache_list_verify(lst) != LST_OK)                                                                          \
+    if (_cache_list_verify(lst) != 0)                                                                               \
     {                                                                                                               \
     $o  return ret_val;                                                                                             \
     }
@@ -261,7 +282,7 @@ void cache_list_dump(const void *const _lst);
 
 #if !defined(NDEBUG) && !defined(LIST_NDEBUG)
 #define cache_lst_debug_verify(lst)                                                                                 \
-        log_assert(_cache_list_verify(lst) == LST_OK)
+        log_assert(_cache_list_verify(lst) == 0)
 #else
 #define cache_lst_debug_verify(lst)
 #endif
