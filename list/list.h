@@ -16,7 +16,6 @@
 */
 struct list_node
 {
-    const void *data;    ///< указатель на элемент листа
     list_node  *prev;    ///< указатель на предыдущую вершину листа
     list_node  *next;    ///< указатель на следующую вершину листа
 };
@@ -28,8 +27,10 @@ struct list
 {
     list_node *fictional;                   ///< указатель на фиктивную вершину листа
 
-    size_t size;                            ///< количество элементов в листе
+    size_t    size;                         ///< количество элементов в листе
+    size_t el_size;                         ///< размер элемента листа
 
+    void (*el_dtor) (      void *const);    ///< указатель на dtor элемента листа
     void (*el_dump) (const void *const);    ///< указатель на dump элемента листа
 };
 
@@ -58,20 +59,26 @@ unsigned _list_verify(const list *const lst);
 *   @brief List_ctor.
 *
 *   @param lst     [out] - указатель на лист
+*   @param el_size [in]  - размер элемента листа (в байтах)
+*   @param el_dtor [in]  - указатель на dtor элемента листа
 *   @param el_dump [in]  - указатель на dump элемента листа
 */
-bool list_ctor(list *const lst, void (*el_dump) (const void *const) = nullptr);
+bool list_ctor(list *const lst, const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
+                                                      void (*el_dump) (const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Создает лист в динамической памяти.
 *
+*   @param el_size [in] - размер элемента листа (в байтах)
+*   @param el_dtor [in] - указатель на dtor элемента листа
 *   @param el_dump [in] - указатель на dump элемента листа
 *
 *   @return указатель на созданный лист или nullptr в случае ошибки
 */
-list *list_new(void (*el_dump) (const void *const) = nullptr);
+list *list_new(const size_t el_size, void (*el_dtor) (      void *const) = nullptr,
+                                     void (*el_dump) (const void *const) = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dtor
@@ -137,34 +144,37 @@ bool list_push_back(list *const lst, const void *const data);
 /**
 *   @brief Удаляет элемент из листа.
 *
-*   @param lst   [in, out] - указатель на лист
-*   @param index [in]      - порядковый номер удаляемого элемента
+*   @param lst     [in, out] - указатель на лист
+*   @param pos         [in]  - порядковый номер удаляемого элемента
+*   @param erased_data [out] - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
-*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
+*   @return true, если все ОК, false в случае ошибки
 */
-void *list_erase(list *const lst, const size_t index);
+bool list_erase(list *const lst, const size_t pos, void *const erased_data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из начала листа.
 *
-*   @param lst [in, out] - указатель на лист
+*   @param lst     [in, out] - указатель на лист
+*   @param erased_data [out] - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
-*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
+*   @return true, если все ОК, false в случае ошибки
 */
-void *list_pop_front(list *const lst);
+bool list_pop_front(list *const lst, void *const erased_data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из конца листа.
 *
-*   @param lst [in, out] - указатель на лист
+*   @param lst     [in, out] - указатель на лист
+*   @param erased_data [out] - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
-*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
+*   @return true, если все ОК, false в случае ошибки
 */
-void *list_pop_back(list *const lst);
+bool list_pop_back(list *const lst, void *const erased_data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
@@ -173,19 +183,19 @@ void *list_pop_back(list *const lst);
 /**
 *   @brief Показывает содержимое элемента листа.
 *
-*   @param lst   [in]  - указатель на лист
-*   @param index [in]  - порядковый номер элемента
+*   @param lst [in] - указатель на лист
+*   @param pos [in] - порядковый номер элемента
 *
 *   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
-void *list_get(const list *const lst, const size_t index);
+void *list_get(const list *const lst, const size_t pos);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Показывает содержимое первого элемента листа.
 *
-*   @param lst  [in]  - указатель на лист
+*   @param lst [in] - указатель на лист
 *
 *   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
@@ -215,7 +225,7 @@ void *list_back(const list *const lst);
 *
 *   @return указатель на первое вхождение найденного элемента или nullptr, если его в листе нет.
 */
-void *list_find(const list *const lst, const void *const target, int (*elem_cmp)(const void *elem_1, const void *elem_2));
+void *list_find(const list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2));
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // dump
