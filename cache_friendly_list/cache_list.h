@@ -161,11 +161,11 @@ bool cache_list_push_back(cache_list *const lst, const void *const data);
 /**
 *   @brief Удаляет элемент из кэш-листа.
 *
-*   @param lst         [in, out] - указатель на кэш-лист
-*   @param pos         [in]      - порядковый номер удаляемого элемента
-*   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
+*   @param lst     [in, out] - указатель на кэш-лист
+*   @param pos         [in]  - порядковый номер удаляемого элемента
+*   @param erased_data [out] - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
-*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
+*   @return true, если все ОК, false в случае ошибки
 */
 bool cache_list_erase(cache_list *const lst, const size_t pos, void *const erased_data = nullptr);
 
@@ -174,10 +174,10 @@ bool cache_list_erase(cache_list *const lst, const size_t pos, void *const erase
 /**
 *   @brief Удаляет элемент из начала кэш-листа.
 *
-*   @param lst         [in, out] - указатель на кеш-лист
-*   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
+*   @param lst     [in, out] - указатель на кеш-лист
+*   @param erased_data [out] - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
-*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
+*   @return true, если все ОК, false в случае ошибки
 */
 bool cache_list_pop_front(cache_list *const lst, void *const erased_data = nullptr);
 
@@ -186,8 +186,8 @@ bool cache_list_pop_front(cache_list *const lst, void *const erased_data = nullp
 /**
 *   @brief Удаляет элемент из конца кэш-листа.
 *
-*   @param lst         [in, out] - указатель на кэш-лист
-*   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
+*   @param lst     [in, out] - указатель на кэш-лист
+*   @param erased_data [out] - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
 *
 *   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
@@ -200,8 +200,8 @@ bool cache_list_pop_back(cache_list *const lst, void *const erased_data = nullpt
 /**
 *   @brief Показывает содержимое элемента кэш-листа.
 *
-*   @param lst  [in] - указатель на кэш-лист
-*   @param pos  [in] - порядковый номер элемента
+*   @param lst [in] - указатель на кэш-лист
+*   @param pos [in] - порядковый номер элемента
 *
 *   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
@@ -212,7 +212,7 @@ void *cache_list_get(const cache_list *const lst, const size_t pos);
 /**
 *   @brief Показывает содержимое первого элемента кэш-листа.
 *
-*   @param lst  [in]  - указатель на кэш-лист
+*   @param lst [in] - указатель на кэш-лист
 *
 *   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */
@@ -223,7 +223,7 @@ void *cache_list_front(const cache_list *const lst);
 /**
 *   @brief Показывает содержимое последнего элемента кэш-листа.
 *
-*   @param lst  [in]  - указатель на лист
+*   @param lst [in] - указатель на лист
 *
 *   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки
 */

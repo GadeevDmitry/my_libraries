@@ -192,7 +192,7 @@ static unsigned _list_node_verify(const list *const lst, const list_node *const 
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Конструктор поля fictional кэш-листа.
+*   @brief Конструктор полей .fictional и .data кэш-листа.
 *   Выделяет динамическую память для вершин кэш-листа, инициализирует фиктивную вершину листа и цикл свободных элементов.
 *
 *   @return true, если все ОК, false в случае ошибки
@@ -202,8 +202,7 @@ static bool list_data_ctor(list *const lst);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Конструктор поля fictional кэш-листа.
-*   Инициализирует цикл свободных элементов.
+*   @brief Инициализирует цикл свободных элементов.
 */
 static void list_free_cycle_ctor(list *const lst);
 
@@ -231,7 +230,7 @@ static void list_free_node_init(list *const lst, const size_t ind_cur ,
 *   @param ind_cur     [in]      - индекс вершины в массиве
 *   @param erased_data [out]     - указатель, по которому скопировать содержимое удаляемой вершины (nullptr, если копировать не надо)
 *
-*   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
+*   @return true, если все ОК, false в случае ошибки
 */
 static bool list_free_node_new(list *const lst, const size_t ind_cur, void *const erased_data);
 
@@ -259,10 +258,11 @@ static void list_free_node_ctor(list *const lst, const size_t ind_cur,
 *   @brief Переводит вершину из цикла свободных элементов в цикл занятых.
 *
 *   @param lst [in, out] - указатель на кэш-лист
-*
 *   @param data    [out] - указатель, откуда скопировать содержимое кэш-листа
 *   @param ind_prev [in] - индекс предыдущей вершины в цикле
 *   @param ind_next [in] - индекс следующей вершины в цикле
+*
+*   @return true, если все ОК, false в случае ошибки
 */
 static bool list_busy_node_new(list *const lst, const void *const data, const size_t ind_prev,
                                                                         const size_t ind_next);
@@ -273,14 +273,12 @@ static bool list_busy_node_new(list *const lst, const void *const data, const si
 *   @brief конструктор занятой вершины кэш-листа.
 *
 *   @param lst [in, out] - указатель на кэш-лист
-*
 *   @param data     [in] - указатель, откуда скопировать содержимое кэш-листа
-*
 *   @param ind_cur  [in] - индекс занятой вершины в массиве вершин
 *   @param ind_prev [in] - индекс предыдущей вершины в цикле
 *   @param ind_next [in] - индекс следующей вершины в цикле
 */
-static bool list_busy_node_ctor(list *const lst, const void *const data, const size_t ind_cur,
+static void list_busy_node_ctor(list *const lst, const void *const data, const size_t ind_cur,
                                                                          const size_t ind_prev,
                                                                          const size_t ind_next);
 
@@ -305,10 +303,11 @@ static size_t list_get_node_index(const list *const lst, const size_t pos);
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
-*   @brief Дамп кэш-листа.
+*   @brief Дамп кеш-листа.
+*   В "полном" режиме (is_full = true), помимо пользовательских данных, дампит и служебные. Используется для дампа невалидного кеш-листа.
 *
-*   @param lst     [in] - указатель на кэш-лист
-*   @param is_full [in] - true, если нужен дамп "static" полей
+*   @param lst     [in] - указатель на кеш-лист
+*   @param is_full [in] - true, если нужен дамп со служебной информацией, false иначе
 */
 static void list_static_dump(const list *const lst, const bool is_full);
 

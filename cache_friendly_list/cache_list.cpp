@@ -392,20 +392,19 @@ $   if ($size + 1 == $capacity) if (!list_resize(lst)) { $o return false; }
         $el_free = free_next;
     }
 
-$   bool ret = list_busy_node_ctor(lst, data, ind_cur, ind_prev, ind_next);
-$o  return ret;
+$   list_busy_node_ctor(lst, data, ind_cur, ind_prev, ind_next);
+$o  return true;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool list_busy_node_ctor(list *const lst, const void *const data, const size_t ind_cur,
+static void list_busy_node_ctor(list *const lst, const void *const data, const size_t ind_cur,
                                                                          const size_t ind_prev,
                                                                          const size_t ind_next)
 {
 $i
-    log_assert(lst        != nullptr);
-    log_assert($fictional != nullptr);
-    log_assert(data       != nullptr);
+    cache_lst_debug_verify(lst);
+    log_assert(data != nullptr);
 
     log_assert(ind_cur != 0);
     log_assert(ind_cur  < $capacity);
@@ -422,8 +421,7 @@ $i
     memcpy (ind_data, data, $el_size);
 
     $size++;
-
-$o  return true;
+$o
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -523,13 +521,13 @@ $   cache_lst_verify(lst       , false);
     size_t ind_prev = 0;
     size_t ind_next = 0;
 
-    if (pos == 0) { $ ind_prev = 0;                                 ind_next = $fictional->next;          }
+    if (pos == 0) {   ind_prev = 0;                                 ind_next = $fictional->next;          }
     else          { $ ind_prev = list_get_node_index(lst, pos - 1); ind_next = $fictional[ind_prev].next; }
 
-$   list_busy_node_new(lst, data, ind_prev, ind_next);
+$   bool ret = list_busy_node_new(lst, data, ind_prev, ind_next);
 
 $   cache_lst_debug_verify(lst);
-$o  return true;
+$o  return ret;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -572,7 +570,7 @@ $o  return true;
 bool cache_list_pop_front(cache_list *const lst, void *const erased_data /* = nullptr */)
 {
 $i
-$   bool ret = cache_list_erase(lst, 0, erased_data);
+$   bool   ret = cache_list_erase(lst, 0, erased_data);
 $o  return ret;
 }
 
@@ -730,17 +728,21 @@ $i
 
     bool is_any_invalid = false;
 
-    if      ($data    == LST_POISON.data)      { $ poison_field_dump ("data    ");               is_any_invalid = true; }
-    else if ($data    == nullptr)              { $ error_field_dump  ("data    ", "%p" , $data); is_any_invalid = true; }
+    if      ($data     == LST_POISON.data)     { $ poison_field_dump ("data    ");               is_any_invalid = true; }
+    else if ($data     == nullptr)             { $ error_field_dump  ("data    ", "%p" , $data); is_any_invalid = true; }
     else                                       { $ usual_field_dump  ("data    ", "%p" , $data); }
 
-    if      ($size    == LST_POISON.size)      { $ poison_field_dump ("size    ");               is_any_invalid = true; }
-    else if ($size    >= $capacity)            { $ error_field_dump  ("size    ", "%lu", $size); is_any_invalid = true; }
+    if      ($size     == LST_POISON.size)     { $ poison_field_dump ("size    ");               is_any_invalid = true; }
+    else if ($size     >= $capacity)           { $ error_field_dump  ("size    ", "%lu", $size); is_any_invalid = true; }
     else                                       { $ usual_field_dump  ("size    ", "%lu", $size); }
 
     if      ($capacity == LST_POISON.capacity) { $ poison_field_dump ("capacity");                   is_any_invalid = true; }
     else if ($capacity <= $size)               { $ error_field_dump  ("capacity", "%lu", $capacity); is_any_invalid = true; }
     else                                       { $ usual_field_dump  ("capacity", "%lu", $capacity); }
+
+    if      ($el_size  == LST_POISON.el_size)  { $ poison_field_dump("el_size  "); is_any_invalid = true; }
+    else if ($el_size  == 0UL)                 { $ error_field_dump ("el_size  ", "%lu", $el_size); }
+    else                                       { $ usual_field_dump ("el_size  ", "%lu", $el_size); }
 
     if      ($el_dtor  == LST_POISON.el_dtor)  { $ poison_field_dump ("el_dtor "); is_any_invalid = true; }
     else if ($el_dtor  == nullptr)             { $ warning_field_dump("el_dtor ", "%p",  nullptr);        }
@@ -771,9 +773,6 @@ $i
     if      ($el_free   == LST_POISON.el_free)   { $ poison_field_dump("el_free  ");                  is_any_invalid = true; }
     else if ($el_free   >  $capacity)            { $ error_field_dump ("el_free  ", "%lu", $el_free); is_any_invalid = true; }
     else                                         { $ usual_field_dump ("el_free  ", "%lu", $el_free); }
-
-    if      ($el_size   == LST_POISON.el_size)   { $ poison_field_dump("el_size  "); is_any_invalid = true; }
-    else                                         { $ usual_field_dump ("el_size  ", "%lu", $el_size); }
 
 $   log_message("\n");
 
