@@ -83,7 +83,7 @@ static const char *LST_STATUS_MESSAGES[] =
     "cache_list.fictional"" is poison"                          ,
     "cache_list.data"     " is poison"                          ,
     "cache_list.size"     " is poison"                          ,
-    "cache_list.capacity" " is poison"
+    "cache_list.capacity" " is poison"                          ,
     "cache_list.el_free"  " is poison"                          ,
     "cache_list.el_size"  " is poison"                          ,
     "cache_list.el_dtor"  " is poison"                          ,
@@ -197,7 +197,7 @@ static unsigned _list_node_verify(const list *const lst, const list_node *const 
 *
 *   @return true, если все ОК, false в случае ошибки
 */
-static bool list_fictional_ctor(list *const lst);
+static bool list_data_ctor(list *const lst);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

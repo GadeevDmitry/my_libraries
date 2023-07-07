@@ -26,14 +26,14 @@ struct cache_list_node
 */
 struct cache_list
 {
-    list_node *fictional; ///< массив с данными о порядке вершин в листе (первая вершина фиктивная)
-    void      *data;      ///< массив с пользовательскими данными
+    cache_list_node *fictional; ///< массив с данными о порядке вершин в листе (первая вершина фиктивная)
+    void            *data;      ///< массив с пользовательскими данными
 
-    size_t size;          ///< размер  массивов .service и .data
-    size_t capacity;      ///< емкость массивов .service и .data
+    size_t size;                ///< размер  массивов .service и .data
+    size_t capacity;            ///< емкость массивов .service и .data
 
-    size_t el_free;       ///< индекс свободного элемента листа
-    size_t el_size;       ///< размер элемента листа
+    size_t el_free;             ///< индекс свободного элемента листа
+    size_t el_size;             ///< размер элемента листа
 
     void (*el_dtor) (      void *const);    ///< указатель на dtor элемента листа
     void (*el_dump) (const void *const);    ///< указатель на dump элемента листа
@@ -66,11 +66,14 @@ unsigned _cache_list_verify(const cache_list *const lst);
 *   @brief cache_list_ctor.
 *
 *   @param lst           [out] - указатель на кэш-лист
+*   @param el_size       [in]  - размер элемента кеш-листа (в байтах)
 *   @param el_dtor       [in]  - указатель на dtor элемента листа
 *   @param el_dump       [in]  - указатель на dump элемента листа
 *   @param list_capacity [in]  - начальная емкость кеш-листа
 */
-bool cache_list_ctor(cache_list *const lst, void (*el_dtor) (      void *const) = nullptr,
+bool cache_list_ctor(cache_list *const lst, const size_t el_size,
+
+                                            void (*el_dtor) (      void *const) = nullptr,
                                             void (*el_dump) (const void *const) = nullptr,
 
                                             const size_t list_capacity = DEFAULT_CACHE_LIST_CAPACITY);
@@ -80,13 +83,16 @@ bool cache_list_ctor(cache_list *const lst, void (*el_dtor) (      void *const) 
 /**
 *   @brief Создает кэш лист в динамической памяти.
 *
+*   @param el_size       [in] - размер элемента кеш-листа (в байтах)
 *   @param el_dtor       [in] - указатель на dtor элемента листа
 *   @param el_dump       [in] - указатель на dump элемента листа
 *   @param list_capacity [in] - начальная емкость кеш-листа
 *
 *   @return указатель на созданный лист или nullptr в случае ошибки
 */
-cache_list *cache_list_new(void (*el_dtor) (      void *const) = nullptr,
+cache_list *cache_list_new(const size_t el_size,
+
+                           void (*el_dtor) (      void *const) = nullptr,
                            void (*el_dump) (const void *const) = nullptr,
 
                            const size_t list_capacity = DEFAULT_CACHE_LIST_CAPACITY);
@@ -173,7 +179,7 @@ bool cache_list_erase(cache_list *const lst, const size_t pos, void *const erase
 *
 *   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_pop_front(cache_list *const lst, void *const erased_data);
+bool cache_list_pop_front(cache_list *const lst, void *const erased_data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
@@ -185,7 +191,7 @@ bool cache_list_pop_front(cache_list *const lst, void *const erased_data);
 *
 *   @return указатель на содержимое удаляемой вершины, если все ОК, nullptr в случае ошибки
 */
-bool cache_list_pop_back(cache_list *const lst, void *const erased_data);
+bool cache_list_pop_back(cache_list *const lst, void *const erased_data = nullptr);
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // list get
@@ -270,7 +276,7 @@ void cache_list_dump(const void *const _lst);
 // cache_list verify
 //--------------------------------------------------------------------------------------------------------------------------------
 
-#if !defined(NVERIFY) && !defined(LIST_NVERIFY)
+#if !defined(NVERIFY) && !defined(CACHE_LIST_NVERIFY)
 #define cache_lst_verify(lst, ret_val)                                                                              \
     if (_cache_list_verify(lst) != 0)                                                                               \
     {                                                                                                               \
@@ -280,7 +286,7 @@ void cache_list_dump(const void *const _lst);
 #define cache_lst_verify(lst, ret_val)
 #endif
 
-#if !defined(NDEBUG) && !defined(LIST_NDEBUG)
+#if !defined(NDEBUG) && !defined(CACHE_LIST_NDEBUG)
 #define cache_lst_debug_verify(lst)                                                                                 \
         log_assert(_cache_list_verify(lst) == 0)
 #else

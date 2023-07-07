@@ -180,9 +180,9 @@ $i
     log_assert(lst      != nullptr);
     log_assert(lst_node != nullptr);
 
-    if ($is_busy != is_busy) return 1 << LST_INVALID_CYCLE;
-    if ($next   > $capacity) return 1 << LST_INVALID_CYCLE;
-    if ($prev   > $capacity) return 1 << LST_INVALID_CYCLE;
+    if ($is_busy != is_busy) { $o return 1 << LST_INVALID_CYCLE; }
+    if ($next   > $capacity) { $o return 1 << LST_INVALID_CYCLE; }
+    if ($prev   > $capacity) { $o return 1 << LST_INVALID_CYCLE; }
 
 $o  return LST_OK;
 }
@@ -191,7 +191,9 @@ $o  return LST_OK;
 // ctor
 //--------------------------------------------------------------------------------------------------------------------------------
 
-bool cache_list_ctor(cache_list *const lst, void (*el_dtor) (      void *const) /* = nullptr */,
+bool cache_list_ctor(cache_list *const lst, const size_t el_size,
+
+                                            void (*el_dtor) (      void *const) /* = nullptr */,
                                             void (*el_dump) (const void *const) /* = nullptr */,
 
                                             const size_t list_capacity /* = DEFAULT_CACHE_LIST_CAPACITY */)
@@ -199,15 +201,18 @@ bool cache_list_ctor(cache_list *const lst, void (*el_dtor) (      void *const) 
 $i
     log_verify(lst    != nullptr, false);
     log_verify(list_capacity > 1, false);
+    log_verify(el_size  > 0UL   , false);
 
     $el_dtor  = el_dtor;
     $el_dump  = el_dump;
 
-    $capacity = list_capacity;
     $size     = 0;
+    $capacity = list_capacity;
+
+    $el_size  = el_size;
     $el_free  = 1;
 
-$   if (!list_fictional_ctor(lst)) { $o return false; }
+$   if (!list_data_ctor(lst)) { $o return false; }
 
 $   cache_lst_debug_verify(lst);
 $o  return true;
@@ -215,7 +220,9 @@ $o  return true;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-cache_list *cache_list_new(void (*el_dtor) (      void *const) /* = nullptr */,
+cache_list *cache_list_new(const size_t el_size,
+
+                           void (*el_dtor) (      void *const) /* = nullptr */,
                            void (*el_dump) (const void *const) /* = nullptr */,
 
                            const size_t list_capacity /* = DEFAULT_CACHE_LIST_CAPACITY */)
@@ -228,7 +235,7 @@ $       log_error("log_calloc(1, sizeof(list) = %lu) returns nullptr\n", sizeof(
 $o      return nullptr;
     }
 
-$   if (!cache_list_ctor(lst, el_dtor, el_dump, list_capacity)) { log_free(lst); $o return nullptr; }
+$   if (!cache_list_ctor(lst, el_size, el_dtor, el_dump, list_capacity)) { log_free(lst); $o return nullptr; }
 
 $   cache_lst_debug_verify(lst);
 $o  return lst;
@@ -236,20 +243,28 @@ $o  return lst;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
-static bool list_fictional_ctor(list *const lst)
+static bool list_data_ctor(list *const lst)
 {
 $i
     log_assert(lst != nullptr);
 
 $   $fictional = (list_node *) log_calloc($capacity, sizeof(list_node));
+$   $data      =               log_calloc($capacity, $el_size);
+
     if ($fictional == nullptr)
     {
 $       log_error("log_calloc($capacity = %lu, sizeof(list_node) = %lu) returns nullptr\n",
                               $capacity      , sizeof(list_node));
 $o      return false;
     }
+    if ($data == nullptr)
+    {
+$       log_error("log_calloc($capacity = %lu, $el_size = %lu) returns nullptr\n",
+                              $capacity      , $el_size);
+$o      return false;
+    }
 
-    list_free_node_init (lst, 0 /* fictional */, 0, 0);
+$   list_free_node_init (lst, 0 /* fictional */, 0, 0);
 $   list_free_cycle_ctor(lst);
 
 $o  return true;
@@ -318,7 +333,7 @@ $   cache_lst_debug_verify(lst);
     $el_free = ind_cur;
 
     if (erased_data != nullptr) memcpy(erased_data, erased_el, $el_size);
-    if ($el_dtor    != nullptr) $el_dtor(erased_el);
+    if ($el_dtor    != nullptr) { $ $el_dtor(erased_el); }
 
 $   cache_lst_debug_verify(lst);
 $o  return true;
@@ -568,7 +583,7 @@ bool cache_list_pop_back(cache_list *const lst, void *const erased_data /* = nul
 $i
 $  cache_lst_verify(lst, false);
 
-$   bool ret = cache_list_erase(lst, $size - 1, erased_data);
+$   bool   ret = cache_list_erase(lst, $size - 1, erased_data);
 $o  return ret;
 }
 
@@ -665,7 +680,11 @@ $i
     const list *const lst = (const list *) _lst;
 $   cache_lst_verify (lst, (void) 0);
 
+    #if !defined(NDEBUG) && !defined(CACHE_LIST_NDEBUG)
+$   list_static_dump(lst, true);
+    #else
 $   list_static_dump(lst, false);
+    #endif
 $o
 }
 
@@ -822,9 +841,9 @@ $i
     log_assert($data    != nullptr);
     log_assert(el_data  != nullptr);
 
-    if ($fictional == lst_node) log_tab_service_message("FICTIONAL", "\n");
-    else if ($is_busy)          log_tab_service_message("BUSY"     , "\n");
-    else                        log_tab_service_message("FREE"     , "\n");
+    if ($fictional == lst_node) { $ log_tab_service_message("FICTIONAL", "\n"); }
+    else if ($is_busy)          { $ log_tab_service_message("BUSY"     , "\n"); }
+    else                        { $ log_tab_service_message("FREE"     , "\n"); }
 
     if ($prev >= $capacity) { $ error_field_dump("prev", "%lu", $prev); }
     else                    { $ usual_field_dump("prev", "%lu", $prev); }
@@ -832,7 +851,7 @@ $i
     if ($next >= $capacity) { $ error_field_dump("next", "%lu", $next); }
     else                    { $ usual_field_dump("next", "%lu", $next); }
 
-    if (!$is_busy) return;
+    if (!$is_busy) { $o return; }
 $   log_message("\n");
 
     if ($el_dump == nullptr) { $ log_tab_warning_message("don't know how to dump the elem", "\n"); }
