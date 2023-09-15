@@ -383,6 +383,23 @@ $o  return true;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+bool list_erase(list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2),
+                void *const erased_data /* = nullptr */)
+{
+$i
+$   lst_verify(lst,               false);
+    log_verify(target != nullptr, false);
+    log_verify(el_cmp != nullptr, false);
+
+$   size_t cur_pos = list_find_pos(lst, target, el_cmp);
+    if (cur_pos == -1UL) { $o return false; }
+
+$   bool result = list_erase(lst, cur_pos, erased_data);
+$o  return result;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 bool list_pop_front(list *const lst, void *const erased_data /* = nullptr */)
 {
 $i
@@ -451,13 +468,32 @@ void *list_find(const list *const lst, const void *const target, int (*el_cmp)(c
 {
 $i
 $   lst_verify(lst, nullptr);
-    log_verify (target != nullptr, nullptr);
-    log_verify (el_cmp != nullptr, nullptr);
+    log_verify(target != nullptr, nullptr);
+    log_verify(el_cmp != nullptr, nullptr);
 
 $   for (const list_node *cur_node = $fictional->next; cur_node != $fictional; cur_node = cur_node->next)
         if (el_cmp(cur_node + 1, target) == 0) { $o return (void *) (cur_node + 1); }
 
 $o  return nullptr;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static size_t list_find_pos(const list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2))
+{
+$i
+$   lst_debug_verify(lst);
+    log_assert(target != nullptr);
+    log_assert(el_cmp != nullptr);
+
+    size_t pos = 0;
+
+$   for (const list_node *cur_node = $fictional->next; cur_node != $fictional; cur_node = cur_node->next)
+    {
+        if (el_cmp(cur_node + 1, target) == 0) { $o return pos; }
+        ++pos;
+    }
+$o  return -1UL;
 }
 
 #pragma GCC diagnostic pop
