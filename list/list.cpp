@@ -461,6 +461,17 @@ $o  return geted_el;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void *list_next(const list *const lst, const void *cur_el)
+{
+$i
+$   lst_verify(lst, nullptr);
+
+    const list_node *cur_lst_node = ((const list_node *) cur_el) - 1;
+$o  return (void *) (cur_lst_node->next + 1);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 
