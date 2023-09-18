@@ -1,7 +1,7 @@
 CC ?= g++
 CFLAGS ?= -D NDEBUG -std=c++20 -O2
 
-BUILD_PREFIX := build/common
+COMMON_PREFIX ?=
 
 #================================================================================================================================
 
@@ -9,25 +9,33 @@ BUILD_PREFIX := build/common
 all:
 
 
-$(BUILD_PREFIX)/list.o: $(COMMON_PREFIX)/list/list.cpp | $(BUILD_PREFIX)
+build/common/algorithm.o: $(COMMON_PREFIX)/algorithm/algorithm.cpp | build/common
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_PREFIX)/list.o
+all: build/common/algorithm.o
 
-$(BUILD_PREFIX)/algorithm.o: $(COMMON_PREFIX)/algorithm/algorithm.cpp | $(BUILD_PREFIX)
+build/common/array.o: $(COMMON_PREFIX)/array/array.cpp | build/common
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_PREFIX)/algorithm.o
+all: build/common/array.o
 
-$(BUILD_PREFIX)/logs.o: $(COMMON_PREFIX)/logs/log.cpp | $(BUILD_PREFIX)
+build/common/cache_list.o: $(COMMON_PREFIX)/cache_friendly_list/cache_list.cpp | build/common
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_PREFIX)/logs.o
+all: build/common/cache_list.o
 
-$(BUILD_PREFIX)/trace.o: $(COMMON_PREFIX)/logs/trace/trace.cpp | $(BUILD_PREFIX)
+build/common/list.o: $(COMMON_PREFIX)/list/list.cpp | build/common
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_PREFIX)/trace.o
+all: build/common/list.o
 
-$(BUILD_PREFIX):
+build/common/logs.o: $(COMMON_PREFIX)/logs/log.cpp | build/common
+	$(CC) -c $(CFLAGS) $< -o $@
+all: build/common/logs.o
+
+build/common/trace.o: $(COMMON_PREFIX)/logs/trace/trace.cpp | build/common
+	$(CC) -c $(CFLAGS) $< -o $@
+all: build/common/trace.o
+
+build/common/stack.o: $(COMMON_PREFIX)/stack/stack.cpp | build/common
+	$(CC) -c $(CFLAGS) $< -o $@
+all: build/common/stack.o
+
+build/common:
 	mkdir -p $@
-
-.PHONY: clean
-clean:
-	rm -rf $(BUILD_PREFIX)
