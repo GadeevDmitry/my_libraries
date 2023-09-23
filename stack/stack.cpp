@@ -1,4 +1,6 @@
+#include "algorithm/algorithm.h"
 #include "stack_static.h"
+#include "vector/vector.h"
 
 //================================================================================================================================
 // STACK
@@ -479,6 +481,27 @@ $o
 */
 
 #include "../vector/vector_static.h"
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// vector erase
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool vector_erase(vector *const vec, const size_t index, void *const erased_data /* = nullptr */)
+{
+$i
+$   vec_verify(vec, false);
+$   log_verify(index < $size, false);
+
+    if (index == $size - 1)
+    { $o return vector_pop_back(vec, erased_data); }
+
+    void * cur_elem = (char *) $data + $el_size * index;
+    void *last_elem = (char *) $data + $el_size * ($size - 1);
+
+$   my_swap(cur_elem, last_elem, $el_size);
+$   bool res = vector_pop_back(vec, erased_data);
+$o  return res;
+}
 
 //--------------------------------------------------------------------------------------------------------------------------------
 // vector iteration

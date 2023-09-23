@@ -3,6 +3,7 @@
 #define VECTOR_STATIC_H
 
 #include "../stack/stack_static.h"
+#include "../algorithm/algorithm.h"
 #include "vector.h"
 
 //================================================================================================================================
