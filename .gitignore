@@ -1,8 +1,8 @@
-TEST/
+unit_tests/
 .vscode/
+.cache/
+.clangd
 
-*.html
-*.txt
-*.o
-*.bak
-**/doc/
+build/
+compile_commands.json
+log.html

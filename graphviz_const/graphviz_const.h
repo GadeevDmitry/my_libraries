@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-static const char *GRAPHVIZ_COLOR_NAMES[]   =
+static const char *GRAPHVIZ_COLOR_NAMES[] =
 {
     "lightblue"     ,
     "lightgreen"    ,
@@ -21,7 +21,7 @@ static const char *GRAPHVIZ_COLOR_NAMES[]   =
     "black"         ,
 };
 
-enum GRAPHVIZ_COLOR
+typedef enum
 {
     GRAPHVIZ_COLOR_LIGHT_BLUE   ,
     GRAPHVIZ_COLOR_LIGHT_GREEN  ,
@@ -37,6 +37,7 @@ enum GRAPHVIZ_COLOR
 
     GRAPHVIZ_COLOR_WHITE        ,
     GRAPHVIZ_COLOR_BLACK        ,
-};
+}
+GRAPHVIZ_COLOR_T;
 
 #endif //GRAPH_DUMP_H
