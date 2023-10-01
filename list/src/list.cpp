@@ -457,6 +457,92 @@ $o  return nullptr;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void *list_next(const void *cur_el)
+{
+$i
+    LOG_VERIFY(cur_el != nullptr, nullptr);
+
+    const list_node  *cur_node = (const list_node *) cur_el - 1;
+    const list_node *next_node = cur_node->next;
+
+$o  return (void *) (next_node + 1);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+void *list_prev(const void *cur_el)
+{
+$i
+    LOG_VERIFY(cur_el != nullptr, nullptr);
+
+    const list_node * cur_node = (const list_node *) cur_el - 1;
+    const list_node *prev_node = cur_node->prev;
+
+$o  return (void *) (prev_node + 1);
+}
+
+#pragma GCC diagnostic pop
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+static void list_replace(list_node *src_node, list_node *dest_prev_node)
+{
+    LOG_ASSERT (src_node       != nullptr);
+    LOG_ASSERT (dest_prev_node != nullptr);
+
+    src_node->prev->next = src_node->next;
+    src_node->next->prev = src_node->prev;
+
+    src_node->prev = dest_prev_node;
+    src_node->next = dest_prev_node->next;
+
+    dest_prev_node->next = src_node;
+    src_node->next->prev = src_node;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+
+bool list_replace(const list *const lst, const size_t src_pos, const size_t dest_pos)
+{
+$i
+$   LIST_VERIFY(lst, false);
+    LOG_VERIFY (src_pos  < lst->size, false);
+    LOG_VERIFY (dest_pos < lst->size, false);
+
+$   list_node *src_node       = list_get_node(lst, src_pos);
+    list_node *dest_prev_node = nullptr;
+
+$   if (dest_pos == 0) dest_prev_node = lst->fictional;
+    else               dest_prev_node = list_get_node(lst, dest_pos - 1);
+
+$   list_replace(src_node, dest_prev_node);
+$o  return true;
+}
+
+bool list_replace(const list *const lst, const void *src_el, const size_t dest_pos)
+{
+$i
+$   LIST_VERIFY(lst, false);
+    LOG_VERIFY (src_el != nullptr, false);
+    LOG_VERIFY (dest_pos < lst->size, false);
+
+    list_node *src_node       = (list_node *) src_el - 1;
+    list_node *dest_prev_node = nullptr;
+
+$   if (dest_pos == 0) dest_prev_node = lst->fictional;
+    else               dest_prev_node = list_get_node(lst, dest_pos - 1);
+
+$   list_replace(src_node, dest_prev_node);
+$o  return true;
+}
+
+#pragma GCC diagnostic pop
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 void list_dump(const void *const _lst)
 {
 $i

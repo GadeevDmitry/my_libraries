@@ -83,6 +83,8 @@ static bool       list_node_delete       (list *const lst, list_node *const lst_
 
 static list_node *list_get_node          (const list *const lst, const size_t index);
 
+static void       list_replace           (list_node *src_node, list_node *dest_prev_node);
+
 static void       list_static_dump       (const list *const lst, const bool is_full);
 static bool       list_header_dump       (const list *const lst);
 static bool       list_public_fields_dump(const list *const lst);

@@ -120,18 +120,6 @@ bool list_push_back(list *const lst, const void *const data);
 */
 bool list_erase(list *const lst, const size_t pos, void *const erased_data = nullptr);
 
-/**
-*   @brief Удаляет элемент из листа.
-*
-*   @param lst [in, out] - указатель на лист
-*   @param target   [in] - указатель на элемент, который нужно удалить
-*   @param elem_cmp [in] - указатель на функцию сравнения элементов, которая возвращает 0, если элементы равны
-*
-*   @return true, если все ОК, false в случае ошибки
-*/
-bool list_erase(list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2),
-                void *const erased_data = nullptr);
-
 //--------------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -193,6 +181,50 @@ void *list_back(const list *const lst);
 *   @return указатель на первое вхождение найденного элемента или nullptr, если его в листе нет.
 */
 void *list_find(const list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2));
+
+/**
+*   @brief Возвращает указатель на элемент, следующий за текущим.
+*   Ответственность за валидность переданного указателя и соблюдение границ листа несет пользователь.
+*
+*   @param cur_el [in] - указатель на текущий элемент листа
+*
+*   @return указатель на следующий элемент листа.
+*/
+void *list_next(const void *cur_el);
+
+/**
+*   @brief Возвращает указатель на предыдущий элемент.
+*   Ответственность за валидность переданного указателя и соблюдение границ листа несет пользователь.
+*
+*   @param cur_el [in] - указатель на текущий элемент листа
+*
+*   @return указатель на следующий элемент листа.
+*/
+void *list_prev(const void *cur_el);
+
+/**
+*   @brief Переставляет элемент с одной позиции на другую.
+*
+*   @param lst [in, out] - указатель на лист
+*   @param src_pos  [in] - порядковый номер элемента, которого нужно переместить
+*   @param dest_pos [in] - номер, на который нужно переместить элемент
+*
+*   @return true в случае успеха, false в случае ошибки
+*/
+bool list_replace(const list *const lst, const size_t src_pos, const size_t dest_pos);
+
+/**
+*   @brief Переставляет элемент с одной позиции на другую.
+*
+*   @param lst [in, out] - указатель на лист
+*   @param src_el   [in] - указатель на элемент, который нужно перемтавить
+*   @param dest_pos [in] - номер, на который нужно переместить элемент
+*
+*   @note Ответственность за вадидность переданного указателя несет пользователь.
+*
+*   @return true в случае успеха, false в случае ошибки
+*/
+bool list_replace(const list *const lst, const void *src_el, const size_t dest_pos);
 
 /**
 *   @brief Дамп листа.
