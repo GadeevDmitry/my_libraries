@@ -191,7 +191,7 @@ stack *stack_new(const size_t el_size, const void *const el_poison              
     }
     if (!stack_ctor(stk, el_size, el_poison, el_dtor, el_dump, stack_capacity))
     {
-        log_free(stk);
+        LOG_FREE(stk);
         return nullptr;
     }
 
@@ -217,7 +217,7 @@ void stack_dtor(void *const _stk)
 void stack_delete(void *const _stk)
 {
     stack_dtor(_stk);
-    log_free  (_stk);
+    LOG_FREE  (_stk);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -231,7 +231,7 @@ static void stack_data_dtor(stack *const stk)
         for (size_t i = 0; i < stk->size; ++i) stk->el_dtor(stack_get(stk, i));
     }
 
-    log_free(stk->data);
+    LOG_FREE(stk->data);
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -508,7 +508,7 @@ static void stack_el_dump(const stack *const stk, const void *const el)
 *   Остальные функции определены ниже.
 */
 
-#include "../../vector/vector_static.h"
+#include "../../vector/src/vector_static.h"
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

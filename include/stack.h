@@ -4,7 +4,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "stack_settings.h"
+#include "../stack/src/stack_settings.h"
 
 //================================================================================================================================
 

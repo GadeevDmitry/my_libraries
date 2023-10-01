@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "algorithm_settings.h"
+#include "../algorithm/src/algorithm_settings.h"
 
 //================================================================================================================================
 

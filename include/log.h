@@ -5,8 +5,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
-
-#include "log_settings.h"
+#include "../log/src/log_settings.h"
 
 //================================================================================================================================
 
@@ -301,7 +300,7 @@ extern size_t LOG_TAB;
 
 #ifndef LOG_NTRACE
 
-#include "../src/trace.h"
+#include "../log/src/trace.h"
 #define $  { trace_upd_pos(__FILE__, __PRETTY_FUNCTION__, __LINE__); }
 #define $i { trace_push   (); $ }
 #define $o { trace_pop    ();   }

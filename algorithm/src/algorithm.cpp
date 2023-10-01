@@ -85,7 +85,9 @@ $o      return err;
     }
 
 $   err = buffer_fields_verify(buff);
-$o  return BUFF_OK;
+
+$   buffer_log_error(buff, err);
+$o  return err;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

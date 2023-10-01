@@ -4,8 +4,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-
-#include "array_settings.h"
+#include "../array/src/array_settings.h"
 
 //================================================================================================================================
 

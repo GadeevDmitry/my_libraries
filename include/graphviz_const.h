@@ -1,8 +1,6 @@
 #ifndef GRAPHVIZ_DUMP_H
 #define GRAPHVIZ_DUMP_H
 
-#include <stdlib.h>
-
 static const char *GRAPHVIZ_COLOR_NAMES[] =
 {
     "lightblue"     ,
