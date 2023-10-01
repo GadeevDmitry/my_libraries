@@ -14,13 +14,13 @@
 //--------------------------------------------------------------------------------------------------------------------------------
 
 #if defined(NVERIFY) || defined(NLOG)
-#define LOG_NLEAK
 #define LOG_NVERIFY
-#define LOG_NTRACE
 #endif
 
 #if defined(NDEBUG) || defined(NLOG)
 #define LOG_NDEBUG
+#define LOG_NLEAK
+#define LOG_NTRACE
 #endif
 
 #endif // LOG_SETTINGS_H

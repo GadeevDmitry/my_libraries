@@ -302,9 +302,9 @@ extern size_t LOG_TAB;
 #ifndef LOG_NTRACE
 
 #include "../src/trace.h"
-#define $  trace_upd_pos(__FILE__, __PRETTY_FUNCTION__, __LINE__);
-#define $i trace_push   ();
-#define $o trace_pop    ();
+#define $  { trace_upd_pos(__FILE__, __PRETTY_FUNCTION__, __LINE__); }
+#define $i { trace_push   (); $ }
+#define $o { trace_pop    ();   }
 
 #else
 

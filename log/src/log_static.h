@@ -8,13 +8,9 @@
 #include <stdarg.h>
 
 //#define NDEBUG
-//#define NVERIFY
 
 #include "log.h"
-
-#ifndef LOG_NTRACE
 #include "trace_static.h"
-#endif
 
 //================================================================================================================================
 

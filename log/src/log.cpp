@@ -15,11 +15,9 @@ static int log_stream_open()
     setvbuf(LOG_STREAM, nullptr, _IONBF, 0);
     fprintf(LOG_STREAM, "<pre>\n" "\"%s\" OPENING IS OK\n\n", LOG_FILE);
 
-    #ifndef LOG_NTRACE
     DYNAMIC_MEMORY -= 1;
     trace_ctor();
     atexit(trace_dtor);
-    #endif
 
     atexit (log_stream_close);
     return 1;
@@ -31,16 +29,12 @@ static void log_stream_close()
 
     fprintf(LOG_STREAM, "\n");
 
-    #ifndef LOG_NLEAK
     if (DYNAMIC_MEMORY == 0) LOG_OK_MESSAGE   ("DYNAMIC_MEMORY = 0." , "\n\n");
     else                     LOG_ERROR_MESSAGE("DYNAMIC_MEMORY = %d.", "\n\n", DYNAMIC_MEMORY);
-    #endif
 
-    #ifndef LOG_NTRACE
     size_t trace_size = trace_get_size();
     if (trace_size == 0) LOG_OK_MESSAGE   ("STACK TRACE SIZE = 0."  , "\n\n");
     else                 LOG_ERROR_MESSAGE("STACK TRACE SIZE = %lu.", "\n\n", trace_size);
-    #endif
 
     fprintf(LOG_STREAM, "\n\"%s\" CLOSING IS OK\n\n", LOG_FILE);
     fclose (LOG_STREAM);
@@ -129,9 +123,7 @@ static void log_failure_environment(const char *const cur_file, const char *cons
     log_param_place(cur_file, cur_func, cur_line);
     log_tab_message(ITALIC_LOG_SEP);
 
-    #ifndef LOG_NTRACE
     trace_dump();
-    #endif
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------
