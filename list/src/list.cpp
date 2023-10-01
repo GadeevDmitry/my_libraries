@@ -419,6 +419,10 @@ $o  return (void *) geted_el;
 void *list_front(const list *const lst)
 {
 $i
+$   LIST_VERIFY(lst, nullptr);
+
+    if (lst->size == 0) { $o return nullptr; }
+
 $   void *geted_el = list_get(lst, 0);
 $o  return geted_el;
 }
@@ -430,6 +434,8 @@ void *list_back(const list *const lst)
 $i
 $   LIST_VERIFY(lst, nullptr);
 
+    if (lst->size == 0) { $o return nullptr; }
+
 $   void *geted_el = list_get(lst, lst->size - 1);
 $o  return geted_el;
 }
@@ -438,7 +444,11 @@ $o  return geted_el;
 
 void *list_fict(const list *const lst)
 {
-    return lst->fictional + 1;
+$i
+$   LIST_VERIFY(lst, nullptr);
+
+    if (lst->size == 0) { $o return nullptr; }
+$o  return lst->fictional + 1;
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------

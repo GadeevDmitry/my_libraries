@@ -157,7 +157,7 @@ void *list_get(const list *const lst, const size_t pos);
 *
 *   @param lst [in] - указатель на лист
 *
-*   @return указатель на содержимое вершины, в случае успеха, nullptr в случае ошибки.
+*   @return указатель на первый элемент в случае успеха, nullptr в случае ошибки.
 */
 void *list_front(const list *const lst);
 
@@ -167,7 +167,7 @@ void *list_front(const list *const lst);
 *   @param lst  [in]  - указатель на лист
 *   @param data [out] - указатель, куда скопировать содержимое элемента
 *
-*   @return указатель на содержимое вершины, если все ОК, nullptr в случае ошибки.
+*   @return указатель на последний элемент в случае успеха, nullptr в случае ошибки.
 */
 void *list_back(const list *const lst);
 
@@ -177,6 +177,8 @@ void *list_back(const list *const lst);
 *   Указатель на фиктивный элемент можно использовать для проверки выхода за границы листа в цикле.
 *
 *   @param lst [in] - указатель на лист
+*
+*   @return указатель на фиктивный элемент в случае успеха, nullptr в случае ошибки.
 */
 void *list_fict(const list *const lst);
 
