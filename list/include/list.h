@@ -172,6 +172,15 @@ void *list_front(const list *const lst);
 void *list_back(const list *const lst);
 
 /**
+*   @brief Возвращает указатель на фиктивный элемент листа.
+*   Фиктивный элемент - элемент, следующий за последним и идущий перед первым.
+*   Указатель на фиктивный элемент можно использовать для проверки выхода за границы листа в цикле.
+*
+*   @param lst [in] - указатель на лист
+*/
+void *list_fict(const list *const lst);
+
+/**
 *   @brief Ищет элемент в листе.
 *
 *   @param lst      [in] - указатель на лист
@@ -218,13 +227,12 @@ bool list_replace(const list *const lst, const size_t src_pos, const size_t dest
 *
 *   @param lst [in, out] - указатель на лист
 *   @param src_el   [in] - указатель на элемент, который нужно перемтавить
+*   @param src_pos  [in] - порядковый номер элемента, которого нужно переместить
 *   @param dest_pos [in] - номер, на который нужно переместить элемент
-*
-*   @note Ответственность за вадидность переданного указателя несет пользователь.
 *
 *   @return true в случае успеха, false в случае ошибки
 */
-bool list_replace(const list *const lst, const void *src_el, const size_t dest_pos);
+bool list_replace(const list *const lst, const void *src_el, const size_t src_pos, const size_t dest_pos);
 
 /**
 *   @brief Дамп листа.

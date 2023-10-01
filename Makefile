@@ -15,10 +15,9 @@ endif
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
-BUILD_DIR  ?= build/
-LIB_PREFIX ?= ./
-
-include include_paths.d
+LIB_BUILD_DIR ?= build/
+LIB_PREFIX    ?= ./
+include $(LIB_PREFIX)include_paths.d
 
 #================================================================================================================================
 
@@ -31,37 +30,37 @@ compilation_database:
 	$(MAKE) clean
 	bear -- $(MAKE) all -k
 
-$(BUILD_DIR)algorithm.o: $(LIB_PREFIX)algorithm/src/algorithm.cpp | $(BUILD_DIR)
+$(LIB_BUILD_DIR)algorithm.o: $(LIB_PREFIX)algorithm/src/algorithm.cpp | $(LIB_BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_DIR)algorithm.o
+all: $(LIB_BUILD_DIR)algorithm.o
 
-$(BUILD_DIR)array.o: $(LIB_PREFIX)array/src/array.cpp | $(BUILD_DIR)
+$(LIB_BUILD_DIR)array.o: $(LIB_PREFIX)array/src/array.cpp | $(LIB_BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_DIR)array.o
+all: $(LIB_BUILD_DIR)array.o
 
-#$(BUILD_DIR)/cache_list.o: $(LIB_PREFIX)cache_friendly_list/src/cache_list.cpp | $(BUILD_DIR)
+#$(LIB_BUILD_DIR)/cache_list.o: $(LIB_PREFIX)cache_friendly_list/src/cache_list.cpp | $(LIB_BUILD_DIR)
 #	$(CC) -c $(CFLAGS) $< -o $@
-#all: $(BUILD_DIR)/cache_list.o
+#all: $(LIB_BUILD_DIR)/cache_list.o
 
-$(BUILD_DIR)list.o: $(LIB_PREFIX)list/src/list.cpp | $(BUILD_DIR)
+$(LIB_BUILD_DIR)list.o: $(LIB_PREFIX)list/src/list.cpp | $(LIB_BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_DIR)list.o
+all: $(LIB_BUILD_DIR)list.o
 
-$(BUILD_DIR)log.o: $(LIB_PREFIX)log/src/log.cpp | $(BUILD_DIR)
+$(LIB_BUILD_DIR)log.o: $(LIB_PREFIX)log/src/log.cpp | $(LIB_BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_DIR)log.o
+all: $(LIB_BUILD_DIR)log.o
 
-$(BUILD_DIR)trace.o: $(LIB_PREFIX)log/src/trace.cpp | $(BUILD_DIR)
+$(LIB_BUILD_DIR)trace.o: $(LIB_PREFIX)log/src/trace.cpp | $(LIB_BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_DIR)trace.o
+all: $(LIB_BUILD_DIR)trace.o
 
-$(BUILD_DIR)stack.o: $(LIB_PREFIX)stack/src/stack.cpp | $(BUILD_DIR)
+$(LIB_BUILD_DIR)stack.o: $(LIB_PREFIX)stack/src/stack.cpp | $(LIB_BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@
-all: $(BUILD_DIR)stack.o
+all: $(LIB_BUILD_DIR)stack.o
 
-$(BUILD_DIR):
+$(LIB_BUILD_DIR):
 	mkdir -p $@
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(LIB_BUILD_DIR)

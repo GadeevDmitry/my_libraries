@@ -436,6 +436,13 @@ $o  return geted_el;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void *list_fict(const list *const lst)
+{
+    return lst->fictional + 1;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 
@@ -489,6 +496,7 @@ static void list_replace(list_node *src_node, list_node *dest_prev_node)
 {
     LOG_ASSERT (src_node       != nullptr);
     LOG_ASSERT (dest_prev_node != nullptr);
+    LOG_ASSERT (src_node != dest_prev_node);
 
     src_node->prev->next = src_node->next;
     src_node->next->prev = src_node->prev;
@@ -512,28 +520,33 @@ $   LIST_VERIFY(lst, false);
     LOG_VERIFY (src_pos  < lst->size, false);
     LOG_VERIFY (dest_pos < lst->size, false);
 
-$   list_node *src_node       = list_get_node(lst, src_pos);
-    list_node *dest_prev_node = nullptr;
+    if (src_pos == dest_pos) { $o return true; }
 
-$   if (dest_pos == 0) dest_prev_node = lst->fictional;
-    else               dest_prev_node = list_get_node(lst, dest_pos - 1);
-
-$   list_replace(src_node, dest_prev_node);
-$o  return true;
+$   list_node *src_node = list_get_node(lst, src_pos);
+$   bool res = list_replace(lst, src_node + 1, src_pos, dest_pos);
+$o  return res;
 }
 
-bool list_replace(const list *const lst, const void *src_el, const size_t dest_pos)
+//--------------------------------------------------------------------------------------------------------------------------------
+
+bool list_replace(const list *const lst, const void *src_el, const size_t src_pos, const size_t dest_pos)
 {
 $i
 $   LIST_VERIFY(lst, false);
     LOG_VERIFY (src_el != nullptr, false);
+    LOG_VERIFY (src_pos  < lst->size, false);
     LOG_VERIFY (dest_pos < lst->size, false);
 
-    list_node *src_node       = (list_node *) src_el - 1;
-    list_node *dest_prev_node = nullptr;
+    if (src_pos == dest_pos) { $o return true; }
 
-$   if (dest_pos == 0) dest_prev_node = lst->fictional;
-    else               dest_prev_node = list_get_node(lst, dest_pos - 1);
+    int dest_prev_pos = ((int) src_pos < (int) dest_pos) ? (int) dest_pos : (int) dest_pos - 1;
+
+    list_node *src_node = (list_node *) src_el - 1;
+    LOG_VERIFY(src_node == list_get_node(lst, src_pos), false);
+
+    list_node *dest_prev_node = nullptr;
+$   if (dest_prev_pos < 0) dest_prev_node = lst->fictional;
+    else                   dest_prev_node = list_get_node(lst, (size_t) dest_prev_pos);
 
 $   list_replace(src_node, dest_prev_node);
 $o  return true;
@@ -665,10 +678,17 @@ $i
     LOG_ASSERT(lst->fictional != LST_POISON.fictional);
     LOG_ASSERT(lst->fictional != nullptr);
 
-    const list_node *lst_node = lst->fictional;
+$   LOG_TAB_SERVICE_MESSAGE("#-:\n" "{", "\n");
+    LOG_TAB++;
+$   list_node_debug_dump(lst, lst->fictional);
+    LOG_TAB--;
+$   LOG_TAB_SERVICE_MESSAGE("}", "\n");
 
-    for (size_t i = 0; i <= lst->size; ++i)
+    const list_node *lst_node = lst->fictional->next;
+    for (size_t i = 0; i < lst->size; ++i)
     {
+        if (lst_node == lst->fictional) break;
+
 $       LOG_TAB_SERVICE_MESSAGE("#%lu:\n" "{", "\n", i);
         LOG_TAB++;
 $       list_node_debug_dump(lst, lst_node);
@@ -676,7 +696,6 @@ $       list_node_debug_dump(lst, lst_node);
 $       LOG_TAB_SERVICE_MESSAGE("}", "\n");
 
         lst_node = lst_node->next;
-        if (lst_node == lst->fictional) break;
     }
 $o
 }
