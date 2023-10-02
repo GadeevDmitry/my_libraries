@@ -15,8 +15,7 @@ static int log_stream_open()
     setvbuf(LOG_STREAM, nullptr, _IONBF, 0);
     fprintf(LOG_STREAM, "<pre>\n" "\"%s\" OPENING IS OK\n\n", LOG_FILE);
 
-    DYNAMIC_MEMORY -= 1;
-    trace_ctor();
+    trace_ctor(); DYNAMIC_MEMORY = 0;
     atexit(trace_dtor);
 
     atexit (log_stream_close);
