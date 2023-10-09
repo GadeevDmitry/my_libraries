@@ -74,9 +74,16 @@ void list_dtor(void *const _lst);
 /**
 *   @brief Деструктор листа в динамической памяти.
 *
-*   @see list_dtor(void* _lst)
+*   @param _lst [in] - указатель на лист
 */
 void list_delete(void *const _lst);
+
+/**
+*   @brief Удаляет все содержимое листа.
+*
+*   @param lst [in, out] - указатель на лист
+*/
+void list_clear(list *const lst);
 
 /**
 *   @brief Кладет элемент в лист.
@@ -119,8 +126,6 @@ bool list_push_back(list *const lst, const void *const data);
 *   @return true, в случае успеха, false в случае ошибки.
 */
 bool list_erase(list *const lst, const size_t pos, void *const erased_data = nullptr);
-
-//--------------------------------------------------------------------------------------------------------------------------------
 
 /**
 *   @brief Удаляет элемент из начала листа.

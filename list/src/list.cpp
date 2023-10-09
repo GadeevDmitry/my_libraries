@@ -321,6 +321,21 @@ $o  return cur_node;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+void list_clear(list *const lst)
+{
+$i
+$   LIST_VERIFY(lst, (void) 0);
+
+    size_t initial_size = lst->size;
+$   for (size_t i = 0; i < initial_size; ++i)
+    {
+        list_pop_front(lst);
+    }
+$o
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 bool list_insert(list *const lst, const void *const data, const size_t pos)
 {
 $i
