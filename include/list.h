@@ -128,6 +128,18 @@ bool list_push_back(list *const lst, const void *const data);
 bool list_erase(list *const lst, const size_t pos, void *const erased_data = nullptr);
 
 /**
+*   @brief Удаляет первое вхождение заданного элемента.
+*
+*   @param lst     [in, out] - указатель на лист
+*   @param target      [in]  - указатель на элемент, который нужно удалить
+*   @param el_cmp      [in]  - указатель на функцию сравнения элементов, которая возвращает 0, если элементы равны
+*   @param erased_data [out] - указатель, по которому скопировать содержимое удаляемой вершины (nullptr по умолчанию)
+*
+*   @return true, в случае успеха, false в случае ошибки
+*/
+bool list_erase(list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2) = nullptr, void *const erased_data = nullptr);
+
+/**
 *   @brief Удаляет элемент из начала листа.
 *
 *   @param lst     [in, out] - указатель на лист
@@ -190,13 +202,13 @@ void *list_fict(const list *const lst);
 /**
 *   @brief Ищет элемент в листе.
 *
-*   @param lst      [in] - указатель на лист
-*   @param target   [in] - указатель на элемент, который нужно найти
-*   @param elem_cmp [in] - указатель на функцию сравнения элементов, которая возвращает 0, если элементы равны
+*   @param lst    [in] - указатель на лист
+*   @param target [in] - указатель на элемент, который нужно найти
+*   @param el_cmp [in] - указатель на функцию сравнения элементов, которая возвращает 0, если элементы равны
 *
 *   @return указатель на первое вхождение найденного элемента или nullptr, если его в листе нет.
 */
-void *list_find(const list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2));
+void *list_find(const list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2) = nullptr);
 
 /**
 *   @brief Возвращает указатель на элемент, следующий за текущим.

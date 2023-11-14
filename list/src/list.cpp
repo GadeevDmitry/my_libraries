@@ -392,6 +392,23 @@ $o  return true;
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+bool list_erase(list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2) /* = nullptr */, void *const erased_data /* = nullptr */)
+{
+$i
+$   LIST_VERIFY(lst, false);
+
+$   void *el_to_erase = list_find(lst, target, el_cmp);
+    if (el_to_erase == nullptr) { $o return false; }
+
+    list_node *node_to_erase = (list_node *) el_to_erase - 1;
+$   list_node_delete(lst, node_to_erase, erased_data);
+
+$   LIST_ASSERT(lst);
+$o  return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 bool list_pop_front(list *const lst, void *const erased_data /* = nullptr */)
 {
 $i
@@ -471,17 +488,27 @@ $o  return lst->fictional + 1;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"
 
-void *list_find(const list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2))
+void *list_find(const list *const lst, const void *const target, int (*el_cmp)(const void *el_1, const void *el_2) /* = nullptr */)
 {
 $i
 $   LIST_VERIFY(lst, nullptr);
     LOG_VERIFY (target != nullptr, nullptr);
-    LOG_VERIFY (el_cmp != nullptr, nullptr);
 
-$   for (const list_node *cur_node = lst->fictional->next; cur_node != lst->fictional; cur_node = cur_node->next)
+    if (el_cmp != nullptr)
     {
-        if (el_cmp(cur_node + 1, target) == 0)
-        { $o return (void *) (cur_node + 1); }
+$       for (const list_node *cur_node = lst->fictional->next; cur_node != lst->fictional; cur_node = cur_node->next)
+        {
+            if (el_cmp(cur_node + 1, target) == 0)
+            { $o return (void *) (cur_node + 1); }
+        }
+    }
+    else
+    {
+$       for (const list_node *cur_node = lst->fictional->next; cur_node != lst->fictional; cur_node = cur_node->next)
+        {
+            if (strncmp((const char *) (cur_node + 1), (const char *) target, lst->el_size) == 0)
+            { $o return (void *) (cur_node + 1); }
+        }
     }
 
 $o  return nullptr;
