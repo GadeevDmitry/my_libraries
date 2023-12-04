@@ -151,7 +151,7 @@ $o      return false;
     }
 
     buff->pos  = buff->beg;
-    buff->size = buff->size;
+    buff->size = buff_size;
 
     BUFFER_ASSERT(buff);
 $o  return true;
