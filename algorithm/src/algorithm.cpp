@@ -283,6 +283,14 @@ $o
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+char *buffer_end(const buffer *const buff)
+{
+    BUFFER_VERIFY(buff, nullptr);
+    return buff->beg + buff->size;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 bool buffer_write(buffer *const buff, const void *data, const size_t data_size)
 {
 $i
