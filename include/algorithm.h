@@ -129,6 +129,20 @@ void buffer_dtor(void *const _buff);
 void buffer_delete(void *const _buff);
 
 /**
+*   @brief Возвращает указатель на конец буфера - элемент, следующий за последним.
+*
+*   @param buff - указатель на буфер
+*/
+char *buffer_end(const buffer *const buff);
+
+/**
+*   @brief Возвращает указатель на последний элемент буфера.
+*
+*   @param buff - указатель на буфер
+*/
+char *buffer_back(const buffer *const buff);
+
+/**
 *   @brief Записывает данные по адресу .buff_pos.
 *   Если емкость буфера недостаточно велика, записывает, сколько поместится.
 *

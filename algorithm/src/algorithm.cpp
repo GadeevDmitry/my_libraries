@@ -291,6 +291,16 @@ char *buffer_end(const buffer *const buff)
 
 //--------------------------------------------------------------------------------------------------------------------------------
 
+char *buffer_back(const buffer *const buff)
+{
+    BUFFER_VERIFY(buff, nullptr);
+
+    if (buff->size == 0) return nullptr;
+    return buff->beg + buff->size - 1;
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 bool buffer_write(buffer *const buff, const void *data, const size_t data_size)
 {
 $i
