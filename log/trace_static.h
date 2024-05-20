@@ -1,9 +1,6 @@
 #ifndef TRACE_STATIC_H
 #define TRACE_STATIC_H
 
-//#define NDEBUG
-//#define NVERIFY
-
 #include "log.h"
 #include "stack.h"
 #include "trace.h"

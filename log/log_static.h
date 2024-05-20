@@ -6,8 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-
-//#define NDEBUG
+#include <assert.h>
 
 #include "log.h"
 #include "trace_static.h"

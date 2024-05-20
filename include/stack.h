@@ -2,9 +2,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include <assert.h>
 #include <stdlib.h>
-#include "../stack/src/stack_settings.h"
 
 //================================================================================================================================
 
@@ -133,6 +131,16 @@ bool stack_is_empty(const stack *const stk);
 void stack_dump(const void *const _stk);
 
 //================================================================================================================================
+
+#if defined(NVERIFY)
+#define STACK_NVERIFY
+#endif
+
+#if defined(NDEBUG)
+#define STACK_NDEBUG
+#endif
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 #ifndef STACK_NVERIFY
 #define STACK_VERIFY(stk, ret_val)  \

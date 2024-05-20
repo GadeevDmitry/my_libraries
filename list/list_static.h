@@ -5,11 +5,8 @@
 #include <stdio.h>
 #include <string.h>
 
-//#define NDEBUG
-//#define NVERIFY
-
-#include "list.h"
 #include "log.h"
+#include "list.h"
 
 //================================================================================================================================
 

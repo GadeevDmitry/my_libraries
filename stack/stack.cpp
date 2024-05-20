@@ -508,7 +508,7 @@ static void stack_el_dump(const stack *const stk, const void *const el)
 *   Остальные функции определены ниже.
 */
 
-#include "../../vector/src/vector_static.h"
+#include "../vector/vector_static.h"
 
 //--------------------------------------------------------------------------------------------------------------------------------
 

@@ -6,10 +6,6 @@
 #include <assert.h>
 #include <string.h>
 
-//#define NDEBUG
-//#define NVERIFY
-#define LOG_NTRACE
-
 #include "log.h"
 #include "stack.h"
 

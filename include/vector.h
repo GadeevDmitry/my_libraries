@@ -14,8 +14,18 @@ typedef stack vector;
 
 //================================================================================================================================
 
-#ifndef VECTOR_NVERIFY
 
+#if defined(NVERIFY)
+#define VECTOR_NVERIFY
+#endif
+
+#if defined(NDEBUG)
+#define VECTOR_NDEBUG
+#endif
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+#ifndef VECTOR_NVERIFY
 #define VECTOR_VERIFY(vec, ret_val) \
     if (stack_verify(vec) != 0)     \
     {                               \

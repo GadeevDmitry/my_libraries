@@ -1,17 +1,14 @@
 /** @file */
-#ifndef ALGORITHM_STATIC_H
-#define ALGORITHM_STATIC_H
+#ifndef BUFFER_STATIC_H
+#define BUFFER_STATIC_H
 
-#include <math.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-//#define NDEBUG
-//#define NVERIFY
-
-#include "algorithm.h"
+#include "buffer.h"
 #include "log.h"
 
 //================================================================================================================================
@@ -82,8 +79,4 @@ static void     buffer_content_dump       (const buffer *const buff, const bool 
 static void     buffer_content_safety_dump(const buffer *const buff);
 static void     buffer_hex_content_dump   (const buffer *const buff);
 
-//================================================================================================================================
-
-const double DELTA = 0.0001;
-
-#endif //ALGORITHM_STATIC_H
+#endif // BUFFER_STATIC_H

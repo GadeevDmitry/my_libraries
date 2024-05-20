@@ -2,9 +2,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include <assert.h>
 #include <stdlib.h>
-#include "../array/src/array_settings.h"
 
 //================================================================================================================================
 
@@ -118,6 +116,16 @@ void *array_end(const array *const arr);
 void array_dump(const void *const _arr);
 
 //================================================================================================================================
+
+#if defined(NVERIFY)
+#define ARRAY_NVERIFY
+#endif
+
+#if defined(NDEBUG)
+#define ARRAY_NDEBUG
+#endif
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 #ifndef ARRAY_NVERIFY
 #define ARRAY_VERIFY(arr, ret_val)  \

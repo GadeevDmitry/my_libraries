@@ -7,7 +7,6 @@
 #include <assert.h>
 #include <string.h>
 
-#include "cache_list_settings.h"
 #include "cache_list.h"
 
 //================================================================================================================================

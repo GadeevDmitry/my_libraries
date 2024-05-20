@@ -2,9 +2,7 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <assert.h>
 #include <stdlib.h>
-#include "../list/src/list_settings.h"
 
 //================================================================================================================================
 
@@ -261,6 +259,16 @@ bool list_replace(const list *const lst, const void *src_el, const size_t src_po
 void list_dump(const void *const _lst);
 
 //================================================================================================================================
+
+#if defined(NVERIFY)
+#define LIST_NVERIFY
+#endif
+
+#if defined(NDEBUG)
+#define LIST_NDEBUG
+#endif
+
+//--------------------------------------------------------------------------------------------------------------------------------
 
 #ifndef LIST_NVERIFY
 #define LIST_VERIFY(lst, ret_val)   \
