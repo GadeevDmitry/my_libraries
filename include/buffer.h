@@ -116,6 +116,16 @@ void buffer_hex_dump(const void *const _buff);
 
 //================================================================================================================================
 
+#if defined(NVERIFY)
+#define BUFFER_NVERIFY
+#endif
+
+#if defined(NDEBUG)
+#define BUFFER_NDEBUG
+#endif
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
 #ifndef BUFFER_NVERIFY
 #define BUFFER_VERIFY(buf, ret_val) \
     if (buffer_verify(buf) != 0)    \
