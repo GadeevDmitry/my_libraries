@@ -38,7 +38,7 @@ typedef stack vector;
 
 #ifndef VECTOR_NDEBUG
 #define VECTOR_ASSERT(vec)                              \
-    if (stack_verify(stk) != 0)                         \
+    if (stack_verify(vec) != 0)                         \
     {                                                   \
         fprintf(stderr, "VECTOR ASSERTION FAILED\n");   \
         abort();                                        \
